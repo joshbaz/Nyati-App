@@ -1,0 +1,248 @@
+{
+    "genres": [
+        "Comedy",
+        "Fantasy",
+        "Crime",
+        "Drama",
+        "Music",
+        "Adventure",
+        "History",
+        "Thriller",
+        "Animation",
+        "Family",
+        "Mystery",
+        "Biography",
+        "Action",
+        "Film-Noir",
+        "Romance",
+        "Sci-Fi",
+        "War",
+        "Western",
+        "Horror",
+        "Musical",
+        "Sport"
+    ],
+    "movies": [
+     
+        {
+            "id": 110,
+            "title": "Spirited Away",
+            "year": "2001",
+            "runtime": "125",
+            "genres": [
+                "Animation",
+                "Adventure",
+                "Family"
+            ],
+            "director": "Hayao Miyazaki",
+            "actors": "Rumi Hiiragi, Miyu Irino, Mari Natsuki, Takashi Naitô",
+            "plot": "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMjYxMDcyMzIzNl5BMl5BanBnXkFtZTYwNDg2MDU3._V1_SX300.jpg"
+        },
+        {
+            "id": 111,
+            "title": "Indochine",
+            "year": "1992",
+            "runtime": "159",
+            "genres": [
+                "Drama",
+                "Romance"
+            ],
+            "director": "Régis Wargnier",
+            "actors": "Catherine Deneuve, Vincent Perez, Linh Dan Pham, Jean Yanne",
+            "plot": "This story is set in 1930, at the time when French colonial rule in Indochina is ending. A widowed French woman who works in the rubber fields, raises a Vietnamese princess as if she was ...",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTM1MTkzNzA3NF5BMl5BanBnXkFtZTYwNTI2MzU5._V1_SX300.jpg"
+        },
+        {
+            "id": 112,
+            "title": "Birdman or (The Unexpected Virtue of Ignorance)",
+            "year": "2014",
+            "runtime": "119",
+            "genres": [
+                "Comedy",
+                "Drama",
+                "Romance"
+            ],
+            "director": "Alejandro G. Iñárritu",
+            "actors": "Michael Keaton, Emma Stone, Kenny Chin, Jamahl Garrison-Lowe",
+            "plot": "Illustrated upon the progress of his latest Broadway play, a former popular actor's struggle to cope with his current life as a wasted actor is shown.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BODAzNDMxMzAxOV5BMl5BanBnXkFtZTgwMDMxMjA4MjE@._V1_SX300.jpg"
+        },
+        {
+            "id": 113,
+            "title": "Boyhood",
+            "year": "2014",
+            "runtime": "165",
+            "genres": [
+                "Drama"
+            ],
+            "director": "Richard Linklater",
+            "actors": "Ellar Coltrane, Patricia Arquette, Elijah Smith, Lorelei Linklater",
+            "plot": "The life of Mason, from early childhood to his arrival at college.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTYzNDc2MDc0N15BMl5BanBnXkFtZTgwOTcwMDQ5MTE@._V1_SX300.jpg"
+        },
+        {
+            "id": 114,
+            "title": "12 Angry Men",
+            "year": "1957",
+            "runtime": "96",
+            "genres": [
+                "Crime",
+                "Drama"
+            ],
+            "director": "Sidney Lumet",
+            "actors": "Martin Balsam, John Fiedler, Lee J. Cobb, E.G. Marshall",
+            "plot": "A jury holdout attempts to prevent a miscarriage of justice by forcing his colleagues to reconsider the evidence.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BODQwOTc5MDM2N15BMl5BanBnXkFtZTcwODQxNTEzNA@@._V1_SX300.jpg"
+        },
+        {
+            "id": 115,
+            "title": "The Imitation Game",
+            "year": "2014",
+            "runtime": "114",
+            "genres": [
+                "Biography",
+                "Drama",
+                "Thriller"
+            ],
+            "director": "Morten Tyldum",
+            "actors": "Benedict Cumberbatch, Keira Knightley, Matthew Goode, Rory Kinnear",
+            "plot": "During World War II, mathematician Alan Turing tries to crack the enigma code with help from fellow mathematicians.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BNDkwNTEyMzkzNl5BMl5BanBnXkFtZTgwNTAwNzk3MjE@._V1_SX300.jpg"
+        },
+        {
+            "id": 116,
+            "title": "Interstellar",
+            "year": "2014",
+            "runtime": "169",
+            "genres": [
+                "Adventure",
+                "Drama",
+                "Sci-Fi"
+            ],
+            "director": "Christopher Nolan",
+            "actors": "Ellen Burstyn, Matthew McConaughey, Mackenzie Foy, John Lithgow",
+            "plot": "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMjIxNTU4MzY4MF5BMl5BanBnXkFtZTgwMzM4ODI3MjE@._V1_SX300.jpg"
+        },
+        {
+            "id": 117,
+            "title": "Big Nothing",
+            "year": "2006",
+            "runtime": "86",
+            "genres": [
+                "Comedy",
+                "Crime",
+                "Thriller"
+            ],
+            "director": "Jean-Baptiste Andrea",
+            "actors": "David Schwimmer, Simon Pegg, Alice Eve, Natascha McElhone",
+            "plot": "A frustrated, unemployed teacher joining forces with a scammer and his girlfriend in a blackmailing scheme.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTY5NTc2NjYwOV5BMl5BanBnXkFtZTcwMzk5OTY0MQ@@._V1_SX300.jpg"
+        },
+        {
+            "id": 118,
+            "title": "Das Boot",
+            "year": "1981",
+            "runtime": "149",
+            "genres": [
+                "Adventure",
+                "Drama",
+                "Thriller"
+            ],
+            "director": "Wolfgang Petersen",
+            "actors": "Jürgen Prochnow, Herbert Grönemeyer, Klaus Wennemann, Hubertus Bengsch",
+            "plot": "The claustrophobic world of a WWII German U-boat; boredom, filth, and sheer terror.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMjE5Mzk5OTQ0Nl5BMl5BanBnXkFtZTYwNzUwMTQ5._V1_SX300.jpg"
+        },
+        {
+            "id": 119,
+            "title": "Shrek 2",
+            "year": "2004",
+            "runtime": "93",
+            "genres": [
+                "Animation",
+                "Adventure",
+                "Comedy"
+            ],
+            "director": "Andrew Adamson, Kelly Asbury, Conrad Vernon",
+            "actors": "Mike Myers, Eddie Murphy, Cameron Diaz, Julie Andrews",
+            "plot": "Princess Fiona's parents invite her and Shrek to dinner to celebrate her marriage. If only they knew the newlyweds were both ogres.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTk4MTMwNjI4M15BMl5BanBnXkFtZTcwMjExMzUyMQ@@._V1_SX300.jpg"
+        },
+        {
+            "id": 120,
+            "title": "Sin City",
+            "year": "2005",
+            "runtime": "124",
+            "genres": [
+                "Crime",
+                "Thriller"
+            ],
+            "director": "Frank Miller, Robert Rodriguez, Quentin Tarantino",
+            "actors": "Jessica Alba, Devon Aoki, Alexis Bledel, Powers Boothe",
+            "plot": "A film that explores the dark and miserable town, Basin City, and tells the story of three different people, all caught up in violent corruption.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BODZmYjMwNzEtNzVhNC00ZTRmLTk2M2UtNzE1MTQ2ZDAxNjc2XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg"
+        },
+        {
+            "id": 121,
+            "title": "Nebraska",
+            "year": "2013",
+            "runtime": "115",
+            "genres": [
+                "Adventure",
+                "Comedy",
+                "Drama"
+            ],
+            "director": "Alexander Payne",
+            "actors": "Bruce Dern, Will Forte, June Squibb, Bob Odenkirk",
+            "plot": "An aging, booze-addled father makes the trip from Montana to Nebraska with his estranged son in order to claim a million-dollar Mega Sweepstakes Marketing prize.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTU2Mjk2NDkyMl5BMl5BanBnXkFtZTgwNTk0NzcyMDE@._V1_SX300.jpg"
+        },
+        {
+            "id": 122,
+            "title": "Shrek",
+            "year": "2001",
+            "runtime": "90",
+            "genres": [
+                "Animation",
+                "Adventure",
+                "Comedy"
+            ],
+            "director": "Andrew Adamson, Vicky Jenson",
+            "actors": "Mike Myers, Eddie Murphy, Cameron Diaz, John Lithgow",
+            "plot": "After his swamp is filled with magical creatures, an ogre agrees to rescue a princess for a villainous lord in order to get his land back.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTk2NTE1NTE0M15BMl5BanBnXkFtZTgwNjY4NTYxMTE@._V1_SX300.jpg"
+        },
+        {
+            "id": 123,
+            "title": "Mr. & Mrs. Smith",
+            "year": "2005",
+            "runtime": "120",
+            "genres": [
+                "Action",
+                "Comedy",
+                "Crime"
+            ],
+            "director": "Doug Liman",
+            "actors": "Brad Pitt, Angelina Jolie, Vince Vaughn, Adam Brody",
+            "plot": "A bored married couple is surprised to learn that they are both assassins hired by competing agencies to kill each other.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BMTUxMzcxNzQzOF5BMl5BanBnXkFtZTcwMzQxNjUyMw@@._V1_SX300.jpg"
+        },
+        {
+            "id": 124,
+            "title": "Original Sin",
+            "year": "2001",
+            "runtime": "116",
+            "genres": [
+                "Drama",
+                "Mystery",
+                "Romance"
+            ],
+            "director": "Michael Cristofer",
+            "actors": "Antonio Banderas, Angelina Jolie, Thomas Jane, Jack Thompson",
+            "plot": "A woman along with her lover, plan to con a rich man by marrying him and on earning his trust running away with all his money. Everything goes as planned until she actually begins to fall in love with him.",
+            "posterUrl": "https://images-na.ssl-images-amazon.com/images/M/MV5BODg3Mjg0MDY4M15BMl5BanBnXkFtZTcwNjY5MDQ2NA@@._V1_SX300.jpg"
+        }
+    ]
+}
