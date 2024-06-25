@@ -12,11 +12,14 @@ import FilmDetails from '../../screens/2MainScreens/FilmDetails'
 import Donate from '../../screens/3PaymentScreens/Donate'
 import PaymentOptions from '../../screens/3PaymentScreens/PaymentOptions'
 import PaymentComplete from '../../screens/3PaymentScreens/PaymentComplete'
+import LandingPage from '../../screens/1AuthScreens/LandingPage'
+
 const Stack = createNativeStackNavigator()
 const MainNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Signin">
+      <Stack.Navigator initialRouteName="LandingPage">
+        <Stack.Screen name="LandingPage" component={LandingPage} options={{ header: () => null }} />
         <Stack.Screen
           name="Signin"
           component={SignIn}

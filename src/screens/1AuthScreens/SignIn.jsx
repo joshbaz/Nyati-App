@@ -80,11 +80,17 @@ const SignIn = ({ navigation }) => {
                   <Text style={styles.formSubtitle}>Login below or</Text>
                   <TouchableOpacity
                     style={styles.formBtnLink}
+                    onPress={() => navigation.navigate("LandingPage")}
+                  >
+                    <Text style={styles.formLinks}>Go to landing page</Text>
+                  </TouchableOpacity>
+                </HStack>
+                <TouchableOpacity
+                    style={styles.formBtnLink}
                     onPress={() => navigation.navigate("Register")}
                   >
                     <Text style={styles.formLinks}>create an account</Text>
                   </TouchableOpacity>
-                </HStack>
               </VStack>
               <Formik
                 initialValues={{
@@ -96,6 +102,7 @@ const SignIn = ({ navigation }) => {
                   // setHelperFunctions(helpers)
                   // dispatch(Login(values))
                   setIsSubmittingp(() => true);
+                  navigation.navigate("Home");
                 }}
               >
                 {({ values, handleChange, handleBlur, handleSubmit }) => (
