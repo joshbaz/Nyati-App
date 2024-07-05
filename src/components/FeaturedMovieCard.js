@@ -1,28 +1,15 @@
+import { LinearGradient } from "expo-linear-gradient"
+
+import React from "react"
 import {
+  ImageBackground,
   StyleSheet,
   Text,
-  View,
-  Animated,
   TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  ScrollView,
-  Modal,
-  Dimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-} from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { Stack, Box, HStack, VStack } from "@react-native-material/core";
-import { COLORS, FONTSFAMILIES } from "../color/VariableColors";
-import { LinearGradient } from "expo-linear-gradient";
-//import { LinearGradient } from "react-native-linear-gradient";
+  View,
+} from "react-native"
 
-const FeaturedMovieCard = (props) => {
+function FeaturedMovieCard(props) {
   return (
     <View
       style={[
@@ -31,8 +18,8 @@ const FeaturedMovieCard = (props) => {
           ? props.isFirst
             ? { marginLeft: 16 }
             : props.isLast
-            ? { marginRight: 16 }
-            : { maxWidth: props.cardWidth }
+              ? { marginRight: 16 }
+              : { maxWidth: props.cardWidth }
           : { maxWidth: props.cardWidth },
         props.shouldMarginatedAround
           ? { margin: 12 }
@@ -57,17 +44,18 @@ const FeaturedMovieCard = (props) => {
           <LinearGradient
             colors={["rgba(15, 17, 24, 0.945)", "transparent"]}
             start={{ x: 0.9, y: 0.9 }}
-                      end={{ x: 0.9, y: 0.2 }}
-                      
+            end={{ x: 0.9, y: 0.2 }}
             style={styles.linearBg}
-          ></LinearGradient>
+          >
+            <Text>Hello</Text>
+          </LinearGradient>
         </ImageBackground>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default FeaturedMovieCard;
+export default FeaturedMovieCard
 
 const styles = StyleSheet.create({
   linearBg: {
@@ -79,4 +67,4 @@ const styles = StyleSheet.create({
   cardImage: {
     display: "flex",
   },
-});
+})

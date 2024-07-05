@@ -40,55 +40,64 @@ export default function SplashScreen() {
         }, 510);
     },[])
     return (
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: COLORS.generalBg,
-        }}
-      >
-        <Animated.View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              transform: [
+       <View
+          style={{
+             position: "absolute",
+             top: 0,
+             bottom: 0,
+             left: 0,
+             right: 0,
+             backgroundColor: COLORS.generalBg,
+          }}
+       >
+          <Animated.View
+             style={[
                 {
-                  translateY: startAnimation,
+                   flex: 1,
+                   alignItems: "center",
+                   justifyContent: "space-around",
+                   transform: [
+                      {
+                         translateY: startAnimation,
+                      },
+                   ],
                 },
-              ],
-            },
-          ]}
-        >
-          <Image
-            source={Logo}
-            height={sizeImage.height}
-            width={sizeImage.width}
-            resizeMode="contain"
-            style={{ width: sizeImage.width, height: sizeImage.height }}
-          ></Image>
-        </Animated.View>
+             ]}
+          >
+             <Image
+                source={Logo}
+                height={sizeImage.height}
+                width={sizeImage.width}
+                resizeMode='contain'
+                style={{ width: sizeImage.width, height: sizeImage.height }}
+             />
+          </Animated.View>
 
-        {spinnerActive ? (
-          <View style={{display:'flex', alignItems: 'center', position: 'absolute', bottom: 100, left: 0, right: 0}}>
-            <Animated.View
-              style={{
-                position: "relative",
-                width: 50,
-                height: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <BallIndicator color="#ED3F62" count={9} />
-            </Animated.View>
-          </View>
-        ) : null}
-      </View>
-    );
+          {spinnerActive ? (
+             <View
+                style={{
+                   display: "flex",
+                   alignItems: "center",
+                   position: "absolute",
+                   bottom: 100,
+                   left: 0,
+                   right: 0,
+                }}
+             >
+                <Animated.View
+                   style={{
+                      position: "relative",
+                      width: 50,
+                      height: 50,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                   }}
+                >
+                   <BallIndicator color='#ED3F62' count={9} />
+                </Animated.View>
+             </View>
+          ) : null}
+       </View>
+    )
 }

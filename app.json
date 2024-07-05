@@ -1,29 +1,39 @@
 {
   "expo": {
-     "name": "Nyati-Films",
-     "slug": "Nyati-Films",
-     "version": "1.0.0",
-     "orientation": "portrait",
-     "icon": "./assets/icon.png",
-     "userInterfaceStyle": "dark",
-     "splash": {
-        "image": "./assets/splash.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#141118"
-     },
-     "assetBundlePatterns": ["**/*"],
-     "ios": {
-        "supportsTablet": true
-     },
-     "android": {
-        "adaptiveIcon": {
-           "foregroundImage": "./assets/adaptive-icon.png",
-           "backgroundColor": "#ffffff"
-        }
-     },
-     "web": {
-        "favicon": "./assets/favicon.png"
-     },
-     "plugins": ["expo-font"]
+    "name": "Nyati-Films",
+    "slug": "Nyati-Films",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#141118"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-router",
+      "expo-secure-store",
+      "expo-video",
+      "expo-av"
+    ],
+    "scheme": "nyati-films"
   }
 }

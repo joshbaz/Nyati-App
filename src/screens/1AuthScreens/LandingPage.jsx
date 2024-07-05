@@ -99,12 +99,7 @@ const LandingPage = ({ navigation }) => {
                                  <Text style={styles.formLinks}>Sign Up</Text>
                               </TouchableOpacity>
                            </HStack>
-                           <Text
-                              style={{
-                                 ...styles.formSubtitle,
-                                 fontSize: 14,
-                              }}
-                           >
+                           <Text className='text-white text-center text-sm'>
                               By creating an account or signing in, you agree to
                               our terms of Service and Privacy Policy.
                            </Text>
