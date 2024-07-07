@@ -47,7 +47,8 @@ const AuthContext = createContext({
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [fetching, setFetching] = useState(false)
+  const [isFetching, setIsFetching] = useState(false)
+  const [authError, setAuthError] = useState(null)
 
   const { navigate } = useNavigation()
 
@@ -102,7 +103,8 @@ function AuthProvider({ children }) {
 
     if (response?.error) {
       setLoading(false)
-      throw new Error(response.error)
+      setAuthError(response.error?.message)
+      return
     }
 
     await SecureStore.setItemAsync(TOKEN_KEY, response?.res.token)
@@ -127,7 +129,8 @@ function AuthProvider({ children }) {
 
     if (response?.error) {
       setLoading(false)
-      throw new Error(response?.error)
+      setAuthError(response?.error?.message)
+      return
     }
 
     await SecureStore.deleteItemAsync(TOKEN_KEY)
@@ -141,15 +144,16 @@ function AuthProvider({ children }) {
    * @returns Promise<void>
    */
   const fetchUserProfile = useCallback(async () => {
-    setFetching(true)
+    setIsFetching(true)
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
     if (!authToken) {
-      setFetching(false)
+      setIsFetching(false)
+      setAuthError("An authentication error occurred. Please try again.")
       return
     }
     // if user is already set, no need to fetch again
-    if (user?.email) {
-      setFetching(false)
+    if (user?.id) {
+      setIsFetching(false)
       return
     }
 
@@ -160,28 +164,42 @@ function AuthProvider({ children }) {
     })
 
     if (response?.error) {
-      setFetching(false)
-      throw new Error(response.error)
+      setIsFetching(false)
+      setAuthError(response.error?.message)
+      return
     }
 
     setUser(response?.res.user)
     setIsAuthenticated(true)
-    setFetching(false)
-  }, [endpoint, user?.email])
+    setIsFetching(false)
+  }, [endpoint, user?.id])
 
   useEffect(() => {
     fetchUserProfile()
   }, [fetchUserProfile])
 
-  const value = {
-    user,
-    loading,
-    fetching,
-    login,
-    logout,
-    isAuthenticated,
-  }
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  useEffect(() => {
+    if (authError) {
+      setTimeout(() => {
+        setAuthError(null)
+      }, 5000)
+    }
+  }, [authError])
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+        isFetching,
+        isAuthenticated,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // eslint-disable-next-line

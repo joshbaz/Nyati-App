@@ -1,26 +1,18 @@
+import React from "react"
 import {
+  ImageBackground,
   StyleSheet,
   Text,
-  View,
-  Animated,
   TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  ScrollView,
-  Modal,
-  Dimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-} from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { Stack, Box, HStack, VStack } from "@react-native-material/core";
-import { COLORS, FONTSFAMILIES } from "../color/VariableColors";
-import { Ionicons } from "@expo/vector-icons";
-import { ProgressBar } from "react-native-paper";
+  View,
+} from "react-native"
+import { ProgressBar } from "react-native-paper"
+
+import { VStack } from "@react-native-material/core"
+
+import { Ionicons } from "@expo/vector-icons"
+
+import { COLORS } from "../color/VariableColors"
 
 const ContinueWatchCard = (props) => {
   return (
@@ -31,8 +23,8 @@ const ContinueWatchCard = (props) => {
           ? props.isFirst
             ? { marginLeft: 16 }
             : props.isLast
-            ? { marginRight: 16 }
-            : { maxWidth: props.cardWidth }
+              ? { marginRight: 16 }
+              : { maxWidth: props.cardWidth }
           : { maxWidth: props.cardWidth },
         props.shouldMarginatedAround
           ? { margin: 12 }
@@ -71,7 +63,7 @@ const ContinueWatchCard = (props) => {
           >
             <ImageBackground
               source={{ uri: props.posterUrl }}
-              resizeMode="cover"
+              resizeMode='cover'
               style={[
                 styles.cardImage,
                 {
@@ -97,7 +89,7 @@ const ContinueWatchCard = (props) => {
                   ]}
                 >
                   <Ionicons
-                    name="play-sharp"
+                    name='play-sharp'
                     size={40}
                     color={COLORS.formSubTitle}
                   />
@@ -108,8 +100,11 @@ const ContinueWatchCard = (props) => {
                     progress={0.5}
                     color={"#F51D4A"}
                     borderRadius={20}
-                   
-                    style={{ backgroundColor: "#EEF1F4", borderRadius:20, width:'100%' }}
+                    style={{
+                      backgroundColor: "#EEF1F4",
+                      borderRadius: 20,
+                      width: "100%",
+                    }}
                   />
                 </View>
               </View>
@@ -124,10 +119,10 @@ const ContinueWatchCard = (props) => {
         </VStack>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default ContinueWatchCard;
+export default ContinueWatchCard
 
 const styles = StyleSheet.create({
   container: {
@@ -162,7 +157,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingLeft: 10,
     paddingRight: 10,
-    
+
     width: "100%",
   },
   titleText: {
@@ -178,11 +173,10 @@ const styles = StyleSheet.create({
     letterSpacing: -0.26,
   },
   progressBars: {
-    width: '100%',
+    width: "100%",
     paddingLeft: 4,
     paddingRight: 4,
-    position: 'absolute',
-    bottom:8
+    position: "absolute",
+    bottom: 8,
   },
-});
-
+})

@@ -1,28 +1,16 @@
+import React from "react"
 import {
+  ImageBackground,
   StyleSheet,
   Text,
-  View,
-  Animated,
   TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  ScrollView,
-  Modal,
-  Dimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-  
-} from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { Stack, Box, HStack, VStack } from "@react-native-material/core";
-import { COLORS, FONTSFAMILIES } from "../color/VariableColors";
-import { Ionicons } from "@expo/vector-icons";
-import { ProgressBar } from "react-native-paper";
+  View,
+} from "react-native"
+import { ProgressBar } from "react-native-paper"
 
+import { Box, HStack, VStack } from "@react-native-material/core"
+
+import { COLORS } from "../color/VariableColors"
 
 const FilmFundCard = (props) => {
   return (
@@ -33,8 +21,8 @@ const FilmFundCard = (props) => {
           ? props.isFirst
             ? { marginLeft: 16 }
             : props.isLast
-            ? { marginRight: 16 }
-            : { maxWidth: props.cardWidth }
+              ? { marginRight: 16 }
+              : { maxWidth: props.cardWidth }
           : { maxWidth: props.cardWidth },
         props.shouldMarginatedAround
           ? { margin: 12 }
@@ -77,8 +65,8 @@ const FilmFundCard = (props) => {
           >
             <ImageBackground
               source={{ uri: props.posterUrl }}
-              resizeMode="cover"
-              objectFit="cover"
+              resizeMode='cover'
+              objectFit='cover'
               style={[
                 styles.cardImage,
                 {
@@ -87,9 +75,7 @@ const FilmFundCard = (props) => {
                   overflow: "hidden",
                 },
               ]}
-            >
-             
-            </ImageBackground>
+            ></ImageBackground>
           </View>
 
           <Box style={[styles.fundDetailStack, { height: 231 - 128 }]}>
@@ -116,10 +102,10 @@ const FilmFundCard = (props) => {
         </VStack>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default FilmFundCard;
+export default FilmFundCard
 
 const styles = StyleSheet.create({
   container: {
@@ -184,6 +170,4 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Bold",
     letterSpacing: -0.25,
   },
-});
-
-
+})

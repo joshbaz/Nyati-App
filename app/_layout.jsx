@@ -1,16 +1,34 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
 import * as Font from "expo-font"
-import { Stack } from "expo-router"
+import { Stack } from "expo-router";
 
-import React, { useEffect, useState } from "react"
-import { Provider as PaperProvider } from "react-native-paper"
-import { SafeAreaProvider } from "react-native-safe-area-context"
 
-import SplashScreen from "../src/components/SplashScreen"
-import AuthProvider, { useAuth } from "../src/context/AuthProvider"
+
+import React, { useEffect, useState } from "react";
+import { Provider as PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+
+
+import SplashScreen from "../src/components/SplashScreen";
+import AuthProvider, { useAuth } from "../src/context/AuthProvider";
+
 
 function RootLayout() {
-  const { isAuthenticated, fetching } = useAuth()
+  return (
+    <SafeAreaProvider>
+      <PaperProvider>
+        {/* <MainNavigator /> */}
+        <AuthProvider>
+          <AppStacks />
+        </AuthProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
+  )
+}
+
+function AppStacks() {
+  const { isAuthenticated, isFetching } = useAuth()
   const [fontLoaded, setFontLoaded] = useState(false)
 
   const customFonts = {
@@ -50,7 +68,7 @@ function RootLayout() {
     loadFont()
   }, [])
 
-  if (!fontLoaded || fetching) {
+  if (!fontLoaded || isFetching) {
     return (
       <SafeAreaProvider>
         <SplashScreen />
@@ -58,22 +76,7 @@ function RootLayout() {
     )
   }
 
-  console.log("Fetching...", fetching)
-  return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        {/* <MainNavigator /> */}
-        <AuthProvider>
-          <AuthStacks />
-        </AuthProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
-  )
-}
-
-function AuthStacks() {
-  const { isAuthenticated } = useAuth()
-
+  // return the main stack
   if (isAuthenticated) {
     return (
       <Stack>
@@ -82,6 +85,8 @@ function AuthStacks() {
       </Stack>
     )
   }
+
+  // return auth stack & landing page screen
   return (
     <Stack>
       <Stack.Screen name='index' options={{ header: () => null }} />

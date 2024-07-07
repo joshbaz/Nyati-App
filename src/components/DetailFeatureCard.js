@@ -1,26 +1,15 @@
+import React from "react"
 import {
+  ImageBackground,
   StyleSheet,
   Text,
-  View,
-  Animated,
   TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  ScrollView,
-  Modal,
-  Dimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-} from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { Stack, Box, HStack, VStack } from "@react-native-material/core";
-import { COLORS, FONTSFAMILIES } from "../color/VariableColors";
-import { Ionicons } from "@expo/vector-icons";
-import { ProgressBar } from "react-native-paper";
+  View,
+} from "react-native"
+
+import { Box, VStack } from "@react-native-material/core"
+
+import { COLORS } from "../color/VariableColors"
 
 const DetailFeatureCard = (props) => {
   return (
@@ -31,8 +20,8 @@ const DetailFeatureCard = (props) => {
           ? props.isFirst
             ? { marginLeft: 16 }
             : props.isLast
-            ? { marginRight: 16 }
-            : { maxWidth: props.cardWidth }
+              ? { marginRight: 16 }
+              : { maxWidth: props.cardWidth }
           : { maxWidth: props.cardWidth },
         props.shouldMarginatedAround
           ? { margin: 12 }
@@ -77,8 +66,8 @@ const DetailFeatureCard = (props) => {
           >
             <ImageBackground
               source={{ uri: props.posterUrl }}
-              resizeMode="cover"
-              objectFit="cover"
+              resizeMode='cover'
+              objectFit='cover'
               style={[
                 styles.cardImage,
                 {
@@ -98,10 +87,10 @@ const DetailFeatureCard = (props) => {
         </VStack>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default DetailFeatureCard;
+export default DetailFeatureCard
 
 const styles = StyleSheet.create({
   container: {
@@ -153,8 +142,4 @@ const styles = StyleSheet.create({
   progressBars: {
     width: "100%",
   },
-
-});
-
-
-
+})
