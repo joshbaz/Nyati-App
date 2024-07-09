@@ -1,4 +1,4 @@
-import { useNavigation } from "expo-router"
+import { useRouter } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { jwtDecode } from "jwt-decode"
 
@@ -10,7 +10,7 @@ import React, {
   useState,
 } from "react"
 
-import { invoke } from "../../lib/axios"
+import { invoke } from "../lib/axios"
 
 /**
  * @typedef {Object} AuthedUser
@@ -50,22 +50,10 @@ function AuthProvider({ children }) {
   const [isFetching, setIsFetching] = useState(false)
   const [authError, setAuthError] = useState(null)
 
-  const { navigate } = useNavigation()
+  const router = useRouter()
 
   const TOKEN_KEY = "_user_token"
-
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  const adminCredentials = {
-    email: "admin@mail.com",
-    password: "secr3tP@ss",
-  }
-
-  const userCredentials = {
-    email: "testdelete@mail.com",
-    password: "test@Delete",
-  }
-
   const endpoint = "/user"
 
   /**
@@ -88,7 +76,7 @@ function AuthProvider({ children }) {
         await logout()
         setLoading(false)
         setUser(null)
-        navigate("(auth)/login")
+        router.push("(auth)/login")
         return
       }
       // if auth token exists no need to relogin

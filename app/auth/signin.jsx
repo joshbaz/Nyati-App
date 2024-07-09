@@ -26,8 +26,8 @@ import { Formik } from "formik"
 
 import * as yup from "yup"
 
+import { useAuth } from "../../context/AuthProvider"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
-import { useAuth } from "../../src/context/AuthProvider"
 
 function SignIn() {
   const { navigate } = useNavigation()

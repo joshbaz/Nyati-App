@@ -2,21 +2,18 @@ import { ResizeMode, Video } from "expo-av"
 import { useRouter } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
 
-import { useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 import {
-  Button,
+  Animated,
   Dimensions,
-  PixelRatio,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native"
+import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import { HStack, VStack } from "@react-native-material/core"
-
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 
 import { COLORS } from "../color/VariableColors"
 
@@ -25,12 +22,13 @@ const { width } = Dimensions.get("window")
 const videoSource =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
-export default function VideoPlayer({ source, setIsPlaying }) {
+const VideoPlayer = forwardRef(({ source, type }, ref) => {
   const video = useRef(null)
   const router = useRouter()
   //   const [isPlaying, setIsPlaying] = useState(true)
   const [status, setStatus] = useState({})
   const [progress, setProgress] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
 
   const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
     switch (fullscreenUpdate) {
@@ -45,13 +43,19 @@ export default function VideoPlayer({ source, setIsPlaying }) {
     }
   }
 
+  useEffect(() => {
+    if (status?.isBuffering) {
+      console.log("status buffering")
+    }
+  }, [status?.isBuffering])
+
   return (
     <SafeAreaView
       style={{
         flex: 1,
-        height: "100%",
+        height: 397,
         width: "100%",
-        backgroundColor: COLORS.generalBg,
+        backgroundColor: "black",
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "flex-start",
@@ -62,7 +66,6 @@ export default function VideoPlayer({ source, setIsPlaying }) {
           width: "100%",
           height: "100%",
           flex: 1,
-          backgroundColor: COLORS.generalBg,
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "flex-start",
@@ -71,54 +74,62 @@ export default function VideoPlayer({ source, setIsPlaying }) {
         <View
           style={{
             width: width,
-            height: width * 0.9,
+            height: "100%",
             backgroundColor: "black",
+            position: "relative",
           }}
         >
+          {isLoading && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                zIndex: 10,
+                width: "100%",
+                height: "100%",
+                backgroundColor: COLORS.generalOpacity2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Animated.View
+                style={{
+                  position: "relative",
+                  width: 50,
+                  height: 50,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <BallIndicator color='#ED3F62' count={9} />
+              </Animated.View>
+            </View>
+          )}
           <Video
-            ref={video}
+            ref={ref}
             style={{ flex: 1 }}
             source={{
               uri: source,
             }}
-            // onProgress={progress}
+            isLooping
             useNativeControls
+            onProgress={(progress) => {
+              setProgress(progress)
+            }}
             resizeMode={ResizeMode.CONTAIN}
             onFullscreenUpdate={onFullscreenUpdate}
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            onError={(error) => console.error("AV Error", error)}
+            onPlaybackStatusUpdate={(status) => setStatus(status)}
+            onLoad={() => {
+              setIsLoading(false)
+            }}
+            onLoadStart={() => {
+              console.log("loading into memory...")
+            }}
           />
-          <View style={styles.buttons}>
-            <View style={styles.trailerBtnWrap}>
-              <TouchableOpacity
-                style={styles.trailerBtn}
-                onPress={() => {
-                  status.isPlaying
-                    ? video.current.pauseAsync()
-                    : video.current.playAsync()
-                }}
-              >
-                <HStack
-                  gap={8}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View>
-                    <MaterialCommunityIcons
-                      name='play-outline'
-                      size={24}
-                      color='#fff'
-                    />
-                  </View>
-                  <Text style={styles.btnText}>
-                    {status.isPlaying ? "Pause" : "Play"} Trailer
-                  </Text>
-                </HStack>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
         <View style={styles.arrowBackBtn}>
@@ -129,7 +140,9 @@ export default function VideoPlayer({ source, setIsPlaying }) {
       </View>
     </SafeAreaView>
   )
-}
+})
+
+export default VideoPlayer
 
 const styles = StyleSheet.create({
   trailerBtnWrap: {

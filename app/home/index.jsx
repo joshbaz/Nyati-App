@@ -1,4 +1,4 @@
-import { Link, useNavigation, useRouter } from "expo-router"
+import { router } from "expo-router"
 
 import React, { useEffect, useState } from "react"
 import {
@@ -6,6 +6,7 @@ import {
   Dimensions,
   FlatList,
   Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,11 +28,10 @@ import FeaturedMovieCard from "../../src/components/FeaturedMovieCard"
 import FilmFundCard from "../../src/components/FilmFundCard"
 import UpcomingMovieCard from "../../src/components/UpcomingMovieCard"
 
-const { width, height } = Dimensions.get("window")
+const { width } = Dimensions.get("window")
 
 function Home() {
   const { films, fetchFilms } = useFilms()
-  const router = useRouter()
   const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState(undefined)
   const [upcomingFilmList, setUpcomingFilmList] = useState(undefined)
   const [continueWatchingList, setContinueWatchingList] = useState(undefined)
@@ -119,9 +119,7 @@ function Home() {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
-
             width: "100%",
-
             marginTop: 0,
           }}
         >
@@ -160,7 +158,9 @@ function Home() {
                 />
 
                 <View style={styles.menuBarIcon}>
-                  <Entypo name='menu' size={30} color={COLORS.formSubTitle} />
+                  <Pressable onPress={() => router.push("/home/menu")}>
+                    <Entypo name='menu' size={30} color={COLORS.formSubTitle} />
+                  </Pressable>
                 </View>
               </Animated.View>
             </View>
@@ -186,11 +186,15 @@ function Home() {
                   contentContainerStyle={styles.containerGap}
                   renderItem={({ item, index }) => {
                     const poster = item.posters[0]?.url ?? item.posterUrl
+                    console.log("item", item.id)
                     return (
                       <UpcomingMovieCard
                         shouldMarginatedAtEnd={true}
                         cardFunction={() => {
-                          router.push(`film/${item.id}`)
+                          router.push({
+                            pathname: "/home/film/[id]",
+                            params: { id: item?.id },
+                          })
                         }}
                         title={item.title}
                         posterUrl={poster}
@@ -369,7 +373,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTSFAMILIES.formLinks,
     fontSize: 16,
     lineHeight: 22,
-
     letterSpacing: -0.32,
   },
   formBtnLink: {

@@ -5,6 +5,7 @@
  * @returns {string} The formatted date string.
  */
 export const formatAddedDate = (date) => {
+  if (!date) return ""
   const dateObject = new Date(date) // Today's date
   const currentDate = new Date()
 
@@ -19,7 +20,6 @@ export const formatAddedDate = (date) => {
 
   if (diff < oneDay) {
     // calculate the hours, minutes, and seconds
-    console.log(diff)
     if (diff < oneMinute) {
       // if uploaded less than a minute ago
       return "just now"

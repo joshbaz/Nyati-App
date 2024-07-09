@@ -1,12 +1,8 @@
-import LinearGradient from "expo-linear-gradient"
-
 import React, { useEffect } from "react"
 import { LayoutAnimation, Platform, StyleSheet, View } from "react-native"
-import { createShimmerPlaceholder } from "react-native-shimmer-placeholder"
 
 import { COLORS } from "../color/VariableColors"
-
-const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient)
+import SplashScreen from "../components/SplashScreen"
 
 function Loader({ isLoading, children }) {
   useEffect(() => {
@@ -34,7 +30,13 @@ function Loader({ isLoading, children }) {
 
   const renderContent = () => children
 
-  return isLoading ? renderSkeleton() : renderContent()
+  return isLoading ? (
+    <View>
+      <SplashScreen hideLogo={true} />
+    </View>
+  ) : (
+    renderContent()
+  )
 }
 
 const styles = StyleSheet.create({

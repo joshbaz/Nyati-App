@@ -1,18 +1,13 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
 import * as Font from "expo-font"
-import { Stack } from "expo-router";
+import { Stack, router, useSegments } from "expo-router"
 
+import React, { useEffect, useState } from "react"
+import { Provider as PaperProvider } from "react-native-paper"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
-
-import React, { useEffect, useState } from "react";
-import { Provider as PaperProvider } from "react-native-paper";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-
-
-import SplashScreen from "../src/components/SplashScreen";
-import AuthProvider, { useAuth } from "../src/context/AuthProvider";
-
+import AuthProvider, { useAuth } from "../context/AuthProvider"
+import SplashScreen from "../src/components/SplashScreen"
 
 function RootLayout() {
   return (
@@ -68,6 +63,12 @@ function AppStacks() {
     loadFont()
   }, [])
 
+  useEffect(() => {
+    if (fontLoaded && isAuthenticated) {
+      router.push("home")
+    }
+  }, [isAuthenticated, isFetching, fontLoaded])
+
   if (!fontLoaded || isFetching) {
     return (
       <SafeAreaProvider>
@@ -76,12 +77,10 @@ function AppStacks() {
     )
   }
 
-  // return the main stack
-  if (isAuthenticated) {
+  if (isAuthenticated && !isFetching) {
     return (
       <Stack>
-        <Stack.Screen name='(home)' options={{ header: () => null }} />
-        <Stack.Screen name='(payment)' options={{ header: () => null }} />
+        <Stack.Screen name='home' options={{ headerShown: false }} />
       </Stack>
     )
   }
@@ -89,8 +88,8 @@ function AppStacks() {
   // return auth stack & landing page screen
   return (
     <Stack>
-      <Stack.Screen name='index' options={{ header: () => null }} />
-      <Stack.Screen name='(auth)' options={{ header: () => null }} />
+      <Stack.Screen name='index' options={{ headerShown: false }} />
+      <Stack.Screen name='auth' options={{ headerShown: false }} />
     </Stack>
   )
 }

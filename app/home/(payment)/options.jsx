@@ -1,11 +1,12 @@
 import Checkbox from "expo-checkbox"
-import { useRouter } from "expo-router"
 
 import React, { useEffect, useState } from "react"
 import {
   ActivityIndicator,
   Animated,
+  Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
+import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { HStack, VStack } from "@react-native-material/core"
@@ -24,43 +26,16 @@ import { Formik } from "formik"
 
 import * as yup from "yup"
 
-import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
+import AirtelMMImage from "../../../assets/AirtelMoney.png"
+import MomoPayImage from "../../../assets/MtnMoMo.png"
+import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
 
-const RegularAmounts = [
-  {
-    key: "1",
-    amount: 10000,
-  },
-  {
-    key: "2",
-    amount: 20000,
-  },
-  {
-    key: "3",
-    amount: 40000,
-  },
-  {
-    key: "4",
-    amount: 100000,
-  },
-  {
-    key: "5",
-    amount: 200000,
-  },
-  {
-    key: "6",
-    amount: 400000,
-  },
-]
-
-const Donate = () => {
-  const router = useRouter()
+const PaymentOptions = ({ navigation }) => {
   const [editedAmount, setEditedAmount] = useState(null)
   const validationSchema = yup.object().shape({
-    amount: yup.string().required("required"),
-    donateAnonymously: yup.bool().oneOf([true, false], "Field must be checked"),
-    agreeTerms: yup.bool().oneOf([true], "Field must be checked"),
-    agreePrivacyPolicy: yup.bool().oneOf([true], "Field must be checked"),
+    phoneNumber: yup.string().required("required"),
+    payOption: yup.string().required("required"),
+    savePayment: yup.bool().oneOf([true, false], "Field must be checked"),
   })
 
   const [isSubmittingp, setIsSubmittingp] = React.useState(false)
@@ -68,24 +43,24 @@ const Donate = () => {
     if (isSubmittingp) {
       setTimeout(() => {
         setIsSubmittingp(() => false)
-        navigation.navigate("PaymentOptions")
-      }, 500)
+        navigation.navigate("PaymentComplete")
+      }, 5000)
     }
   }, [isSubmittingp])
 
   const changeValues = (setFieldValue, val) => {
-    let changeV = typeof val === "string" ? val.replace(/,/g, "") : val
-    let vsi = changeV !== null || changeV !== "" ? parseInt(changeV) : null
+    let changeV = val.toString()
+    let vsi = changeV !== "" || changeV !== "+256" ? changeV : ""
 
-    if (isNaN(vsi)) {
-      console.log("Not A NUMBER")
-      setFieldValue("amount", null)
+    if (vsi === "") {
+      console.log("Not A Value")
+      setFieldValue("phoneNumber", "")
     } else {
-      let transformedTxt = vsi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-      setFieldValue("amount", transformedTxt)
+      let transformedTxt = vsi
+
+      setFieldValue("phoneNumber", transformedTxt)
     }
   }
-
   return (
     <View
       style={{
@@ -134,17 +109,16 @@ const Donate = () => {
                   spacing={20}
                   style={{ display: "flex", alignItems: "center" }}
                 >
-                  <TouchableOpacity onPress={() => router.back()}>
+                  <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
                   </TouchableOpacity>
-                  <Text style={styles.formTitle}>Donate</Text>
+                  <Text style={styles.formTitle}>Payment Options</Text>
                 </HStack>
                 <Formik
                   initialValues={{
-                    amount: null,
-                    donateAnonymously: false,
-                    agreeTerms: false,
-                    agreePrivacyPolicy: false,
+                    phoneNumber: "",
+                    payOption: "",
+                    savePayment: false,
                   }}
                   validationSchema={validationSchema}
                   onSubmit={(values, helpers) => {
@@ -163,52 +137,117 @@ const Donate = () => {
                     <VStack spacing={60}>
                       {/** form inputs */}
                       <View spacing={20}>
-                        <VStack spacing={10}>
-                          <Text style={styles.formLabel}>Enter Amount</Text>
-                          <HStack style={styles.amountContainer}>
-                            <View style={styles.amountIcon}>
-                              <Text style={styles.amountIconTxt}>UGX</Text>
-                            </View>
+                        {/** payment selector */}
+                        <VStack spacing={23}>
+                          <Text style={styles.formTitle}>
+                            Select Payment Method
+                          </Text>
+                          <View style={styles.amountSelectorWrap}>
+                            <View
+                              style={{
+                                marginBottom: 10,
 
-                            <TextInput
-                              style={styles.amountInput}
-                              enablesReturnKeyAutomatically
-                              keyboardAppearance='dark'
-                              keyboardType='numeric'
-                              value={values.amount}
-                              onChangeText={(e) =>
-                                changeValues(setFieldValue, e)
-                              }
-                              onBlur={handleBlur("amount")}
-                            />
-                          </HStack>
+                                width: "100%",
+                              }}
+                            >
+                              <TouchableOpacity
+                                style={[
+                                  styles.radioBtnWrap,
+                                  { marginBottom: 10 },
+                                ]}
+                                onPress={() =>
+                                  setFieldValue("payOption", "Mtn")
+                                }
+                              >
+                                <HStack
+                                  spacing={21}
+                                  style={{
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <View>
+                                    <Image source={MomoPayImage} />
+                                  </View>
+                                  <Text style={styles.radioTxt}>MTN MOMO</Text>
+                                </HStack>
+
+                                <View
+                                  value='Mtn'
+                                  style={[
+                                    styles.radioBtn,
+                                    values.payOption === "Mtn"
+                                      ? {
+                                          backgroundColor: "#EE5170",
+                                        }
+                                      : {},
+                                  ]}
+                                />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.radioBtnWrap}
+                                onPress={() =>
+                                  setFieldValue("payOption", "Airtel")
+                                }
+                              >
+                                <HStack
+                                  spacing={21}
+                                  style={{
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <View>
+                                    <Image source={AirtelMMImage} />
+                                  </View>
+                                  <Text style={styles.radioTxt}>
+                                    Airtel Money
+                                  </Text>
+                                </HStack>
+                                <View
+                                  style={[
+                                    styles.radioBtn,
+                                    values.payOption === "Airtel"
+                                      ? {
+                                          backgroundColor: "#EE5170",
+                                        }
+                                      : {},
+                                  ]}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
                         </VStack>
 
                         {/** divider */}
                         <View style={styles.horizontalLine} />
-                        {/** amount selector */}
-                        <View style={styles.amountSelectorWrap}>
-                          {RegularAmounts.map((data, index) => {
-                            return (
-                              <TouchableOpacity
-                                key={index}
-                                style={styles.amountSelectorBtn}
-                                onPress={() =>
-                                  changeValues(setFieldValue, data.amount)
-                                }
-                              >
-                                <Text style={styles.amountSelectorTxt}>
-                                  {data.amount
-                                    .toString()
-                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                                </Text>
-                              </TouchableOpacity>
-                            )
-                          })}
-                        </View>
 
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
+                        {/** Mobile Number */}
+                        <VStack spacing={23} style={{ marginBottom: 20 }}>
+                          <Text style={styles.formTitle}>
+                            Add Mobile Number
+                          </Text>
+
+                          <VStack spacing={10}>
+                            <Text style={styles.formLabel}>Mobile Number</Text>
+                            <HStack style={styles.amountContainer}>
+                              <View style={styles.amountIcon}>
+                                <Text style={styles.amountIconTxt}>+256</Text>
+                              </View>
+
+                              <TextInput
+                                style={styles.amountInput}
+                                enablesReturnKeyAutomatically
+                                keyboardAppearance='dark'
+                                keyboardType='number-pad'
+                                value={values.phoneNumber}
+                                onChangeText={(e) =>
+                                  changeValues(setFieldValue, e)
+                                }
+                                onBlur={handleBlur("phoneNumber")}
+                              />
+                            </HStack>
+                          </VStack>
+                        </VStack>
+
                         {/** CheckBox policies */}
                         <VStack spacing={20}>
                           <View
@@ -218,62 +257,17 @@ const Donate = () => {
                             }}
                           >
                             <Checkbox
-                              value={values.donateAnonymously}
+                              value={values.savePayment}
                               color={COLORS.formBtnBg}
                               style={{ width: 24, height: 24 }}
                               onValueChange={(e) => {
-                                setFieldValue("donateAnonymously", e)
+                                setFieldValue("savePayment", e)
                               }}
                             />
 
                             <Text style={styles.checkboxTxt}>
-                              Donate as anonymous
+                              Keep the info for the next payment
                             </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreeTerms}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreeTerms", e)
-                              }}
-                            />
-                            <Text style={styles.checkboxTxt}>
-                              I agree with the Terms and Conditions
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreePrivacyPolicy}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreePrivacyPolicy", e)
-                              }}
-                            />
-                            <View style={{ flexDirection: "row" }}>
-                              <Text style={styles.checkboxTxt}>
-                                I agree with Nyati Films{" "}
-                              </Text>
-                              <TouchableOpacity style={styles.privacyBtnLink}>
-                                <Text style={styles.privacyPolicy}>
-                                  Privacy Policy
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
                           </View>
                         </VStack>
                       </View>
@@ -301,11 +295,48 @@ const Donate = () => {
           </KeyboardAvoidingView>
         </ScrollView>
       </SafeAreaView>
+
+      <Modal
+        transparent={true}
+        visible={isSubmittingp ? true : false}
+        animationType='slide'
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      >
+        <View
+          style={[
+            {
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "space-around",
+              backgroundColor: "rgba(21, 21, 21, 0.6)",
+            },
+          ]}
+        >
+          <Animated.View
+            style={{
+              position: "relative",
+              width: 50,
+              height: 50,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <BallIndicator color='#ED3F62' count={9} />
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   )
 }
 
-export default Donate
+export default PaymentOptions
 
 const styles = StyleSheet.create({
   formTitle: {
@@ -335,12 +366,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   formLabel: {
-    fontFamily: "Inter-SemiBold",
+    fontFamily: "Inter-Regular",
     color: "#FFFAF6",
     fontSize: 16,
 
     letterSpacing: -0.28,
-    textAlign: "center",
   },
   formInputs: {
     height: 48,
@@ -446,5 +476,30 @@ const styles = StyleSheet.create({
     color: "#06F",
     fontFamily: "Inter-Regular",
     fontSize: 14,
+  },
+  radioBtnWrap: {
+    borderWidth: 1,
+    borderColor: "rgba(255, 250, 246, 0.25)",
+    width: "100%",
+    flexDirection: "row",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 6,
+    paddingVertical: 11,
+    paddingHorizontal: 11,
+  },
+  radioBtn: {
+    height: 24,
+    width: 24,
+    borderWidth: 2,
+    borderColor: "#EE5170",
+    borderRadius: 34,
+  },
+  radioTxt: {
+    fontFamily: "Inter-Regular",
+    fontSize: 16,
+    color: "#FFFAF6",
   },
 })

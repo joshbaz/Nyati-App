@@ -1,5 +1,5 @@
-import LinearGradient from "expo-linear-gradient"
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
+import { LinearGradient } from "expo-linear-gradient"
+import { router, useLocalSearchParams } from "expo-router"
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -14,16 +14,15 @@ import {
   View,
 } from "react-native"
 import { ProgressBar } from "react-native-paper"
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
-import { createShimmerPlaceholder } from "react-native-shimmer-placeholder"
+import { SafeAreaView } from "react-native-safe-area-context"
 
-// import SkeletonContent from "react-native-skeleton-content"
 import { HStack, VStack } from "@react-native-material/core"
 
 import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons"
 
 import MoviesDB from "../../../assets/data/db.json"
 import useFilms from "../../../hooks/useFilms"
+import { invoke } from "../../../lib/axios"
 import { COLORS } from "../../../src/color/VariableColors"
 import DetailFeatureCard from "../../../src/components/DetailFeatureCard"
 import FilmFundCard from "../../../src/components/FilmFundCard"
@@ -33,14 +32,12 @@ import { formatAddedDate } from "../../../src/utils/formatDate"
 
 const { width } = Dimensions.get("window")
 
-const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient)
-
 function FilmDetails() {
-  const router = useRouter()
   const videoRef = useRef(null)
   const { id } = useLocalSearchParams()
-  const { navigate } = useNavigation()
-  const { film, fetchFilm } = useFilms()
+  const { film, fetchFilm, isFetching } = useFilms()
+  const [showTrailer, setShowTrailer] = useState(false)
+
   const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState(undefined)
   const [upcomingFilmList, setUpcomingFilmList] = useState(undefined)
   const [continueWatchingList, setContinueWatchingList] = useState(undefined)
@@ -63,19 +60,22 @@ function FilmDetails() {
   }, [fetchFilm, id])
 
   const trailerUrl = useMemo(() => {
+    if (!film?.id) return ""
+
     const BASE_URL = process.env.EXPO_PUBLIC_API_URL
     return `${BASE_URL}/api/v1/film/stream/${film?.id}`
+    // const filmUrl = encodeURI(film?.trailers[0]?.url)
+    // console.log("filmUrl", filmUrl)
+    // return filmUrl
   }, [film?.trailers, film?.id])
 
   return (
-    <Loader isLoading={!film}>
+    <Loader isLoading={!film || isFetching}>
       <View
         style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
+          position: "relative",
+          height: "100%",
+          width: "100%",
           backgroundColor: COLORS.generalBg,
         }}
       >
@@ -88,67 +88,82 @@ function FilmDetails() {
               justifyContent: "flex-start",
               width: "100%",
               marginTop: 0,
-              paddingVertical: 0,
             }}
           >
             <VStack style={{ width: "100%" }}>
               {/** video trailer */}
-
-              <View style={{ height: 397, width: "100%", display: "flex" }}>
-                {trailerUrl ? (
-                  <VideoPlayer
-                    source={
-                      "https://newtou.nyc3.digitaloceanspaces.com/6685c852a1797050df416854/WINDOWS%20OF%20HOPE%20a%20Ugandan%20movie%20for%20children%20children%20teenagers%20teen%20uganda%20movie%20africa_360p.mp4"
-                    }
-                    setIsPlaying={setIsPlaying}
-                  />
-                ) : (
+              <View
+                style={{
+                  height: 397,
+                  width: "100%",
+                  display: "flex",
+                  backgroundColor: "red",
+                }}
+              >
+                {!showTrailer ? (
                   <ImageBackground
                     source={{
                       uri:
                         film?.posters[0]?.url ??
                         "https://images-na.ssl-images-amazon.com/images/M/MV5BMjYxMDcyMzIzNl5BMl5BanBnXkFtZTYwNDg2MDU3._V1_SX300.jpg",
                     }}
-                    style={[
-                      styles.cardImage,
-                      {
-                        width: "100%",
-                        height: "100%",
-                        resizeMode: "contain",
-                      },
-                    ]}
+                    style={{
+                      ...styles.cardImage,
+                      height: "100%",
+                      width: "100%",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                    resizeMode='cover'
                   >
-                    <View style={styles.arrowBackBtn}>
-                      <TouchableOpacity onPress={() => router.back()}>
-                        <Feather
-                          name='arrow-left-circle'
-                          size={30}
-                          color='white'
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.trailerBtnWrap}>
-                      <TouchableOpacity style={styles.trailerBtn}>
-                        <HStack
-                          gap={8}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <View>
-                            <MaterialCommunityIcons
-                              name='play-outline'
-                              size={24}
-                              color='#980F2A'
-                            />
-                          </View>
-                          <Text style={styles.btnText}>Play trailer</Text>
-                        </HStack>
-                      </TouchableOpacity>
-                    </View>
+                    <LinearGradient
+                      colors={["#1F1F1F35", "#1F1F1F60", COLORS.generalBg]}
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <View style={styles.arrowBackBtn}>
+                        <TouchableOpacity onPress={() => router.back()}>
+                          <Feather
+                            name='arrow-left-circle'
+                            size={30}
+                            color='white'
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.trailerBtnWrap}>
+                        {trailerUrl && (
+                          <TouchableOpacity
+                            style={styles.trailerBtn}
+                            onPress={async () => {
+                              setShowTrailer(true)
+                              if (videoRef.current) {
+                                videoRef.current.playAsync()
+                              }
+                            }}
+                          >
+                            <HStack
+                              gap={8}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <View>
+                                <MaterialCommunityIcons
+                                  name='play-outline'
+                                  size={24}
+                                  color='#980F2A'
+                                />
+                              </View>
+                              <Text style={styles.btnText}>Play trailer</Text>
+                            </HStack>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </LinearGradient>
                   </ImageBackground>
+                ) : (
+                  <VideoPlayer ref={videoRef} source={trailerUrl} />
                 )}
               </View>
 
@@ -164,7 +179,7 @@ function FilmDetails() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <Text style={styles.detailTitle}>Fair Play (2011)</Text>
+                      <Text style={styles.detailTitle}>{film?.title}</Text>
                       <HStack spacing={16}>
                         <View style={styles.iconBtn}>
                           <Entypo
