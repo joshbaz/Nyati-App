@@ -1,4 +1,4 @@
-import { router } from "expo-router"
+import { Link, router } from "expo-router"
 
 import React, { useEffect, useState } from "react"
 import {
@@ -17,11 +17,12 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Stack, VStack } from "@react-native-material/core"
 
-import { Entypo } from "@expo/vector-icons"
+import { Entypo, Feather } from "@expo/vector-icons"
 
 import MoviesDB from "../../assets/data/db.json"
 import useFilms from "../../hooks/useFilms"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
+import Avatar from "../../src/components/Avatar"
 import CategoryHeader from "../../src/components/CategoryHeader"
 import ContinueWatchCard from "../../src/components/ContinueWatchCard"
 import FeaturedMovieCard from "../../src/components/FeaturedMovieCard"
@@ -104,11 +105,8 @@ function Home() {
   return (
     <View
       style={{
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
+        width: "100%",
+        height: "100%",
         backgroundColor: COLORS.generalBg,
       }}
     >
@@ -125,7 +123,53 @@ function Home() {
         >
           <Stack direction='column'>
             {/** main featured movies */}
-            <View>
+            <View className='space-y-8'>
+              <View className='w-full bg-transparent h-16 flex flex-row items-center justify-between px-4'>
+                <Pressable onPress={() => router.push("/home/menu")}>
+                  <Entypo name='menu' size={30} color={COLORS.formSubTitle} />
+                </Pressable>
+                <Pressable onPress={() => router.push("/home/search")}>
+                  <Feather
+                    name='search'
+                    size={24}
+                    color={COLORS.formSubTitle}
+                  />
+                </Pressable>
+              </View>
+              <Avatar />
+
+              <View
+                className='flex flex-row gap-x-3 items-center justify-between h-20 mx-5 rounded-md px-2'
+                style={{ backgroundColor: COLORS.formBg }}
+              >
+                <View className='flex flex-col items-start '>
+                  <Text className='text-white font-semibold text-lg tracking-tighter '>
+                    UGX 1.3 Million
+                  </Text>
+                  <Text className='text-gray-400 text-base text-sans'>
+                    total donations
+                  </Text>
+                </View>
+
+                <Link
+                  href='/home/donations'
+                  // className=''
+                >
+                  <View className='flex flex-row items-center gap-x-2'>
+                    <Text
+                      className='font-semibold text-lg text-sans'
+                      style={{ color: COLORS.formLinks }}
+                    >
+                      View all
+                    </Text>
+                    <Feather
+                      name='arrow-right'
+                      size={28}
+                      color={COLORS.formLinks}
+                    />
+                  </View>
+                </Link>
+              </View>
               <Animated.View
                 style={{
                   marginBottom: 30,
@@ -156,12 +200,6 @@ function Home() {
                     />
                   )}
                 />
-
-                <View style={styles.menuBarIcon}>
-                  <Pressable onPress={() => router.push("/home/menu")}>
-                    <Entypo name='menu' size={30} color={COLORS.formSubTitle} />
-                  </Pressable>
-                </View>
               </Animated.View>
             </View>
 
