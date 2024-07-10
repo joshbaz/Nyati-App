@@ -6,6 +6,7 @@ import { forwardRef, useEffect, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
+  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -48,6 +49,16 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
       console.log("status buffering")
     }
   }, [status?.isBuffering])
+
+  const sourceOpts = {
+    uri: source,
+  }
+
+  if (Platform.OS === "android") {
+    sourceOpts.headers = {
+      Range: "bytes=0-",
+    }
+  }
 
   return (
     <SafeAreaView
@@ -111,9 +122,7 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
           <Video
             ref={ref}
             style={{ flex: 1 }}
-            source={{
-              uri: source,
-            }}
+            source={sourceOpts}
             isLooping
             useNativeControls
             onProgress={(progress) => {

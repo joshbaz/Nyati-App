@@ -9,7 +9,7 @@ function MenuLayout() {
       <Drawer>
         <Drawer.Screen
           name='menu'
-          options={{ headerShown: false, headerTitle: "Home" }}
+          options={{ headerShown: false, headerTitle: "Menu" }}
         />
       </Drawer>
     </GestureHandlerRootView>

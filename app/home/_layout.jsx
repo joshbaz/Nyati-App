@@ -12,6 +12,7 @@ function HomeLayout() {
       <Stack.Screen name='film/[id]' options={{ headerShown: false }} />
       <Stack.Screen name='film/watch/[id]' options={{ headerShown: false }} />
       <Stack.Screen name='(payment)' options={{ headerShown: false }} />
+      <Stack.Screen name='(menu)' options={{ headerShown: false }} />
     </Stack>
   )
 }

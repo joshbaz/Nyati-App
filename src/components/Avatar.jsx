@@ -6,7 +6,6 @@ import { COLORS } from "../../src/color/VariableColors"
 
 function Avatar({ hideInfo }) {
   const { user } = useAuth()
-  console.log("Avatar user", user)
   const formatName = () => {
     const { firstname, lastname } = user
     const [firstLetter, ...rest] = firstname
