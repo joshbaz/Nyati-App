@@ -20,7 +20,7 @@ function CustomDrawerContent(props) {
     <View
       style={{
         flex: 1,
-        // backgroundColor: COLORS.generalBg,
+        backgroundColor: COLORS.generalBg,
         paddingVertical: 20 + top,
         borderBottomEndRadius: 10,
       }}
@@ -28,9 +28,9 @@ function CustomDrawerContent(props) {
       <View className='flex flex-row items-center justify-between px-4'>
         <Pressable
           onPress={() => props.navigation.goBack()}
-          className='flex flex-row items-center justify-center border border-white rounded-full h-10 w-10 bg-slate-50/20'
+          className='flex flex-row items-center justify-center border border-white rounded-full h-8 w-8 bg-slate-50/20'
         >
-          <AntDesign name='close' size={28} color='white' />
+          <AntDesign name='close' size={18} color='white' />
         </Pressable>
         <Avatar hideInfo={true} isSmall />
       </View>
@@ -62,12 +62,12 @@ function HomeLayout() {
         drawerContent={CustomDrawerContent}
         screenOptions={{
           headerShown: false,
-          drawerActiveBackgroundColor: "#36323E66",
+          drawerActiveBackgroundColor: "#36323E66", //"#36323E66",
           drawerInactiveBackgroundColor: "transparent",
           drawerActiveTintColor: COLORS.formBtnBg,
           drawerInactiveTintColor: COLORS.formLabel,
           drawerItemStyle: {
-            borderRadius: 10,
+            borderRadius: 5,
             paddingVertical: 10,
             marginVertical: 5,
             marginHorizontal: 20,
@@ -79,7 +79,7 @@ function HomeLayout() {
           },
           drawerAllowFontScaling: true,
           drawerStyle: {
-            backgroundColor: COLORS.generalBg,
+            backgroundColor: "transparent",
             width: "80%",
             borderEndEndRadius: 20,
           },
@@ -121,6 +121,7 @@ function HomeLayout() {
             drawerItemStyle: {
               backgroundColor: COLORS.formBtnBg,
               borderRadius: 100,
+              marginHorizontal: 20,
             },
             drawerLabelStyle: {
               color: "white",

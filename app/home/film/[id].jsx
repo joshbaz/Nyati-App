@@ -1,12 +1,13 @@
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
-
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
   FlatList,
+  Image,
   ImageBackground,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,11 +16,9 @@ import {
 } from "react-native"
 import { ProgressBar } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { HStack, VStack } from "@react-native-material/core"
-
 import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons"
-
+import { Ionicons } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
 import useFilms from "../../../hooks/useFilms"
 import { invoke } from "../../../lib/axios"
@@ -38,21 +37,21 @@ function FilmDetails() {
   const { film, fetchFilm, isFetching } = useFilms()
   const [showTrailer, setShowTrailer] = useState(false)
 
-  const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState(undefined)
-  const [upcomingFilmList, setUpcomingFilmList] = useState(undefined)
-  const [continueWatchingList, setContinueWatchingList] = useState(undefined)
-  const [fundraisingList, setFundraisingList] = useState(undefined)
-  const [isPlaying, setIsPlaying] = useState(false)
+  // const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState(undefined)
+  // const [upcomingFilmList, setUpcomingFilmList] = useState(undefined)
+  // const [continueWatchingList, setContinueWatchingList] = useState(undefined)
+  // const [fundraisingList, setFundraisingList] = useState(undefined)
+  // const [isPlaying, setIsPlaying] = useState(false)
 
-  useEffect(() => {
-    ;(async () => {
-      //  let nowPlaying = await getnowPlayingMoviesList();
-      setNowPlayingMoviesList(() => MoviesDB.movies)
-      setUpcomingFilmList(() => MoviesDB.movies)
-      setContinueWatchingList(() => MoviesDB.movies)
-      setFundraisingList(() => MoviesDB.movies)
-    })()
-  }, [])
+  // useEffect(() => {
+  //   ;(async () => {
+  //     //  let nowPlaying = await getnowPlayingMoviesList();
+  //     setNowPlayingMoviesList(() => MoviesDB.movies)
+  //     setUpcomingFilmList(() => MoviesDB.movies)
+  //     setContinueWatchingList(() => MoviesDB.movies)
+  //     setFundraisingList(() => MoviesDB.movies)
+  //   })()
+  // }, [])
 
   useEffect(() => {
     if (!id) return
@@ -76,304 +75,317 @@ function FilmDetails() {
           position: "relative",
           height: "100%",
           width: "100%",
+          flex: 1,
           backgroundColor: COLORS.generalBg,
         }}
       >
         <SafeAreaView style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={{
-              flexGrow: 1,
+              // flexGrow: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-start",
               width: "100%",
-              marginTop: 0,
             }}
           >
-            <VStack style={{ width: "100%" }}>
-              {/** video trailer */}
-              <View
-                style={{
-                  height: 397,
-                  width: "100%",
-                  display: "flex",
-                  backgroundColor: "red",
-                }}
-              >
-                {!showTrailer ? (
-                  <ImageBackground
-                    source={{
-                      uri:
-                        film?.posters[0]?.url ??
-                        "https://images-na.ssl-images-amazon.com/images/M/MV5BMjYxMDcyMzIzNl5BMl5BanBnXkFtZTYwNDg2MDU3._V1_SX300.jpg",
-                    }}
-                    style={{
-                      ...styles.cardImage,
-                      height: "100%",
-                      width: "100%",
-                      position: "relative",
-                      zIndex: 1,
-                    }}
-                    resizeMode='cover'
+            <View
+              style={{
+                height: 350,
+                width: "100%",
+                display: "flex",
+              }}
+            >
+              {!showTrailer ? (
+                <ImageBackground
+                  source={{
+                    uri:
+                      film?.posters[0]?.url ??
+                      "https://images-na.ssl-images-amazon.com/images/M/MV5BMjYxMDcyMzIzNl5BMl5BanBnXkFtZTYwNDg2MDU3._V1_SX300.jpg",
+                  }}
+                  style={{
+                    ...styles.cardImage,
+                    height: "100%",
+                    width: "100%",
+                    position: "relative",
+                    zIndex: 1,
+                    top: 0,
+                  }}
+                  resizeMode='cover'
+                >
+                  <LinearGradient
+                    colors={[
+                      COLORS.generalOpacity,
+                      COLORS.generalOpacity2,
+                      COLORS.generalBg,
+                    ]}
+                    style={{ width: "100%", height: "100%" }}
                   >
-                    <LinearGradient
-                      colors={["#1F1F1F35", "#1F1F1F60", COLORS.generalBg]}
-                      style={{ width: "100%", height: "100%" }}
-                    >
-                      <View style={styles.arrowBackBtn}>
-                        <TouchableOpacity onPress={() => router.back()}>
-                          <Feather
-                            name='arrow-left-circle'
-                            size={30}
-                            color='white'
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.trailerBtnWrap}>
-                        {trailerUrl && (
-                          <TouchableOpacity
-                            style={styles.trailerBtn}
-                            onPress={async () => {
-                              setShowTrailer(true)
-                              if (videoRef.current) {
-                                videoRef.current.playAsync()
-                              }
-                            }}
-                          >
-                            <HStack
-                              gap={8}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <View>
-                                <MaterialCommunityIcons
-                                  name='play-outline'
-                                  size={24}
-                                  color='#980F2A'
-                                />
-                              </View>
-                              <Text style={styles.btnText}>Play trailer</Text>
-                            </HStack>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </LinearGradient>
-                  </ImageBackground>
-                ) : (
-                  <VideoPlayer ref={videoRef} source={trailerUrl} />
-                )}
-              </View>
-
-              {/** About details */}
-              <View style={styles.detailWrap}>
-                <VStack style={{ paddingVertical: 34, paddingHorizontal: 16 }}>
-                  {/** first section */}
-                  <VStack spacing={5} style={{ paddingBottom: 18 }}>
-                    <HStack
-                      style={{
-                        height: 40,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text style={styles.detailTitle}>{film?.title}</Text>
-                      <HStack spacing={16}>
-                        <View style={styles.iconBtn}>
-                          <Entypo
-                            name='star-outlined'
-                            size={24}
-                            color={"rgba(237, 63, 98, 1)"}
-                          />
-                        </View>
-                        <View style={styles.iconBtn}>
-                          <Feather
-                            name='share-2'
-                            size={24}
-                            color={"rgba(237, 63, 98, 1)"}
-                          />
-                        </View>
-                      </HStack>
-                    </HStack>
-                    <HStack spacing={5}>
-                      <Text style={styles.viewsText}>100 Views</Text>
-                      <Text style={styles.viewsText}>&bull;</Text>
-                      <Text style={styles.viewsText}>
-                        {formatAddedDate(film?.createdAt)}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                  {/** divider */}
-                  <View style={styles.horizontalLine} />
-                  {/** funds raised */}
-                  <VStack spacing={18} style={{ paddingVertical: 30 }}>
-                    <VStack spacing={11}>
-                      <HStack
-                        style={{
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text style={styles.raisedfundsTxt}>1,323,092 UGX</Text>{" "}
-                        <Text style={styles.subfundsTxt}>
-                          funds raised from 14,000,000
-                        </Text>
-                      </HStack>
-                      <View style={styles.progressBars}>
-                        <ProgressBar
-                          progress={0.5}
-                          color={"#F51D4A"}
-                          borderRadius={20}
-                          style={{
-                            backgroundColor: "#EEF1F4",
-                            borderRadius: 20,
-                            width: "100%",
-                          }}
-                        />
-                      </View>
-                      <HStack
-                        style={{
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text style={styles.donatorTxt}>
-                          <Text
-                            style={{
-                              fontFamily: "Inter-ExtraBold",
-                              color: "#EE5170",
-                            }}
-                          >
-                            10
-                          </Text>{" "}
-                          Donators
-                        </Text>{" "}
-                        <Text style={styles.donateTimeline}>
-                          <Text
-                            style={{
-                              fontFamily: "Inter-ExtraBold",
-                              color: "#EE5170",
-                            }}
-                          >
-                            20
-                          </Text>{" "}
-                          days left
-                        </Text>
-                      </HStack>
-                    </VStack>
-
-                    <View>
-                      <TouchableOpacity
-                        style={styles.donateBtn}
-                        onPress={() => {
-                          router.push("donate")
-                        }}
-                      >
-                        <Text style={styles.donateBtnTxt}>Donate</Text>
+                    <View style={styles.arrowBackBtn}>
+                      <TouchableOpacity onPress={() => router.back()}>
+                        <Feather name='arrow-left' size={30} color='white' />
                       </TouchableOpacity>
                     </View>
-                  </VStack>
-
-                  {/** divider */}
-                  <View style={styles.horizontalLine} />
-
-                  {/** About film && Featuring */}
-                  <VStack spacing={33} style={{ paddingVertical: 30 }}>
-                    <VStack spacing={15}>
-                      <Text style={styles.containerSubTitle}>About Film</Text>
-                      <Text style={styles.containerSubTxt}>
-                        {film?.overview}
-                      </Text>
-                    </VStack>
-
-                    <VStack spacing={15}>
-                      <Text style={styles.containerSubTitle}>Featuring</Text>
-                      <Animated.View
-                        style={{
-                          display: "flex",
-                          height: 146,
-                        }}
-                      >
-                        <FlatList
-                          horizontal
-                          data={upcomingFilmList}
-                          keyExtractor={(item) => item.id}
-                          contentContainerStyle={styles.containerGap}
-                          renderItem={({ item, index }) => (
-                            <DetailFeatureCard
-                              shouldMarginatedAtEnd={true}
-                              cardFunction={() => {
-                                navigation.push("FilmDetails", {
-                                  filmid: item.id,
-                                })
-                              }}
-                              title={item.title}
-                              posterUrl={item.posterUrl}
-                              cardWidth={width / 3}
-                              isFirst={index == 0 ? false : false}
-                              isLast={
-                                index == upcomingFilmList?.length - 1
-                                  ? false
-                                  : false
-                              }
-                            />
-                          )}
-                        />
-                      </Animated.View>
-                    </VStack>
-                  </VStack>
-                  {/** divider */}
-                  <View style={styles.horizontalLine} />
-                  {/** More like this*/}
-                  <VStack style={{ paddingVertical: 33 }}>
-                    <Animated.View
-                      style={{
-                        marginBottom: 30,
-                        display: "flex",
-                        height: 280,
-                      }}
-                    >
-                      <Text
-                        style={[styles.containerSubTitle, { marginBottom: 30 }]}
-                      >
-                        More Like This
-                      </Text>
-                      <FlatList
-                        horizontal
-                        data={upcomingFilmList}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.containerGap}
-                        renderItem={({ item, index }) => (
-                          <FilmFundCard
-                            shouldMarginatedAtEnd={true}
-                            cardFunction={() => {
-                              navigation.push("FilmDetails", {
-                                filmid: item.id,
-                              })
-                            }}
-                            title={item.title}
-                            posterUrl={item.posterUrl}
-                            cardWidth={width / 2}
-                            isFirst={index == 0 ? false : false}
-                            isLast={
-                              index == upcomingFilmList?.length - 1
-                                ? false
-                                : false
+                    {/* <View style={styles.trailerBtnWrap}>
+                      {trailerUrl && (
+                        <TouchableOpacity
+                          style={styles.trailerBtn}
+                          onPress={async () => {
+                            setShowTrailer(true)
+                            if (videoRef.current) {
+                              videoRef.current.playAsync()
                             }
-                          />
-                        )}
-                      />
-                    </Animated.View>
-                  </VStack>
-                </VStack>
-              </View>
+                          }}
+                        >
+                          <HStack
+                            gap={8}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <View>
+                              <MaterialCommunityIcons
+                                name='play-outline'
+                                size={24}
+                                color='#980F2A'
+                              />
+                            </View>
+                            <Text style={styles.btnText}>Play trailer</Text>
+                          </HStack>
+                        </TouchableOpacity>
+                      )}
+                    </View> */}
+                  </LinearGradient>
+                </ImageBackground>
+              ) : (
+                <VideoPlayer ref={videoRef} source={trailerUrl} />
+              )}
+            </View>
+            <VStack style={{ width: "100%", flex: 1 }}>
+              {/** video trailer */}
+
+              {/** About details */}
+              <Details film={film} />
             </VStack>
           </ScrollView>
         </SafeAreaView>
       </View>
     </Loader>
+  )
+}
+
+function Details({ film }) {
+  return (
+    <View style={styles.detailWrap}>
+      <View
+        className='space-y-4'
+        style={{ paddingVertical: 20, paddingHorizontal: 16 }}
+      >
+        {/** first section */}
+        <View className='min-h-10 w-full h-auto flex flex-row items-start justify-between'>
+          <View className='flex flex-col items-start justify-start gap-y-1'>
+            <Text className='text-2xl font-bold capitalize text-white'>
+              {film?.title}
+            </Text>
+            <Text className='text-xs font-bold text-gray-300 text-sans'>
+              2010 &bull; Film &bull; Drama{" "}
+            </Text>
+          </View>
+          <Pressable
+            className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
+            style={{ backgroundColor: COLORS.formBtnBg }}
+          >
+            <Ionicons name='play-circle-outline' size={40} color='white' />
+          </Pressable>
+        </View>
+        <View className='space-y-2'>
+          <View className='flex flex-row items-center gap-x-2'>
+            <Image
+              source={require("../../../assets/bagheart.png")}
+              style={{ width: 24, height: 24 }}
+              resizeMode='contain'
+            />
+
+            <Text className='text-gray-300 font-medium tracking-tight text-lg'>
+              Free to watch
+            </Text>
+          </View>
+          <View className='flex flex-row items-center gap-x-4'>
+            <TouchableOpacity
+              onPress={() => props.cardFunction()}
+              className='flex flex-row items-center justify-center gap-x-2 h-14 border-2 border-gray-400 rounded-full bg-gray-500/30'
+              style={{
+                width: 200,
+              }}
+            >
+              <Feather name='plus-circle' size={30} color='white' />
+              <Text className='text-gray-100 font-semibold text-lg'>
+                Watchlist
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View>
+          <Text className='text-gray-400 font-medium text-lg'>
+            {film?.overview}
+          </Text>
+        </View>
+        {/** divider */}
+        {/* <View style={styles.horizontalLine} /> */}
+        {/** funds raised */}
+        <VStack spacing={18} style={{ paddingVertical: 30 }}>
+          <VStack spacing={11}>
+            <HStack
+              style={{
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text style={styles.raisedfundsTxt}>1,323,092 UGX</Text>{" "}
+              <Text style={styles.subfundsTxt}>
+                funds raised from 14,000,000
+              </Text>
+            </HStack>
+            <View style={styles.progressBars}>
+              <ProgressBar
+                progress={0.5}
+                color={"#F51D4A"}
+                borderRadius={20}
+                style={{
+                  backgroundColor: "#EEF1F4",
+                  borderRadius: 20,
+                  width: "100%",
+                }}
+              />
+            </View>
+            <HStack
+              style={{
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text style={styles.donatorTxt}>
+                <Text
+                  style={{
+                    fontFamily: "Inter-ExtraBold",
+                    color: "#EE5170",
+                  }}
+                >
+                  10
+                </Text>{" "}
+                Donators
+              </Text>{" "}
+              <Text style={styles.donateTimeline}>
+                <Text
+                  style={{
+                    fontFamily: "Inter-ExtraBold",
+                    color: "#EE5170",
+                  }}
+                >
+                  20
+                </Text>{" "}
+                days left
+              </Text>
+            </HStack>
+          </VStack>
+
+          <View>
+            <TouchableOpacity
+              style={styles.donateBtn}
+              onPress={() => {
+                router.push("donate")
+              }}
+            >
+              <Text style={styles.donateBtnTxt}>Donate</Text>
+            </TouchableOpacity>
+          </View>
+        </VStack>
+
+        {/** divider */}
+        <View style={styles.horizontalLine} />
+
+        {/** About film && Featuring */}
+        <VStack spacing={33} style={{ paddingVertical: 30 }}>
+          <VStack spacing={15}>
+            <Text style={styles.containerSubTitle}>About Film</Text>
+            <Text style={styles.containerSubTxt}>{film?.overview}</Text>
+          </VStack>
+
+          <VStack spacing={15}>
+            <Text style={styles.containerSubTitle}>Featuring</Text>
+            <Animated.View
+              style={{
+                display: "flex",
+                height: 146,
+              }}
+            >
+              {/* <FlatList
+                horizontal
+                data={upcomingFilmList}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.containerGap}
+                renderItem={({ item, index }) => (
+                  <DetailFeatureCard
+                    shouldMarginatedAtEnd={true}
+                    cardFunction={() => {
+                      navigation.push("FilmDetails", {
+                        filmid: item.id,
+                      })
+                    }}
+                    title={item.title}
+                    posterUrl={item.posterUrl}
+                    cardWidth={width / 3}
+                    isFirst={index == 0 ? false : false}
+                    isLast={
+                      index == upcomingFilmList?.length - 1 ? false : false
+                    }
+                  />
+                )}
+              /> */}
+            </Animated.View>
+          </VStack>
+        </VStack>
+        {/** divider */}
+        <View style={styles.horizontalLine} />
+        {/** More like this*/}
+        <VStack style={{ paddingVertical: 33 }}>
+          <Animated.View
+            style={{
+              marginBottom: 30,
+              display: "flex",
+              height: 280,
+            }}
+          >
+            <Text style={[styles.containerSubTitle, { marginBottom: 30 }]}>
+              More Like This
+            </Text>
+            {/* <FlatList
+              horizontal
+              data={upcomingFilmList}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.containerGap}
+              renderItem={({ item, index }) => (
+                <FilmFundCard
+                  shouldMarginatedAtEnd={true}
+                  cardFunction={() => {
+                    navigation.push("FilmDetails", {
+                      filmid: item.id,
+                    })
+                  }}
+                  title={item.title}
+                  posterUrl={item.posterUrl}
+                  cardWidth={width / 2}
+                  isFirst={index == 0 ? false : false}
+                  isLast={index == upcomingFilmList?.length - 1 ? false : false}
+                />
+              )}
+            /> */}
+          </Animated.View>
+        </VStack>
+      </View>
+    </View>
   )
 }
 
@@ -396,7 +408,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#980F2A",
     position: "absolute",
-
     bottom: 23,
   },
   btnText: {
@@ -485,8 +496,8 @@ const styles = StyleSheet.create({
   arrowBackBtn: {
     color: "#ffffff",
     position: "absolute",
-    top: 20,
-    left: 20,
+    top: 5,
+    left: 14,
     zIndex: 1,
   },
 })

@@ -57,13 +57,11 @@ function AppStacks() {
 
   if (!fontLoaded || isFetching) {
     return (
-      <SafeAreaProvider>
+      <SafeAreaProvider style={{ flex: 1 }}>
         <SplashScreen />
       </SafeAreaProvider>
     )
   }
-
-  console.log("isAuthenticated", isAuthenticated)
 
   if (isAuthenticated && !isFetching) {
     return (

@@ -122,7 +122,7 @@ function Home() {
         >
           <Stack direction='column'>
             {/** main featured movies */}
-            <View className='space-y-6'>
+            <View className='space-y-8'>
               <View className='w-full bg-transparent h-16 flex flex-row items-center justify-between px-4'>
                 <Pressable
                   onPress={() => {
@@ -139,10 +139,11 @@ function Home() {
                   />
                 </Pressable>
               </View>
+              {/* user avatar component */}
               <Avatar />
               <View
                 className='flex flex-row items-center justify-between h-20 mx-5 mb-5 rounded-md px-3'
-                style={{ backgroundColor: COLORS.formBg }}
+                style={{ backgroundColor: "#36323E66" }}
               >
                 <View className='flex flex-col items-start'>
                   <Text className='text-white font-semibold text-lg tracking-tighter '>
