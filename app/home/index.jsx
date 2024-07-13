@@ -1,6 +1,5 @@
 import { DrawerActions } from "@react-navigation/native"
 import { Link, router, useNavigation } from "expo-router"
-
 import React, { useEffect, useState } from "react"
 import {
   Animated,
@@ -15,18 +14,14 @@ import {
 } from "react-native"
 import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { Stack, VStack } from "@react-native-material/core"
-
 import { Entypo, Feather } from "@expo/vector-icons"
-
 import MoviesDB from "../../assets/data/db.json"
 import useFilms from "../../hooks/useFilms"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 import Avatar from "../../src/components/Avatar"
 import CategoryHeader from "../../src/components/CategoryHeader"
 import ContinueWatchCard from "../../src/components/ContinueWatchCard"
-import FeaturedMovieCard from "../../src/components/FeaturedMovieCard"
 import FeaturedSlide from "../../src/components/FeaturedSlide"
 import FilmFundCard from "../../src/components/FilmFundCard"
 import UpcomingMovieCard from "../../src/components/UpcomingMovieCard"
@@ -105,6 +100,7 @@ function Home() {
       </Modal>
     )
   }
+
   return (
     <View
       style={{
@@ -128,7 +124,11 @@ function Home() {
             {/** main featured movies */}
             <View className='space-y-6'>
               <View className='w-full bg-transparent h-16 flex flex-row items-center justify-between px-4'>
-                <Pressable onPress={() => router.push("/home/(menu)")}>
+                <Pressable
+                  onPress={() => {
+                    nav.dispatch(DrawerActions.openDrawer())
+                  }}
+                >
                   <Entypo name='menu' size={30} color={COLORS.formSubTitle} />
                 </Pressable>
                 <Pressable onPress={() => router.push("/home/search")}>

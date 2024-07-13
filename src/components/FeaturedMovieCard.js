@@ -1,21 +1,16 @@
 import { LinearGradient } from "expo-linear-gradient";
-
-
-
-import React from "react";
+import React from "react"
 import {
   Image,
   ImageBackground,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native"
-
-import { Feather, Ionicons } from "@expo/vector-icons"
-
+import { Feather } from "@expo/vector-icons"
 import { COLORS } from "../color/VariableColors"
+
 
 function FeaturedMovieCard(props) {
   return (
@@ -92,11 +87,11 @@ function FeaturedMovieCard(props) {
                     style={{ width: 30, height: 30 }}
                     resizeMode='contain'
                   />
-                  <Text className='text-white font-semibold text-lg'>
+                  <Text className='text-gray-300 font-semibold text-lg'>
                     Trailer
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity className='flex items-center justify-center border border-white rounded-full h-12 w-12'>
+                <TouchableOpacity className='flex items-center justify-center border border-white rounded-full h-12 w-12 bg-slate-50/20'>
                   <Feather name='info' size={28} color={COLORS.formText} />
                 </TouchableOpacity>
               </View>

@@ -1,15 +1,16 @@
-import { useRouter } from "expo-router"
+import { set } from "date-fns"
+import { useRootNavigationState, useRouter } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { jwtDecode } from "jwt-decode"
-
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react"
-
+import Toast from "react-native-root-toast"
 import { invoke } from "../lib/axios"
 
 /**
@@ -44,16 +45,22 @@ const AuthContext = createContext({
   isAuthenticated: false,
 })
 
+function showToast(message) {
+  Toast.show(message, {
+    duration: Toast.durations.SHORT,
+  })
+}
+
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(false)
   const [authError, setAuthError] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const router = useRouter()
 
   const TOKEN_KEY = "_user_token"
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const endpoint = "/user"
 
   /**
@@ -73,10 +80,11 @@ function AuthProvider({ children }) {
     if (authToken) {
       const payload = jwtDecode(authToken)
       if (payload?.exp && Date.now() >= payload?.exp * 1000) {
-        await logout()
+        await logout(payload?.id)
         setLoading(false)
         setUser(null)
-        router.push("(auth)/login")
+        router.push("auth/login")
+        showToast("Your session has expired. Please log in again.")
         return
       }
       // if auth token exists no need to relogin
@@ -91,13 +99,15 @@ function AuthProvider({ children }) {
 
     if (response?.error) {
       setLoading(false)
-      setAuthError(response.error?.message)
+      showToast(response?.error?.message)
       return
     }
 
     await SecureStore.setItemAsync(TOKEN_KEY, response?.res.token)
     setUser(response?.res.user || null)
     setLoading(false)
+    setIsAuthenticated(true)
+    // router.push("home")
   }
 
   /**
@@ -106,9 +116,9 @@ function AuthProvider({ children }) {
    * @param {string} id - The user's ID.
    * @returns Promise<void>
    */
-  const logout = async () => {
+  const logout = async (id = user?.id) => {
     setLoading(true)
-    if (!user?.id) return
+    if (!id) return
 
     const response = await invoke({
       method: "POST",
@@ -117,13 +127,15 @@ function AuthProvider({ children }) {
 
     if (response?.error) {
       setLoading(false)
-      setAuthError(response?.error?.message)
+      showToast(response?.error?.message)
       return
     }
 
     await SecureStore.deleteItemAsync(TOKEN_KEY)
     setUser(null)
     setLoading(false)
+    setIsAuthenticated(false)
+    router.replace("/")
   }
 
   /**
@@ -132,16 +144,18 @@ function AuthProvider({ children }) {
    * @returns Promise<void>
    */
   const fetchUserProfile = useCallback(async () => {
-    setIsFetching(true)
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
     if (!authToken) {
-      setIsFetching(false)
-      setAuthError("An authentication error occurred. Please try again.")
+      setIsAuthenticated(false)
+      showToast("An authentication error occurred. Please try again.")
       return
     }
-    // if user is already set, no need to fetch again
+
+    setIsFetching(true)
+
     if (user?.id) {
       setIsFetching(false)
+      setIsAuthenticated(true)
       return
     }
 
@@ -153,12 +167,18 @@ function AuthProvider({ children }) {
 
     if (response?.error) {
       setIsFetching(false)
-      setAuthError(response.error?.message)
+      if ([401, 403].includes(response?.status) && authToken) {
+        await SecureStore.deleteItemAsync(TOKEN_KEY)
+        showToast("An authentication error occurred. Please try again.")
+        return
+      }
+      showToast(response?.error?.message)
+      setIsAuthenticated(false)
       return
     }
 
-    setUser(response?.res.user)
     setIsAuthenticated(true)
+    setUser(response?.res.user)
     setIsFetching(false)
   }, [endpoint, user?.id])
 
@@ -170,7 +190,7 @@ function AuthProvider({ children }) {
     if (authError) {
       setTimeout(() => {
         setAuthError(null)
-      }, 5000)
+      }, 5000) // 5 seconds
     }
   }, [authError])
 
@@ -199,6 +219,7 @@ function AuthProvider({ children }) {
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (!context) {
+    showToast("useAuth must be used within an AuthProvider")
     throw new Error("useAuth must be used within an AuthProvider")
   }
   return context

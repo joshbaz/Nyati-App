@@ -1,7 +1,7 @@
-import React from "react"
-import { Animated, Dimensions, FlatList, Text, View } from "react-native"
+import React from "react";
+import { Animated, Dimensions, FlatList, View } from "react-native"
+import FeaturedMovieCard from "./FeaturedMovieCard";
 
-import FeaturedMovieCard from "./FeaturedMovieCard"
 
 const { width } = Dimensions.get("window")
 

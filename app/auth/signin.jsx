@@ -1,10 +1,8 @@
-import { Link, useNavigation } from "expo-router"
-
+import { Link } from "expo-router"
 import React from "react"
 import {
   ActivityIndicator,
   Animated,
-  Button,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -17,20 +15,14 @@ import {
 } from "react-native"
 import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { HStack, VStack } from "@react-native-material/core"
-
 import { Ionicons } from "@expo/vector-icons"
-
 import { Formik } from "formik"
-
 import * as yup from "yup"
-
 import { useAuth } from "../../context/AuthProvider"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 
 function SignIn() {
-  const { navigate } = useNavigation()
   const { login } = useAuth()
   const [textSecure, setTextSecure] = React.useState(true)
   const [isSubmittingp, setIsSubmittingp] = React.useState(false)
@@ -43,15 +35,6 @@ function SignIn() {
     username: yup.string().required("Username is required"),
     password: yup.string().required("Password is required"),
   })
-
-  //   useEffect(() => {
-  //     if (isSubmittingp) {
-  //       setTimeout(() => {
-  //         setIsSubmittingp(() => false)
-  //         navigation.navigate("Home")
-  //       }, 5000)
-  //     }
-  //   }, [isSubmittingp])
 
   return (
     <View
@@ -110,10 +93,8 @@ function SignIn() {
                       email: values.username,
                       password: values.password,
                     })
-
                     helpers.setSubmitting(false)
                     helpers.resetForm()
-                    navigate("(home)")
                   } catch (error) {
                     console.log(error)
                     helpers.setSubmitting(false)
@@ -206,10 +187,7 @@ function SignIn() {
                       ) : (
                         <TouchableOpacity
                           style={styles.formBtn}
-                          onPress={(e) => {
-                            console.log(e)
-                            handleSubmit(e)
-                          }}
+                          onPress={handleSubmit}
                         >
                           <Text style={styles.formBtnText}>Sign In</Text>
                         </TouchableOpacity>

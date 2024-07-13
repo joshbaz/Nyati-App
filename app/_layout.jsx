@@ -1,26 +1,12 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
 import * as Font from "expo-font"
-import { Stack, router, useSegments } from "expo-router"
-
-import React, { useEffect, useState } from "react"
-import { Provider as PaperProvider } from "react-native-paper"
+import { Stack, router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Provider as PaperProvider } from "react-native-paper";
+import { RootSiblingParent } from "react-native-root-siblings"
 import { SafeAreaProvider } from "react-native-safe-area-context"
-
 import AuthProvider, { useAuth } from "../context/AuthProvider"
 import SplashScreen from "../src/components/SplashScreen"
-
-function RootLayout() {
-  return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        {/* <MainNavigator /> */}
-        <AuthProvider>
-          <AppStacks />
-        </AuthProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
-  )
-}
 
 function AppStacks() {
   const { isAuthenticated, isFetching } = useAuth()
@@ -67,7 +53,7 @@ function AppStacks() {
     if (fontLoaded && isAuthenticated) {
       router.push("home")
     }
-  }, [isAuthenticated, isFetching, fontLoaded])
+  }, [isAuthenticated, fontLoaded])
 
   if (!fontLoaded || isFetching) {
     return (
@@ -77,20 +63,37 @@ function AppStacks() {
     )
   }
 
+  console.log("isAuthenticated", isAuthenticated)
+
   if (isAuthenticated && !isFetching) {
     return (
-      <Stack>
-        <Stack.Screen name='home' options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name='home' />
       </Stack>
     )
   }
 
   // return auth stack & landing page screen
   return (
-    <Stack>
-      <Stack.Screen name='index' options={{ headerShown: false }} />
-      <Stack.Screen name='auth' options={{ headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='index' />
+      <Stack.Screen name='auth' />
     </Stack>
+  )
+}
+
+function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <PaperProvider>
+        {/* <MainNavigator /> */}
+        <RootSiblingParent>
+          <AuthProvider>
+            <AppStacks />
+          </AuthProvider>
+        </RootSiblingParent>
+      </PaperProvider>
+    </SafeAreaProvider>
   )
 }
 
