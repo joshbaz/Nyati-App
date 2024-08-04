@@ -1,11 +1,13 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
-import * as Font from "expo-font"
+import * as Font from "expo-font";
 import { Stack, router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Provider as PaperProvider } from "react-native-paper";
+import * as ScreenOrientation from "expo-screen-orientation"
+import React, { useEffect, useMemo, useState } from "react"
+import { Provider as PaperProvider } from "react-native-paper"
 import { RootSiblingParent } from "react-native-root-siblings"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import AuthProvider, { useAuth } from "../context/AuthProvider"
+import ToastProvider from "../context/ToastProvider"
 import SplashScreen from "../src/components/SplashScreen"
 
 function AppStacks() {
@@ -41,6 +43,9 @@ function AppStacks() {
     async function loadFont() {
       await Font.loadAsync(customFonts)
       //Text.defaultProps.style.fontFamily = 'Inter-Regular';
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      )
       setTimeout(() => {
         setFontLoaded(true)
       }, 5000)
@@ -67,6 +72,7 @@ function AppStacks() {
     return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name='home' />
+        <Stack.Screen name='payment' />
       </Stack>
     )
   }
@@ -86,9 +92,11 @@ function RootLayout() {
       <PaperProvider>
         {/* <MainNavigator /> */}
         <RootSiblingParent>
-          <AuthProvider>
-            <AppStacks />
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <AppStacks />
+            </AuthProvider>
+          </ToastProvider>
         </RootSiblingParent>
       </PaperProvider>
     </SafeAreaProvider>

@@ -3,12 +3,12 @@ import React from "react"
 
 function FilmLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name='[id]'
-        options={{ headerShown: false, headerTitle: "Film" }}
+        options={{ headerTitle: "Film" }}
       />
-      <Stack.Screen name='watch/[id]' options={{ headerShown: false }} />
+      <Stack.Screen name='watch/[id]' />
     </Stack>
   )
 }

@@ -1,17 +1,19 @@
-import { Video } from "expo-av"
-
-import React, { useState } from "react"
+import { router } from "expo-router"
+import * as ScreenOrientation from "expo-screen-orientation"
+import React, { useEffect, useState } from "react"
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native"
-import Orientation from "react-native-orientation"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { Feather } from "@expo/vector-icons"
-
+import { invoke } from "../../../../lib/axios"
 import { COLORS } from "../../../../src/color/VariableColors"
+import VideoPlayer from "../../../../src/components/VideoPlayer"
 
-const { width } = Dimensions.get("window")
+const { width, height } = Dimensions.get("window")
 
-const WatchFilm = ({ navigation }) => {
+const videoSource =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+
+const WatchFilm = () => {
   const [filmStatus, setFilmStatus] = useState({
     currentTime: 0,
     duration: 0.1,
@@ -19,47 +21,39 @@ const WatchFilm = ({ navigation }) => {
     overlay: false,
     fullscreen: false,
   })
-  const [status, setStatus] = React.useState({})
+  const [orientation, setOrientation] = useState(1)
+  const videoRef = React.useRef(null)
+  // const [videoSource, setVideoSource] = useState("")
 
-  const video = React.useRef(null)
-  const urlVideo = React.useRef(null)
-  //load function
+  // const fetchVideoSource = async () => {
+  //   try {
+  //     const response = await invoke({ endpoint: "/stream/{filmId}" })
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
 
-  //timer
-  const getTime = (t) => {
-    const digit = (n) => (n < 10 ? `0${n}` : `${n}`)
-    // const t = Math.round(time);
-    const sec = digit(Math.floor(t % 60))
-    const min = digit(Math.floor((t / 60) % 60))
-    const hr = digit(Math.floor((t / 3600) % 60))
-    return hr + ":" + min + ":" + sec // this will convert sec to timer string
-    // 33 -> 00:00:33
-    // this is done here
-    // ok now the theme is good to look
+  const lockOrientation = async () => {
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
+    )
+    const o = await ScreenOrientation.getOrientationAsync()
+    setOrientation(o)
   }
 
-  const load = ({ duration }) =>
-    setFilmStatus(() => ({ ...filmStatus, duration: duration }))
-  const progress = ({ currentTime }) => {
-    console.log("running progress", currentTime)
-    setFilmStatus(() => ({ ...filmStatus, currentTime }))
-  }
-
-  const fullscreen = () => {
-    const { fullscreen } = filmStatus
-    if (fullscreen) {
-      Orientation.lockToPortrait()
-    } else {
-      Orientation.lockToLandscape()
+  useEffect(() => {
+    lockOrientation()
+    if (videoRef.current) {
+      videoRef.current.playAsync()
+      // videoRef?.current?.presentFullscreenPlayer()
     }
-
-    setFilmStatus(() => ({ ...filmStatus, fullscreen: !fullscreen }))
-  }
+  }, [])
 
   return (
     <SafeAreaView
       style={{
         flex: 1,
+        width,
         backgroundColor: COLORS.generalBg,
         display: "flex",
         alignItems: "center",
@@ -68,8 +62,8 @@ const WatchFilm = ({ navigation }) => {
     >
       <View
         style={{
-          width: "100%",
-          height: "100%",
+          width,
+          height,
           flex: 1,
           backgroundColor: COLORS.generalBg,
           display: "flex",
@@ -77,27 +71,18 @@ const WatchFilm = ({ navigation }) => {
           justifyContent: "center",
         }}
       >
-        <View
-          style={{
-            width: width,
-            height: width * 0.9,
-            backgroundColor: "black",
-          }}
-        >
-          <Video
-            ref={video}
-            style={{ flex: 1 }}
-            source={require("../../../../src/screens/2MainScreens/reactapp.mp4")}
-            onProgress={progress}
-            useNativeControls
-            resizeMode={"contain"}
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-          />
-        </View>
+        <VideoPlayer ref={videoRef} source={videoSource} />
 
         <View style={styles.arrowBackBtn}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Feather name='arrow-left-circle' size={30} color='white' />
+          <TouchableOpacity
+            onPress={() => {
+              ScreenOrientation.lockAsync(
+                ScreenOrientation.OrientationLock.PORTRAIT_UP,
+              )
+              router.back()
+            }}
+          >
+            <Feather name='arrow-left' size={30} color='white' />
           </TouchableOpacity>
         </View>
       </View>
@@ -121,6 +106,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     position: "absolute",
     top: 20,
-    left: 20,
+    left: 40,
   },
 })

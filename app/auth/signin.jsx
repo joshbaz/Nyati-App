@@ -75,7 +75,7 @@ function SignIn() {
                 <Text style={styles.formTitle}>Sign in to your account</Text>
                 <HStack spacing={5}>
                   <Text style={styles.formSubtitle}>Login below or</Text>
-                  <Link href='/register' style={styles.formBtnLink}>
+                  <Link href='/auth/register' style={styles.formBtnLink}>
                     <Text style={styles.formLinks}>create an account</Text>
                   </Link>
                 </HStack>

@@ -1,24 +1,20 @@
-import { ResizeMode, Video } from "expo-av"
-import { useRouter } from "expo-router"
+import { ResizeMode, Video } from "expo-av";
+import { useRouter } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation"
-
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { forwardRef, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
-  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native"
 import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { Feather } from "@expo/vector-icons"
-
 import { COLORS } from "../color/VariableColors"
 
-const { width } = Dimensions.get("window")
+const { width, height } = Dimensions.get("window")
 
 const videoSource =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
@@ -44,109 +40,105 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
     }
   }
 
-  useEffect(() => {
-    if (status?.isBuffering) {
-      console.log("status buffering")
-    }
-  }, [status?.isBuffering])
-
-  const sourceOpts = {
-    uri: source,
-  }
-
-  if (Platform.OS === "android") {
-    sourceOpts.headers = {
-      Range: "bytes=0-",
-    }
-  }
+  console.log("status", status)
 
   return (
     <SafeAreaView
       style={{
         flex: 1,
-        height: 397,
-        width: "100%",
+        height,
+        width,
         backgroundColor: "black",
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "flex-start",
+        position: "relative",
       }}
     >
-      <View
+      {/* <View
         style={{
-          width: "100%",
-          height: "100%",
+          width,
+          height,
           flex: 1,
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "flex-start",
         }}
-      >
+      > */}
+      {/* <View
+        style={{
+          width,
+          height,
+          backgroundColor: "black",
+          position: "relative",
+        }}
+      > */}
+      {isLoading && (
         <View
           style={{
-            width: width,
-            height: "100%",
-            backgroundColor: "black",
-            position: "relative",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            zIndex: 10,
+            width,
+            height,
+            backgroundColor: COLORS.generalOpacity2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {isLoading && (
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 10,
-                width: "100%",
-                height: "100%",
-                backgroundColor: COLORS.generalOpacity2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Animated.View
-                style={{
-                  position: "relative",
-                  width: 50,
-                  height: 50,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <BallIndicator color='#ED3F62' count={9} />
-              </Animated.View>
-            </View>
-          )}
-          <Video
-            ref={ref}
-            style={{ flex: 1 }}
-            source={sourceOpts}
-            isLooping
-            useNativeControls
-            onProgress={(progress) => {
-              setProgress(progress)
+          <Animated.View
+            style={{
+              position: "relative",
+              width: 50,
+              height: 50,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-            resizeMode={ResizeMode.CONTAIN}
-            onFullscreenUpdate={onFullscreenUpdate}
-            onError={(error) => console.error("AV Error", error)}
-            onPlaybackStatusUpdate={(status) => setStatus(status)}
-            onLoad={() => {
-              setIsLoading(false)
-            }}
-            onLoadStart={() => {
-              console.log("loading into memory...")
-            }}
-          />
+          >
+            <BallIndicator color='#ED3F62' count={9} />
+          </Animated.View>
         </View>
+      )}
+      <Video
+        ref={ref}
+        style={{ flex: 1 }}
+        source={{
+          uri: source,
+        }}
+        isLooping
+        useNativeControls
+        onProgress={(progress) => {
+          setProgress(progress)
+        }}
+        resizeMode={ResizeMode.CONTAIN}
+        onFullscreenUpdate={onFullscreenUpdate}
+        onError={(error) => console.error("AV Error", error)}
+        onPlaybackStatusUpdate={(status) => setStatus(status)}
+        onLoad={() => {
+          setIsLoading(false)
+        }}
+        onLoadStart={() => {
+          setIsLoading(true)
+        }}
+      />
+      {/* </View> */}
 
-        <View style={styles.arrowBackBtn}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Feather name='arrow-left-circle' size={30} color='white' />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.arrowBackBtn}>
+        <TouchableOpacity
+          onPress={() => {
+            ScreenOrientation.lockAsync(
+              ScreenOrientation.OrientationLock.PORTRAIT,
+            )
+            // router.back()
+          }}
+        >
+          <Feather name='arrow-left' size={30} color='white' />
+        </TouchableOpacity>
       </View>
+      {/* </View> */}
     </SafeAreaView>
   )
 })
@@ -191,7 +183,7 @@ const styles = StyleSheet.create({
   arrowBackBtn: {
     color: "#ffffff",
     position: "absolute",
-    top: 20,
+    top: -40,
     left: 20,
   },
 })

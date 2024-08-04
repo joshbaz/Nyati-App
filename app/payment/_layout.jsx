@@ -3,13 +3,9 @@ import React from "react"
 
 function DonateLayout() {
   return (
-    <Stack>
-      <Stack.Screen
-        name='index'
-        options={{ headerShown: false, headerTitle: "Donate" }}
-      />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='plans' options={{ headerShown: false }} />
       <Stack.Screen name='options' options={{ headerShown: false }} />
-      <Stack.Screen name='complete' options={{ headerShown: false }} />
     </Stack>
   )
 }

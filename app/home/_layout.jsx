@@ -25,14 +25,16 @@ function CustomDrawerContent(props) {
         borderBottomEndRadius: 10,
       }}
     >
-      <View className='flex flex-row items-center justify-between px-4'>
+      <View className='flex flex-row items-center justify-between px-4' style={{zIndex: 100}}>
         <Pressable
-          onPress={() => props.navigation.goBack()}
-          className='flex flex-row items-center justify-center border border-white rounded-full h-8 w-8 bg-slate-50/20'
+          onPress={() => props.navigation.closeDrawer()}
+          className='flex flex-row items-center justify-center border border-white rounded-full h-12 w-12 bg-slate-50/20 z-50'
         >
-          <AntDesign name='close' size={18} color='white' />
+          <AntDesign name='close' size={24} color='white' />
         </Pressable>
-        <Avatar hideInfo={true} isSmall />
+        <Pressable onPress={() => router.push("/home/settings")}>
+          <Avatar hideInfo={true} isSmall />
+        </Pressable>
       </View>
       <View style={{ flex: 1 }} className='flex flex-col gap-y-20'>
         <DrawerContentScrollView
@@ -46,7 +48,7 @@ function CustomDrawerContent(props) {
       <View style={{ paddingBottom: 20 + bottom, paddingHorizontal: 20 }}>
         <Pressable
           className='flex flex-row items-center justify-center h-14 w-full rounded-full border border-gray-400 bg-slate-50/20 p-2'
-          onPress={async () => await logout()}
+          onPress={()=>logout()}
         >
           <Text className='text-gray-300 font-semibold text-xl'>Sign Out</Text>
         </Pressable>
