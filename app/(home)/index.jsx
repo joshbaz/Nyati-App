@@ -171,11 +171,6 @@ function Home() {
                   </View>
                 </Link>
               </View>
-              <Button
-                title='Go to payment plans  '
-                colorScheme='blue'
-                onPress={() => router.push("/payment/plans")}
-              />
               <FeaturedSlide films={upcomingFilmList} />
             </View>
 

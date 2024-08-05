@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Feather } from "@expo/vector-icons"
 import { COLORS } from "../color/VariableColors"
 
+
 const { width, height } = Dimensions.get("window")
 
 const videoSource =
@@ -28,103 +29,90 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
   const [isLoading, setIsLoading] = useState(true)
 
   const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
+    console.log("fullscreenUpdate", fullscreenUpdate)
+
+    // what do we want to do here?
+    // if the current orientation is portrait, we want to lock to landscape
+    // if the current orientation is landscape, we want to lock to portrait
+    // Orientations are 0, 1, 2, 3 (portrait, landscape, portrait, landscape)
+
     switch (fullscreenUpdate) {
-      case (0, 1):
-        await ScreenOrientation.unlockAsync() // only on Android required
-        break
-      case (2, 3):
+      case (0, 2):
+        // await ScreenOrientation.unlockAsync() // only on Android required
+        console.log("PORTRAIT")
         await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT,
+          ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
+        )
+        break
+      case (1, 3):
+        console.log("LANDSCAPE")
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
         ) // only on Android required
         break
     }
   }
 
-  console.log("status", status)
-
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        height,
-        width,
-        backgroundColor: "black",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        position: "relative",
-      }}
-    >
-      {/* <View
+    <View className='flex flex-1 items-start justify-start w-full h-full'>
+      <View
+        className='h-full w-full bg-black relative'
         style={{
           width,
-          height,
-          flex: 1,
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
         }}
-      > */}
-      {/* <View
-        style={{
-          width,
-          height,
-          backgroundColor: "black",
-          position: "relative",
-        }}
-      > */}
-      {isLoading && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            zIndex: 10,
-            width,
-            height,
-            backgroundColor: COLORS.generalOpacity2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Animated.View
+      >
+        {/* {isLoading && (
+          <View
             style={{
-              position: "relative",
-              width: 50,
-              height: 50,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: 10,
+              width,
+              height,
+              backgroundColor: COLORS.generalOpacity2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
-        </View>
-      )}
-      <Video
-        ref={ref}
-        style={{ flex: 1 }}
-        source={{
-          uri: source,
-        }}
-        isLooping
-        useNativeControls
-        onProgress={(progress) => {
-          setProgress(progress)
-        }}
-        resizeMode={ResizeMode.CONTAIN}
-        onFullscreenUpdate={onFullscreenUpdate}
-        onError={(error) => console.error("AV Error", error)}
-        onPlaybackStatusUpdate={(status) => setStatus(status)}
-        onLoad={() => {
-          setIsLoading(false)
-        }}
-        onLoadStart={() => {
-          setIsLoading(true)
-        }}
-      />
-      {/* </View> */}
+            <Animated.View
+              style={{
+                position: "relative",
+                width: 50,
+                height: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <BallIndicator color='#ED3F62' count={9} />
+            </Animated.View>
+          </View>
+        )} */}
+        <Video
+          ref={ref}
+          style={{ flex: 1, width, height }}
+          source={{
+            uri: source,
+          }}
+          isLooping
+          useNativeControls={true}
+          onProgress={(progress) => {
+            setProgress(progress)
+          }}
+          resizeMode={ResizeMode.CONTAIN}
+          onFullscreenUpdate={onFullscreenUpdate}
+          onError={(error) => console.error("AV Error", error)}
+          onPlaybackStatusUpdate={(status) => setStatus(status)}
+          onLoad={() => {
+            setIsLoading(false)
+          }}
+          onLoadStart={() => {
+            setIsLoading(true)
+          }}
+        />
+      </View>
 
       <View style={styles.arrowBackBtn}>
         <TouchableOpacity
@@ -138,8 +126,7 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
           <Feather name='arrow-left' size={30} color='white' />
         </TouchableOpacity>
       </View>
-      {/* </View> */}
-    </SafeAreaView>
+    </View>
   )
 })
 

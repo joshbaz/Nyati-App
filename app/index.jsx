@@ -1,6 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient"
-import { Link, router } from "expo-router"
-
+import { Link, Redirect, router } from "expo-router"
 import React from "react"
 import {
   Animated,
@@ -13,15 +12,25 @@ import {
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { HStack, VStack } from "@react-native-material/core"
-
+import { useAuth } from "../context/AuthProvider"
 import { COLORS, FONTSFAMILIES } from "../src/color/VariableColors"
+import SplashScreen from "../src/components/SplashScreen"
 
 const { width } = Dimensions.get("window")
 
 function LandingPage() {
-  console.log(process.env.EXPO_PUBLIC_API_URL)
+  const { isAuthenticated, isFetching } = useAuth()
+
+  if (!isAuthenticated && isFetching) {
+    //TODO: improve on this
+    return <SplashScreen hideLogo={true} />
+  }
+
+  if (isAuthenticated && !isFetching) {
+    return <Redirect href='/(home)' />
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.generalBg }}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -126,7 +135,7 @@ function LandingPage() {
                   >
                     <View>
                       <Pressable
-                        onPress={() => router.push("auth/signin")}
+                        onPress={() => router.push("/(auth)/signin")}
                         style={styles.formBtn}
                       >
                         <Text style={styles.formBtnText}>Sign In</Text>
@@ -143,7 +152,7 @@ function LandingPage() {
                       <Text style={styles.formSubtitle}>
                         Don&apos;t have an account?
                       </Text>
-                      <Link href='/auth/register' style={styles.formLinks}>
+                      <Link href='/(auth)/register' style={styles.formLinks}>
                         <Text style={styles.formLinks}>Sign Up</Text>
                       </Link>
                     </HStack>

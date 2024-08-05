@@ -66,8 +66,6 @@ function Options() {
   const { toast, showToast } = useToast()
   const localParams = useLocalSearchParams()
 
-  console.log("localParams", localParams)
-
   const {
     handleBlur,
     handleChange,
@@ -116,7 +114,7 @@ function Options() {
         setTimeout(() => {
           hp.resetForm()
           hp.setSubmitting(false)
-          router.push("/home")
+          router.push("/(home)")
         }, 3000)
       } catch (e) {
         console.error(e)

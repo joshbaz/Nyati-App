@@ -1,18 +1,17 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
 import * as Font from "expo-font";
-import { Stack, router } from "expo-router";
+import { Slot } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Provider as PaperProvider } from "react-native-paper"
 import { RootSiblingParent } from "react-native-root-siblings"
 import { SafeAreaProvider } from "react-native-safe-area-context"
-import AuthProvider, { useAuth } from "../context/AuthProvider"
+import AuthProvider from "../context/AuthProvider"
 import ToastProvider from "../context/ToastProvider"
 import SplashScreen from "../src/components/SplashScreen"
 
-function AppStacks() {
-  const { isAuthenticated, isFetching } = useAuth()
-  const [fontLoaded, setFontLoaded] = useState(false)
+function useLoadFonts() {
+  const [loaded, setLoaded] = useState(false)
 
   const customFonts = {
     "Inter-Black": require("../assets/Fonts/Inter/static/Inter-Black.ttf"),
@@ -47,54 +46,29 @@ function AppStacks() {
         ScreenOrientation.OrientationLock.PORTRAIT_UP,
       )
       setTimeout(() => {
-        setFontLoaded(true)
+        setLoaded(true)
       }, 5000)
     }
 
     loadFont()
   }, [])
-
-  useEffect(() => {
-    if (fontLoaded && isAuthenticated) {
-      router.push("home")
-    }
-  }, [isAuthenticated, fontLoaded])
-
-  if (!fontLoaded || isFetching) {
-    return (
-      <SafeAreaProvider style={{ flex: 1 }}>
-        <SplashScreen />
-      </SafeAreaProvider>
-    )
-  }
-
-  if (isAuthenticated && !isFetching) {
-    return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='home' />
-        <Stack.Screen name='payment' />
-      </Stack>
-    )
-  }
-
-  // return auth stack & landing page screen
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='index' />
-      <Stack.Screen name='auth' />
-    </Stack>
-  )
+  return { loaded }
 }
 
 function RootLayout() {
+  const { loaded } = useLoadFonts()
+
+  if (!loaded) {
+    return <SplashScreen />
+  }
+
   return (
     <SafeAreaProvider>
       <PaperProvider>
-        {/* <MainNavigator /> */}
         <RootSiblingParent>
           <ToastProvider>
             <AuthProvider>
-              <AppStacks />
+              <Slot initialRouteName='index' />
             </AuthProvider>
           </ToastProvider>
         </RootSiblingParent>

@@ -5,7 +5,7 @@ const tokens = {
     200: "#F8B5C3",
     300: "#F59DAF",
     400: "#F27C94",
-    500: "#EE5170",
+    500: "#EE5170", // primary
     600: "#EA254D",
     700: "#D2143A",
     800: "#B21132",
@@ -61,63 +61,35 @@ const tokens = {
 
 const themeSettings = {
   palette: {
-    primary: {
-      ...tokens.primary,
-      main: tokens.primary[500],
-      light: tokens.primary[400],
-    },
-    secondary: {
-      ...tokens.secondary,
-      main: tokens.secondary[500],
-    },
-    tertiary: {
-      ...tokens.black,
-      main: tokens.black[500],
-    },
-    whites: {
-      ...tokens.whites,
-      main: tokens.whites[500],
-    },
-    background: {
-      default: tokens.background.main,
-      light: tokens.background.light,
-      dark: tokens.background.dark,
+    colors: {
+      primary: {
+        ...tokens.primary,
+        main: tokens.primary[500],
+        light: tokens.primary[400],
+      },
+      secondary: {
+        ...tokens.secondary,
+        main: tokens.secondary[500],
+      },
+      tertiary: {
+        ...tokens.black,
+        main: tokens.black[500],
+      },
+      whites: {
+        ...tokens.whites,
+        main: tokens.whites[500],
+      },
+      background: {
+        default: tokens.background.main,
+        light: tokens.background.light,
+        dark: tokens.background.dark,
+      },
+      border: "#696870",
     },
   },
   typography: {
     fontFamily: ["Inter", "sans-serif"].join(","),
     fontSize: 12,
-    h1: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 32,
-    },
-    h2: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 24,
-    },
-    h3: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 20,
-      fontWeight: 800,
-      color: tokens.secondary[700],
-    },
-    h4: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 14,
-      fontWeight: 600,
-      color: tokens.secondary[300],
-    },
-    h5: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 15,
-      fontWeight: 500,
-      color: tokens.secondary[500],
-    },
-    h6: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
-      fontSize: 10,
-      color: tokens.secondary[700],
-    },
   },
 }
 
@@ -127,7 +99,10 @@ module.exports = {
   theme: {
     extend: {
       transparent: "transparent",
-      ...themeSettings.palette,
+      colors: {
+        ...themeSettings.palette.colors,
+      },
+      ...themeSettings.typography,
     },
   },
   plugins: [],

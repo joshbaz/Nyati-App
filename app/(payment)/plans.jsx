@@ -61,7 +61,7 @@ function Plans() {
                         }}
                         onPress={() => {
                           router.push({
-                            pathname: "/payment/options",
+                            pathname: "/(payment)/options",
                             params: {
                               selectedPlan: plan.value,
                               userId: localParams.userId,
@@ -89,7 +89,7 @@ function Plans() {
               })}
             </View>
             <Link
-              href='/home'
+              href='/(home)'
               className='text-center text-lg uppercase'
               style={{ color: COLORS.formBtnBg }}
             >

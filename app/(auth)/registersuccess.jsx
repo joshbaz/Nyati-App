@@ -13,8 +13,6 @@ import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 function RegisterSuccess() {
   const localParams = useLocalSearchParams()
 
-  console.log("RegisterSuccess localParams", localParams)
-
   return (
     <View
       style={{
@@ -71,7 +69,7 @@ function RegisterSuccess() {
             <TouchableOpacity
               onPress={() => {
                 router.replace({
-                  pathname: "/payment/plans",
+                  pathname: "/(payment)/plans",
                   params: {
                     userId: localParams.userId,
                   },

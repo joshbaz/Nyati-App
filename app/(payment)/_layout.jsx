@@ -1,7 +1,7 @@
 import { Stack } from "expo-router"
 import React from "react"
 
-function DonateLayout() {
+function PaymentLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name='plans' options={{ headerShown: false }} />
@@ -10,4 +10,4 @@ function DonateLayout() {
   )
 }
 
-export default DonateLayout
+export default PaymentLayout

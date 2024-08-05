@@ -29,22 +29,22 @@ function FilmDetails() {
   const videoRef = useRef(null)
   const { id } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilms()
-  const [showTrailer, setShowTrailer] = useState(false)
+  const [showFilm, setshowFilm] = useState(false)
 
   useEffect(() => {
     if (!id) return
     fetchFilm(id)
   }, [fetchFilm, id])
 
-  const trailerUrl = useMemo(() => {
+  const videoUrl = useMemo(() => {
     if (!film?.id) return ""
 
     const BASE_URL = process.env.EXPO_PUBLIC_API_URL
     return `${BASE_URL}/api/v1/film/stream/${film?.id}` //TODO: change this to the trailer url
-  }, [film?.trailers, film?.id])
+  }, [film?.id])
 
-  const playTrailer = async () => {
-    setShowTrailer(true)
+  const playFilm = async () => {
+    setshowFilm(true)
     if (videoRef.current) {
       videoRef.current.playAsync()
     }
@@ -74,13 +74,12 @@ function FilmDetails() {
             }}
           >
             <View
+              className='flex flex-1 items-start justify-start w-full'
               style={{
                 height: 400,
-                width: "100%",
-                display: "flex",
               }}
             >
-              {!showTrailer ? (
+              {!showFilm ? (
                 <ImageBackground
                   source={{
                     uri:
@@ -144,18 +143,14 @@ function FilmDetails() {
                   </LinearGradient>
                 </ImageBackground>
               ) : (
-                <VideoPlayer ref={videoRef} source={trailerUrl} />
+                <VideoPlayer ref={videoRef} source={videoUrl} />
               )}
             </View>
             <VStack style={{ width: "100%", flex: 1 }}>
               {/** video trailer */}
 
               {/** About details */}
-              <Details
-                film={film}
-                playTrailer={playTrailer}
-                showTrailer={showTrailer}
-              />
+              <Details film={film} play={playFilm} showFilm={showFilm} />
             </VStack>
           </ScrollView>
         </SafeAreaView>
@@ -164,7 +159,7 @@ function FilmDetails() {
   )
 }
 
-function Details({ film, playTrailer, showTrailer }) {
+function Details({ film, play, showFilm }) {
   return (
     <View style={styles.detailWrap}>
       <View
@@ -181,7 +176,7 @@ function Details({ film, playTrailer, showTrailer }) {
               2010 &bull; Film &bull; Drama{" "}
             </Text>
           </View>
-          {showTrailer ? (
+          {showFilm ? (
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-3 bg-gray-500/50 border border-white'
               onPress={async () => {
@@ -198,7 +193,8 @@ function Details({ film, playTrailer, showTrailer }) {
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
               style={{ backgroundColor: COLORS.formBtnBg }}
               onPress={async () => {
-                router.push("/home/film/watch/[id]", { id: film?.id })
+                // change change to fullscreen mode
+                play()
               }}
             >
               <Image

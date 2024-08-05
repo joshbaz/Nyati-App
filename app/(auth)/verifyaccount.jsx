@@ -12,45 +12,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
-import { OtpInput } from "react-native-otp-entry"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { HStack, Stack, VStack } from "@react-native-material/core"
+import { HStack, VStack } from "@react-native-material/core"
 import { useFormik } from "formik"
 import * as yup from "yup"
 import { useAuth } from "../../context/AuthProvider"
 import { Toast, useToast } from "../../context/ToastProvider"
 import { invoke } from "../../lib/axios"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
-
-const breakParams = (param, isEmail) => {
-  // replace some of the characters in the string with ***
-  let str = param
-  let newStr = ""
-  if (isEmail) {
-    const splitEmail = str.split("@")
-    str = splitEmail[0]
-    let strArray = str ? str.split("") : []
-    for (let i = 0; i < strArray?.length; i++) {
-      if (i < 2) {
-        newStr += strArray[i]
-      } else {
-        newStr += "*"
-      }
-    }
-    return `${newStr}@${splitEmail[1]}`
-  }
-  // This is in case of phone number
-  let strArray = str.split("")
-  for (let i = 0; i < strArray.length; i++) {
-    if (i < 4 || i > strArray.length - 4) {
-      newStr += strArray[i]
-    } else {
-      newStr += "*"
-    }
-  }
-
-  return newStr
-}
+import OtpConfirm from "../../src/components/OtpConfirm"
+import { breakParams } from "../../src/utils/breakParams"
 
 const validationSchema = yup.object().shape({
   otp: yup.string().required("OTP is required"),
@@ -100,7 +71,7 @@ const VerifyAccount = () => {
         }
 
         // get the token and save it to secure storage & fetch the user's profile
-        setToken(response.res?.token)
+        setToken(response.res?.token, true)
 
         // get the id from the token
         const payload = response.res?.token
@@ -120,7 +91,7 @@ const VerifyAccount = () => {
         hp.setSubmitting(false)
         hp.resetForm()
         router.push({
-          pathname: "/auth/registersuccess",
+          pathname: "/(auth)/registersuccess",
           params: {
             contact: localParams.contact,
             isEmail: localParams.isEmail,
@@ -128,6 +99,7 @@ const VerifyAccount = () => {
           },
         })
       } catch (error) {
+        console.log("error", error)
         showToast({
           type: "danger",
           message: "Something went wrong, please try again",
@@ -145,7 +117,6 @@ const VerifyAccount = () => {
       if (isResending) {
         setIsSubmitResending(true)
       }
-      console.log
       try {
         const response = await invoke({
           method: "POST",
@@ -160,7 +131,6 @@ const VerifyAccount = () => {
           // setFieldValue("timer", 0)
           throw new Error(response.error)
         }
-        console.log("OTP sent")
 
         // start the timer
         if (isResending) {
@@ -171,7 +141,6 @@ const VerifyAccount = () => {
         }
       } catch (error) {
         setFieldValue("timer", 0)
-        console.error("error", error)
         setIsSubmitResending(false)
         showToast({
           type: "danger",
@@ -184,7 +153,6 @@ const VerifyAccount = () => {
   )
 
   useEffect(() => {
-    console.log("I need to on run once")
     makeOTPRequest()
   }, [makeOTPRequest])
 
@@ -243,62 +211,15 @@ const VerifyAccount = () => {
 
                 <VStack w='100%' items='center' spacing={100}>
                   {/** inputs */}
-                  <Stack w='100%' items='center' spacing={40}>
-                    <OtpInput
-                      numberOfDigits={4}
-                      onFilled={(code) => console.log("code", code)}
-                      onTextChange={(otp) => {
-                        console.log("otp", otp)
-                        setFieldValue("otp", otp)
-                      }}
-                      focusColor={COLORS.formBtnBg}
-                      blurOnFilled={true}
-                      theme={{
-                        pinCodeContainerStyle: {
-                          width: 70,
-                          height: 70,
-                          borderColor: COLORS.formBorder,
-                          borderRadius: 6,
-                          backgroundColor: COLORS.formBg,
-                        },
-                        pinCodeTextStyle: {
-                          color: COLORS.formText,
-                          fontSize: 24,
-                          fontFamily: FONTSFAMILIES.formBtnText,
-                        },
-                      }}
+                  <View>
+                    <OtpConfirm
+                      timer={values.timer}
+                      resendCode={makeOTPRequest}
+                      isResending={isSubmitResending}
+                      onCodeChange={(otp) => setFieldValue("otp", otp)}
+                      handleTimeChange={(time) => setFieldValue("timer", time)}
                     />
-
-                    <HStack
-                      items='center'
-                      spacing={5}
-                      style={{ marginTop: 20 }}
-                    >
-                      <Text style={styles.formSubtitle}>Resend Code in</Text>
-                      {isSubmitResending ? (
-                        <View>
-                          <ActivityIndicator
-                            size='small'
-                            color={COLORS.formBtnBg}
-                          />
-                        </View>
-                      ) : (
-                        <TouchableOpacity
-                          disabled={values.timer > 0 || isSubmitResending}
-                          onPress={async () => await makeOTPRequest(true)}
-                        >
-                          {values.timer > 0 ? (
-                            <MemoizedTimer
-                              time={values.timer}
-                              setTime={(time) => setFieldValue("timer", time)}
-                            />
-                          ) : (
-                            <Text style={styles.formLinks}>Resend</Text>
-                          )}
-                        </TouchableOpacity>
-                      )}
-                    </HStack>
-                  </Stack>
+                  </View>
 
                   {/** button & signup */}
                   <VStack
@@ -331,26 +252,6 @@ const VerifyAccount = () => {
     </View>
   )
 }
-
-function Timer({ time, setTime }) {
-  // update the timer every second
-  useEffect(() => {
-    if (time >= 0) {
-      const interval = setInterval(() => {
-        setTime(time - 1)
-      }, 1000)
-
-      return () => clearInterval(interval)
-    }
-  }, [time])
-  return (
-    <Text style={{ fontSize: 16, fontWeight: "bold", color: COLORS.formBtnBg }}>
-      {time} s
-    </Text>
-  )
-}
-
-const MemoizedTimer = React.memo(Timer)
 
 export default VerifyAccount
 

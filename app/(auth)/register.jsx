@@ -101,7 +101,7 @@ const Register = () => {
         hp.setSubmitting(false)
         hp.resetForm()
         router.push({
-          pathname: "/auth/verifyaccount",
+          pathname: "/(auth)/verifyaccount",
           params: {
             isEmail: values.isEmail ?? true,
             contact: values.contact ?? "mymbugua@gmail.com",
@@ -175,7 +175,7 @@ const Register = () => {
                     </Text>
                     <TouchableOpacity
                       style={styles.formBtnLink}
-                      onPress={() => router.replace("/auth/signin")}
+                      onPress={() => router.replace("/(auth)/signin")}
                     >
                       <Text style={styles.formLinks}>log in</Text>
                     </TouchableOpacity>

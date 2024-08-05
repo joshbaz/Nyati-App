@@ -2,7 +2,7 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer"
-import { router } from "expo-router"
+import { Redirect, router } from "expo-router"
 import { Drawer } from "expo-router/drawer"
 import React from "react"
 import { Pressable, Text, View } from "react-native"
@@ -25,7 +25,10 @@ function CustomDrawerContent(props) {
         borderBottomEndRadius: 10,
       }}
     >
-      <View className='flex flex-row items-center justify-between px-4' style={{zIndex: 100}}>
+      <View
+        className='flex flex-row items-center justify-between px-4'
+        style={{ zIndex: 100 }}
+      >
         <Pressable
           onPress={() => props.navigation.closeDrawer()}
           className='flex flex-row items-center justify-center border border-white rounded-full h-12 w-12 bg-slate-50/20 z-50'
@@ -48,7 +51,7 @@ function CustomDrawerContent(props) {
       <View style={{ paddingBottom: 20 + bottom, paddingHorizontal: 20 }}>
         <Pressable
           className='flex flex-row items-center justify-center h-14 w-full rounded-full border border-gray-400 bg-slate-50/20 p-2'
-          onPress={()=>logout()}
+          onPress={() => logout()}
         >
           <Text className='text-gray-300 font-semibold text-xl'>Sign Out</Text>
         </Pressable>
@@ -58,6 +61,11 @@ function CustomDrawerContent(props) {
 }
 
 function HomeLayout() {
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <Redirect href='/' />
+  }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer

@@ -23,10 +23,10 @@ import { Toast, useToast } from "./ToastProvider"
  * @typedef {Object} AuthContextType
  * @property {AuthedUser | null} user - The user object containing the user's information, or null if the user is not authenticated.
  * @property {boolean} loading - A boolean indicating whether the user is currently loading.
- * @property {boolean} fetching - A boolean indicating whether the user is currently fetching.
- * @property {() => void} login - A function to log in the user.
+ * @property {boolean} isFetching - A boolean indicating whether the user is currently fetching.
+ * @property {(params: {contact: string, isEmail: boolean, password: string}) => void} login - A function to log in the user.
  * @property {(token: string, fetchProfile?: boolean) => void} setToken - A function to set the user's authentication token.
- * @property {() => void} logout - A function to log out the user.
+ * @property {(id: [string]) => void} logout - A function to log out the user.
  * @property {boolean} isAuthenticated - A boolean indicating whether the user is authenticated.
  */
 
@@ -39,7 +39,7 @@ import { Toast, useToast } from "./ToastProvider"
 const AuthContext = createContext({
   user: null,
   loading: false,
-  fetching: false,
+  isFetching: false,
   login: () => {},
   logout: () => {},
   setToken: () => {},
@@ -50,7 +50,7 @@ function AuthProvider({ children }) {
   const { toast, showToast } = useToast()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(false)
+  const [isFetching, setIsFetching] = useState(true)
   const [authError, setAuthError] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -87,7 +87,7 @@ function AuthProvider({ children }) {
    *@name login
    * @description Logs in the user with the provided credentials.
    * @param {{
-   *  email: string;
+   *  contact: string;
    *  password: string;
    * }} credentials
    * @returns Promise<void>
@@ -95,22 +95,12 @@ function AuthProvider({ children }) {
   const login = async (credentials) => {
     setLoading(true)
 
-    const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
-    // if auth token exists, fetch the admin profile check expiration
-    if (authToken) {
-      const payload = jwtDecode(authToken)
-      if (payload?.exp && Date.now() >= payload?.exp * 1000) {
-        await logout(payload?.id)
-        setLoading(false)
-        setUser(null)
-        router.push("auth/login")
-        showToast({
-          type: "danger",
-          message: "Your session has expired. Please log in again.",
-        })
-        return
-      }
-      // if auth token exists no need to relogin
+    if (!credentials) {
+      setLoading(false)
+      showToast({
+        type: "danger",
+        message: "Please provide your credentials",
+      })
       return
     }
 
@@ -163,7 +153,7 @@ function AuthProvider({ children }) {
     setUser(null)
     setLoading(false)
     setIsAuthenticated(false)
-    router.replace("/")
+    // router.replace("/")
   }
 
   /**
@@ -175,10 +165,9 @@ function AuthProvider({ children }) {
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
     if (!authToken) {
       setIsAuthenticated(false)
+      setIsFetching(false)
       return
     }
-
-    setIsFetching(true)
 
     if (user?.id) {
       setIsFetching(false)
