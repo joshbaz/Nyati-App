@@ -1,10 +1,7 @@
 import React from "react"
 import { StyleSheet, Text, TouchableOpacity } from "react-native"
-
 import { HStack } from "@react-native-material/core"
-
 import { Octicons } from "@expo/vector-icons"
-
 import { COLORS, FONTSFAMILIES } from "../color/VariableColors"
 
 const CategoryHeader = ({ title, viewMoreArrow }) => {
@@ -15,7 +12,7 @@ const CategoryHeader = ({ title, viewMoreArrow }) => {
         alignItems: "center",
         justifyContent: "space-between",
         marginBottom: 10,
-        marginLeft: 16,
+        // marginLeft: 16,
         marginRight: 16,
       }}
     >

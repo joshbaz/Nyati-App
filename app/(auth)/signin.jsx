@@ -1,4 +1,4 @@
-import { Link, router, useLocalSearchParams } from "expo-router"
+import { Link, Redirect, router, useLocalSearchParams } from "expo-router"
 import React, { useEffect } from "react"
 import {
   ActivityIndicator,
@@ -17,16 +17,15 @@ import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { HStack, VStack } from "@react-native-material/core"
 import { Ionicons } from "@expo/vector-icons"
-import { Formik, useFormik } from "formik"
+import { useFormik } from "formik"
 import * as yup from "yup"
 import { useAuth } from "../../context/AuthProvider"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 
 function SignIn() {
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const params = useLocalSearchParams()
   const [textSecure, setTextSecure] = React.useState(true)
-  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
   const onChangeSecure = () => {
     setTextSecure(!textSecure)
   }
@@ -68,9 +67,12 @@ function SignIn() {
           password: values.password,
           isEmail: values.isEmail,
         })
-        hp.setSubmitting(false)
-        hp.resetForm()
-        router.push("/(home)")
+
+        if (isAuthenticated) {
+          hp.setSubmitting(false)
+          hp.resetForm()
+          router.push("/(home)")
+        }
       } catch (error) {
         hp.setSubmitting(false)
       }
@@ -83,6 +85,11 @@ function SignIn() {
       setFieldValue("isEmail", isEmail)
     }
   }, [values.contact])
+
+  if (isAuthenticated) {
+    // redirect to home page if user is authenticated
+    return <Redirect href='/(home)' />
+  }
 
   return (
     <View
@@ -237,42 +244,44 @@ function SignIn() {
         </KeyboardAvoidingView>
       </SafeAreaView>
 
-      <Modal
-        transparent={true}
-        visible={isSubmittingp ? true : false}
-        animationType='slide'
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-        }}
-      >
-        <View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              backgroundColor: "rgba(21, 21, 21, 0.6)",
-            },
-          ]}
+      {isSubmitting ? (
+        <Modal
+          transparent={true}
+          visible={isSubmitting ? true : false}
+          animationType='slide'
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }}
         >
-          <Animated.View
-            style={{
-              position: "relative",
-              width: 50,
-              height: 50,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          <View
+            style={[
+              {
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "space-around",
+                backgroundColor: "rgba(21, 21, 21, 0.6)",
+              },
+            ]}
           >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
-        </View>
-      </Modal>
+            <Animated.View
+              style={{
+                position: "relative",
+                width: 50,
+                height: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <BallIndicator color='#ED3F62' count={9} />
+            </Animated.View>
+          </View>
+        </Modal>
+      ) : null}
     </View>
   )
 }

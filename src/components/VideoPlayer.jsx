@@ -1,66 +1,174 @@
-import { ResizeMode, Video } from "expo-av";
-import { useRouter } from "expo-router";
+import { ResizeMode, Video } from "expo-av"
+import { LinearGradient } from "expo-linear-gradient"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
-import { forwardRef, useRef, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react"
 import {
   Animated,
   Dimensions,
+  ImageBackground,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { BallIndicator } from "react-native-indicators"
-import { SafeAreaView } from "react-native-safe-area-context"
 import { Feather } from "@expo/vector-icons"
+import { invoke } from "../../lib/axios"
 import { COLORS } from "../color/VariableColors"
-
+import VideoControls from "./VideoControls"
 
 const { width, height } = Dimensions.get("window")
 
 const videoSource =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
-const VideoPlayer = forwardRef(({ source, type }, ref) => {
-  const video = useRef(null)
+const playbackSpeedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
+
+function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
   const router = useRouter()
-  //   const [isPlaying, setIsPlaying] = useState(true)
-  const [status, setStatus] = useState({})
-  const [progress, setProgress] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const videoRef = useRef(null)
 
-  const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
-    console.log("fullscreenUpdate", fullscreenUpdate)
+  const { source: src } = useVideo()
 
-    // what do we want to do here?
-    // if the current orientation is portrait, we want to lock to landscape
-    // if the current orientation is landscape, we want to lock to portrait
-    // Orientations are 0, 1, 2, 3 (portrait, landscape, portrait, landscape)
+  // video states
+  const [orientation, setOrientation] = useState(1)
+  const [showControls, setShowControls] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isLoading, setLoading] = useState(true)
 
-    switch (fullscreenUpdate) {
-      case (0, 2):
-        // await ScreenOrientation.unlockAsync() // only on Android required
-        console.log("PORTRAIT")
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
+  // forward 10s
+  const forward10s = () => {
+    if (videoRef.current) {
+      videoRef.current.getStatusAsync().then((status) => {
+        const newPosition = Math.max(
+          status.positionMillis + 10000,
+          status.durationMillis,
         )
-        break
-      case (1, 3):
-        console.log("LANDSCAPE")
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
-        ) // only on Android required
-        break
+        videoRef.current.setPositionAsync(newPosition)
+      })
     }
   }
 
+  // rewind 10s
+  const rewind10s = () => {
+    if (videoRef.current) {
+      videoRef.current.getStatusAsync().then((status) => {
+        const newPosition = Math.max(status.positionMillis - 10000, 0)
+        videoRef.current.setPositionAsync(newPosition)
+      })
+    }
+  }
+
+  // Show or hide controls
+  const onSingleTap = Gesture.Tap()
+    .maxDuration(100)
+    .onStart((event) => {
+      console.log("Gesture Event Tap", event)
+      // Toggle show & hide controls
+      setShowControls(!showControls)
+    })
+
+  // Set the current time, if video is finished & film type is series, go to the next video
+  const handlePlaybackStatusUpdate = (status) => {
+    setCurrentTime(status.positionMillis)
+    if (status.didJustFinish && type === "series") {
+      // play next video
+    }
+  }
+
+  // Toggle play/pause
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      videoRef.current.pauseAsync()
+    } else {
+      videoRef.current.playAsync()
+    }
+    setIsPlaying(!isPlaying)
+  }
+
+  // Play the next Video
+  const playNextVideo = () => {
+    // play next video
+  }
+
+  // Play the previous Video
+  const playPreviousVideo = () => {}
+
+  // Toggle mute
+  const toggleMute = () => {
+    videoRef.current.setIsMutedAsync(isMuted)
+    setIsMuted(!isMuted)
+  }
+
+  // Toggle fullscreen
+  const toggleFullscreen = async () => {
+    if (!isFullscreen) {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
+      )
+      setIsFullscreen(true)
+      handleFullscreen(true)
+    } else {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      )
+      setIsFullscreen(false)
+      handleFullscreen(false)
+    }
+    setOrientation(await ScreenOrientation.getOrientationAsync())
+  }
+
+  // handle back button press
+  const onBackPress = () => {
+    // if its fullscreen, exit fullscreen
+    if (isFullscreen) {
+      toggleFullscreen()
+      return
+    }
+
+    // go back
+    router.back()
+  }
+
+  useImperativeHandle(ref, () => {
+    return {
+      playVideo: () => {
+        if (videoRef.current) {
+          // set orientation to landscape
+          toggleFullscreen()
+          // play video
+          videoRef.current.playAsync()
+        }
+      },
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isPlaying && showControls) {
+      const timer = setTimeout(() => {
+        setShowControls(false)
+      }, 5000)
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [isPlaying, showControls])
+
   return (
     <View className='flex flex-1 items-start justify-start w-full h-full'>
-      <View
-        className='h-full w-full bg-black relative'
-        style={{
-          width,
-        }}
-      >
+      <View className='h-full w-full bg-black relative'>
         {/* {isLoading && (
           <View
             style={{
@@ -70,7 +178,7 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
               zIndex: 10,
               width,
               height,
-              backgroundColor: COLORS.generalOpacity2,
+              backgroundColor: COLORS.generalOpacity,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -90,47 +198,140 @@ const VideoPlayer = forwardRef(({ source, type }, ref) => {
             </Animated.View>
           </View>
         )} */}
-        <Video
-          ref={ref}
-          style={{ flex: 1, width, height }}
-          source={{
-            uri: source,
-          }}
-          isLooping
-          useNativeControls={true}
-          onProgress={(progress) => {
-            setProgress(progress)
-          }}
-          resizeMode={ResizeMode.CONTAIN}
-          onFullscreenUpdate={onFullscreenUpdate}
-          onError={(error) => console.error("AV Error", error)}
-          onPlaybackStatusUpdate={(status) => setStatus(status)}
-          onLoad={() => {
-            setIsLoading(false)
-          }}
-          onLoadStart={() => {
-            setIsLoading(true)
-          }}
-        />
+
+        <View className='h-full w-full'>
+          <GestureDetector
+            gesture={Gesture.Tap()
+              .runOnJS(true)
+              .onStart(() => {
+                setShowControls((prev) => !prev)
+              })}
+          >
+            <Video
+              ref={videoRef}
+              style={{ flex: 1 }}
+              source={{
+                uri: src,
+              }}
+              isLooping
+              useNativeControls={false}
+              resizeMode={ResizeMode.CONTAIN}
+              onLoadStart={() => setLoading(true)}
+              posterSource={posterSource}
+              usePoster={true}
+              PosterComponent={({ source, style }) => {
+                console.log("PosterComponent", source)
+                return (
+                  <ImageBackground
+                    source={{
+                      uri: source,
+                    }}
+                    style={{
+                      ...style,
+                      height: "100%",
+                      width: "100%",
+                      position: "relative",
+                      zIndex: 1,
+                      top: 0,
+                    }}
+                    resizeMode='cover'
+                  >
+                    <LinearGradient
+                      colors={[
+                        "transparent",
+                        "transparent",
+                        COLORS.generalOpacity,
+                        COLORS.generalOpacity,
+                        COLORS.generalBg,
+                      ]}
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <View style={styles.arrowBackBtn}>
+                        <TouchableOpacity onPress={() => router.back()}>
+                          <Feather name='arrow-left' size={30} color='white' />
+                        </TouchableOpacity>
+                      </View>
+                    </LinearGradient>
+                  </ImageBackground>
+                )
+              }}
+              onError={(error) => console.error("AV Error", error)}
+            />
+          </GestureDetector>
+        </View>
+        {showControls && (
+          <VideoControls
+            onTogglePlayPause={togglePlayPause}
+            onForward={forward10s}
+            onRewind={rewind10s}
+            onSeek={(value) => {
+              videoRef.current.setPositionAsync(+value)
+              setCurrentTime(+value)
+            }}
+            onToggleFullscreen={toggleFullscreen}
+            duration={duration}
+            currentTime={currentTime}
+            isMuted={isMuted}
+            shouldPlay={isPlaying}
+            fullScreenValue={isFullscreen}
+            onBackPress={onBackPress}
+          />
+        )}
       </View>
 
-      <View style={styles.arrowBackBtn}>
+      {/* <View style={styles.arrowBackBtn}>
         <TouchableOpacity
           onPress={() => {
-            ScreenOrientation.lockAsync(
-              ScreenOrientation.OrientationLock.PORTRAIT,
-            )
-            // router.back()
+            if (isFullscreen) {
+              toggleFullscreen()
+            }
+            router.back()
           }}
         >
           <Feather name='arrow-left' size={30} color='white' />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   )
-})
+}
 
-export default VideoPlayer
+function useVideo() {
+  const params = useLocalSearchParams()
+  const [source, setSource] = useState("")
+  const [loading, setLoading] = useState(true)
+
+  const getVideoUrl = useCallback(async () => {
+    try {
+      if (!params.id) return
+
+      setLoading(true)
+
+      const response = await invoke({
+        method: "GET",
+        endpoint: `/film/track/${params.id}`,
+      })
+
+      if (response.error) {
+        console.error("Error", response.error)
+        setLoading(false)
+        return
+      }
+
+      setSource(response.res?.video?.url)
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+    }
+  }, [params.filmId])
+
+  useEffect(() => {
+    getVideoUrl()
+  }, [getVideoUrl])
+
+  return {
+    source,
+  }
+}
 
 const styles = StyleSheet.create({
   trailerBtnWrap: {
@@ -170,7 +371,9 @@ const styles = StyleSheet.create({
   arrowBackBtn: {
     color: "#ffffff",
     position: "absolute",
-    top: -40,
+    top: 20,
     left: 20,
   },
 })
+
+export default forwardRef(VideoPlayer)

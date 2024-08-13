@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
-
 import { HStack, VStack } from "@react-native-material/core"
-
 import { COLORS } from "../color/VariableColors"
 
 const UpcomingMovieCard = (props) => {

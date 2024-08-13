@@ -1,8 +1,9 @@
 // import MainNavigator from "./src/components/Navigation/MainNavigator"
-import * as Font from "expo-font";
+import * as Font from "expo-font"
 import { Slot } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
 import React, { useEffect, useState } from "react"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { Provider as PaperProvider } from "react-native-paper"
 import { RootSiblingParent } from "react-native-root-siblings"
 import { SafeAreaProvider } from "react-native-safe-area-context"
@@ -66,11 +67,13 @@ function RootLayout() {
     <SafeAreaProvider>
       <PaperProvider>
         <RootSiblingParent>
-          <ToastProvider>
-            <AuthProvider>
-              <Slot initialRouteName='index' />
-            </AuthProvider>
-          </ToastProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ToastProvider>
+              <AuthProvider>
+                <Slot initialRouteName='index' />
+              </AuthProvider>
+            </ToastProvider>
+          </GestureHandlerRootView>
         </RootSiblingParent>
       </PaperProvider>
     </SafeAreaProvider>

@@ -12,7 +12,7 @@ export const COLORS = {
   formBtnText: "#FFFFFF",
   generalBg: "#141118",
   generalOpacity: "rgba(20, 17, 24, 0.5)",
-  generalOpacity2: "rgba(20, 17, 24, 0.6)",
+  generalOpacity2: "rgba(20, 17, 24, 0.8)",
 
   /** MainScreen */
   categoryTitle: "#F2F2F2",
@@ -31,4 +31,4 @@ export const FONTSFAMILIES = {
 
   /** MainScreen */
   categoryTitle: "Inter-SemiBold",
-};
+}

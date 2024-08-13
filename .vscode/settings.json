@@ -21,4 +21,6 @@
 //     "peacock.color": "#dd0531"
 // }
 
-{}
+{
+    "thunder-client.saveToWorkspace": false
+}

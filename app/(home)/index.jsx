@@ -179,7 +179,7 @@ function Home() {
               <Animated.View
                 style={{
                   marginBottom: 30,
-
+                  paddingHorizontal: 20,
                   display: "flex",
                   height: 310,
                 }}
@@ -194,10 +194,10 @@ function Home() {
                     const poster = item.posters[0]?.url ?? item.posterUrl
                     return (
                       <UpcomingMovieCard
-                        shouldMarginatedAtEnd={true}
+                        shouldMarginatedAtEnd={false}
                         cardFunction={() => {
                           router.push({
-                            pathname: "/home/film/[id]",
+                            pathname: "/(home)/film/[id]",
                             params: { id: item?.id },
                           })
                         }}
@@ -218,7 +218,7 @@ function Home() {
               <Animated.View
                 style={{
                   marginBottom: 30,
-
+                  paddingHorizontal: 20,
                   display: "flex",
                   height: 310,
                 }}
@@ -234,7 +234,7 @@ function Home() {
                   contentContainerStyle={styles.containerGap}
                   renderItem={({ item, index }) => (
                     <UpcomingMovieCard
-                      shouldMarginatedAtEnd={true}
+                      shouldMarginatedAtEnd={false}
                       cardFunction={() => {
                         navigation.push("FilmDetails", {
                           filmid: item.id,
@@ -258,7 +258,7 @@ function Home() {
               <Animated.View
                 style={{
                   marginBottom: 30,
-
+                  paddingHorizontal: 20,
                   display: "flex",
                   height: 210,
                 }}
@@ -271,7 +271,7 @@ function Home() {
                   contentContainerStyle={styles.containerGap}
                   renderItem={({ item, index }) => (
                     <ContinueWatchCard
-                      shouldMarginatedAtEnd={true}
+                      shouldMarginatedAtEnd={false}
                       cardFunction={() => {
                         navigation.push("WatchFilm", {
                           filmid: item.id,
@@ -295,6 +295,7 @@ function Home() {
               <Animated.View
                 style={{
                   marginBottom: 30,
+                  paddingHorizontal: 20,
                   display: "flex",
                   height: 280,
                 }}
@@ -310,7 +311,7 @@ function Home() {
                   contentContainerStyle={styles.containerGap}
                   renderItem={({ item, index }) => (
                     <FilmFundCard
-                      shouldMarginatedAtEnd={true}
+                      shouldMarginatedAtEnd={false}
                       cardFunction={() => {
                         navigation.push("FilmDetails", {
                           filmid: item.id,

@@ -1,9 +1,11 @@
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
+import * as ScreenOrientation from "expo-screen-orientation"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
+  FlatList,
   Image,
   ImageBackground,
   Pressable,
@@ -17,10 +19,15 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import { Ionicons } from "@expo/vector-icons"
+import MoviesDB from "../../../assets/data/db.json"
+import useDisclosure from "../../../hooks/useDisclosure"
 // import MoviesDB from "../../../assets/data/db.json"
 import useFilms from "../../../hooks/useFilms"
 import { COLORS } from "../../../src/color/VariableColors"
+import CategoryHeader from "../../../src/components/CategoryHeader"
 import Loader from "../../../src/components/Loader"
+import ReadMoreCard from "../../../src/components/ReadMore"
+import UpcomingMovieCard from "../../../src/components/UpcomingMovieCard"
 import VideoPlayer from "../../../src/components/VideoPlayer"
 
 const { width } = Dimensions.get("window")
@@ -30,23 +37,17 @@ function FilmDetails() {
   const { id } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilms()
   const [showFilm, setshowFilm] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
     if (!id) return
     fetchFilm(id)
   }, [fetchFilm, id])
 
-  const videoUrl = useMemo(() => {
-    if (!film?.id) return ""
-
-    const BASE_URL = process.env.EXPO_PUBLIC_API_URL
-    return `${BASE_URL}/api/v1/film/stream/${film?.id}` //TODO: change this to the trailer url
-  }, [film?.id])
-
   const playFilm = async () => {
     setshowFilm(true)
     if (videoRef.current) {
-      videoRef.current.playAsync()
+      await videoRef.current.playVideo()
     }
   }
 
@@ -77,81 +78,21 @@ function FilmDetails() {
               className='flex flex-1 items-start justify-start w-full'
               style={{
                 height: 400,
+                flex: 1,
               }}
             >
-              {!showFilm ? (
-                <ImageBackground
-                  source={{
-                    uri:
-                      film?.posters[0]?.url ??
-                      "https://images-na.ssl-images-amazon.com/images/M/MV5BMjYxMDcyMzIzNl5BMl5BanBnXkFtZTYwNDg2MDU3._V1_SX300.jpg",
-                  }}
-                  style={{
-                    ...styles.cardImage,
-                    height: "100%",
-                    width: "100%",
-                    position: "relative",
-                    zIndex: 1,
-                    top: 0,
-                  }}
-                  resizeMode='cover'
-                >
-                  <LinearGradient
-                    colors={[
-                      COLORS.generalOpacity2,
-                      COLORS.generalOpacity2,
-                      COLORS.generalBg,
-                    ]}
-                    style={{ width: "100%", height: "100%" }}
-                  >
-                    <View style={styles.arrowBackBtn}>
-                      <TouchableOpacity onPress={() => router.back()}>
-                        <Feather name='arrow-left' size={30} color='white' />
-                      </TouchableOpacity>
-                    </View>
-                    {/* <View style={styles.trailerBtnWrap}>
-                      {trailerUrl && (
-                        <TouchableOpacity
-                          style={styles.trailerBtn}
-                          onPress={async () => {
-                            setShowTrailer(true)
-                            if (videoRef.current) {
-                              videoRef.current.playAsync()
-                            }
-                          }}
-                        >
-                          <HStack
-                            gap={8}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <View>
-                              <MaterialCommunityIcons
-                                name='play-outline'
-                                size={24}
-                                color='#980F2A'
-                              />
-                            </View>
-                            <Text style={styles.btnText}>Play trailer</Text>
-                          </HStack>
-                        </TouchableOpacity>
-                      )}
-                    </View> */}
-                  </LinearGradient>
-                </ImageBackground>
-              ) : (
-                <VideoPlayer ref={videoRef} source={videoUrl} />
-              )}
+              <VideoPlayer
+                ref={videoRef}
+                posterSource={film?.posters[0]?.url}
+                handleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
+              />
             </View>
-            <VStack style={{ width: "100%", flex: 1 }}>
-              {/** video trailer */}
 
-              {/** About details */}
-              <Details film={film} play={playFilm} showFilm={showFilm} />
-            </VStack>
+            {isFullscreen ? null : (
+              <VStack style={{ width: "100%", flex: 1 }}>
+                <Details film={film} play={playFilm} showFilm={showFilm} />
+              </VStack>
+            )}
           </ScrollView>
         </SafeAreaView>
       </View>
@@ -160,6 +101,13 @@ function FilmDetails() {
 }
 
 function Details({ film, play, showFilm }) {
+  const [upcomingFilmList, setUpcomingFilmList] = useState(
+    MoviesDB.movies || undefined,
+  )
+
+  // useEffect(() => {
+  //   setUpcomingFilmList(() => MoviesDB.movies)
+  // }, [MoviesDB.movies.length])
   return (
     <View style={styles.detailWrap}>
       <View
@@ -192,10 +140,7 @@ function Details({ film, play, showFilm }) {
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
               style={{ backgroundColor: COLORS.formBtnBg }}
-              onPress={async () => {
-                // change change to fullscreen mode
-                play()
-              }}
+              onPress={() => router.setParams({})}
             >
               <Image
                 source={require("../../../assets/playcircle.png")}
@@ -233,117 +178,35 @@ function Details({ film, play, showFilm }) {
             </TouchableOpacity>
           </View>
         </View>
-        <View>
-          <Text className='text-gray-400 font-medium text-lg'>
-            {film?.overview}
-          </Text>
+        <View className='relative'>
+          <ReadMoreCard content={film?.overview} linesToShow={5} />
         </View>
         {/** divider */}
         {/* <View style={styles.horizontalLine} /> */}
-        {/** funds raised */}
-        {/* <VStack spacing={18} style={{ paddingVertical: 30 }}>
-          <VStack spacing={11}>
-            <HStack
-              style={{
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={styles.raisedfundsTxt}>1,323,092 UGX</Text>{" "}
-              <Text style={styles.subfundsTxt}>
-                funds raised from 14,000,000
-              </Text>
-            </HStack>
-            <View style={styles.progressBars}>
-              <ProgressBar
-                progress={0.5}
-                color={"#F51D4A"}
-                borderRadius={20}
-                style={{
-                  backgroundColor: "#EEF1F4",
-                  borderRadius: 20,
-                  width: "100%",
+        <View>
+          <CategoryHeader title='Start Watching' viewMoreArrow={true} />
+          <FlatList
+            horizontal
+            data={upcomingFilmList}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.containerGap}
+            renderItem={({ item, index }) => (
+              <UpcomingMovieCard
+                shouldMarginatedAtEnd={false}
+                cardFunction={() => {
+                  navigation.push("FilmDetails", {
+                    filmid: item.id,
+                  })
                 }}
+                title={item.title}
+                posterUrl={item.posterUrl}
+                cardWidth={width / 2}
+                isFirst={index == 0 ? true : false}
+                isLast={index == upcomingFilmList?.length - 1 ? true : false}
               />
-            </View>
-            <HStack
-              style={{
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={styles.donatorTxt}>
-                <Text
-                  style={{
-                    fontFamily: "Inter-ExtraBold",
-                    color: "#EE5170",
-                  }}
-                >
-                  10
-                </Text>{" "}
-                Donators
-              </Text>{" "}
-              <Text style={styles.donateTimeline}>
-                <Text
-                  style={{
-                    fontFamily: "Inter-ExtraBold",
-                    color: "#EE5170",
-                  }}
-                >
-                  20
-                </Text>{" "}
-                days left
-              </Text>
-            </HStack>
-          </VStack>
-
-          <View>
-            <TouchableOpacity
-              style={styles.donateBtn}
-              onPress={() => {
-                router.push("donate")
-              }}
-            >
-              <Text style={styles.donateBtnTxt}>Donate</Text>
-            </TouchableOpacity>
-          </View>
-        </VStack> */}
-
-        {/** More like this*/}
-        <VStack style={{ paddingVertical: 33 }}>
-          <Animated.View
-            style={{
-              marginBottom: 30,
-              display: "flex",
-              height: 280,
-            }}
-          >
-            <Text style={[styles.containerSubTitle, { marginBottom: 30 }]}>
-              More Like This
-            </Text>
-            {/* <FlatList
-              horizontal
-              data={upcomingFilmList}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.containerGap}
-              renderItem={({ item, index }) => (
-                <FilmFundCard
-                  shouldMarginatedAtEnd={true}
-                  cardFunction={() => {
-                    navigation.push("FilmDetails", {
-                      filmid: item.id,
-                    })
-                  }}
-                  title={item.title}
-                  posterUrl={item.posterUrl}
-                  cardWidth={width / 2}
-                  isFirst={index == 0 ? false : false}
-                  isLast={index == upcomingFilmList?.length - 1 ? false : false}
-                />
-              )}
-            /> */}
-          </Animated.View>
-        </VStack>
+            )}
+          />
+        </View>
       </View>
     </View>
   )

@@ -20,12 +20,12 @@ import { HStack, VStack } from "@react-native-material/core"
 import { Ionicons } from "@expo/vector-icons"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import { Toast, useToast } from "../../context/ToastProvider"
+import { useToast } from "../../context/ToastProvider"
 import { invoke } from "../../lib/axios"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 
 const Register = () => {
-  const { showToast, toast } = useToast()
+  const { showToast } = useToast()
   const [textSecure, setTextSecure] = React.useState(true)
   const onChangeSecure = () => {
     setTextSecure(!textSecure)
@@ -108,6 +108,7 @@ const Register = () => {
           },
         })
       } catch (error) {
+        console.log(error)
         showToast({
           type: "danger",
           message: "Error creating account, try again",
@@ -146,7 +147,6 @@ const Register = () => {
             paddingVertical: 100,
           }}
         >
-          <Toast toast={toast} />
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
