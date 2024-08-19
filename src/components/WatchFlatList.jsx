@@ -1,3 +1,4 @@
+import { router } from "expo-router"
 import React from "react"
 import { Animated, Dimensions, FlatList, View } from "react-native"
 import useWatchList from "../../hooks/useWatchList"
