@@ -4,7 +4,7 @@ import { HStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
 import { COLORS, FONTSFAMILIES } from "../color/VariableColors"
 
-const CategoryHeader = ({ title, viewMoreArrow }) => {
+const CategoryHeader = ({ title, viewMoreArrow, handleMore }) => {
   return (
     <HStack
       style={{
@@ -19,7 +19,7 @@ const CategoryHeader = ({ title, viewMoreArrow }) => {
       <Text style={styles.categoryTitle}>{title}</Text>
 
       {viewMoreArrow ? (
-        <TouchableOpacity style={{ height: "100%" }}>
+        <TouchableOpacity style={{ height: "100%" }} onPress={handleMore}>
           <Octicons name='arrow-right' size={24} color={COLORS.categoryTitle} />
         </TouchableOpacity>
       ) : null}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useAuth } from "../context/AuthProvider"
 import { invoke } from "../lib/axios"
 
@@ -11,10 +11,10 @@ import { invoke } from "../lib/axios"
 /**
  * @name useWatchList
  * @description custom hook to fetch watchlist
- * @param {{ limit: [number] }} options - limit of watchlist
+ * @param {{ limit: [number], filters: { type: [string]} }} options - limit of watchlist
  * @returns {Returns} - watchList and loading state
  */
-function useWatchList({ limit }) {
+function useWatchList({ limit, filters }) {
   const { user } = useAuth()
   const [watchList, setWatchList] = useState([])
   const [loading, setLoading] = useState(false)
@@ -40,11 +40,18 @@ function useWatchList({ limit }) {
     }
   }, [limit, user?.id])
 
+  const filteredWatchList = useMemo(() => {
+    if (!watchList.length) return []
+    if (!filters?.type) return watchList
+
+    return watchList.filter((item) => item.type === filters.type)
+  }, [watchList, filters?.type])
+
   useEffect(() => {
     fetchWatchList()
   }, [fetchWatchList])
 
-  return { loading, watchList, fetchWatchList }
+  return { loading, watchList: filteredWatchList, fetchWatchList }
 }
 
 export default useWatchList

@@ -149,6 +149,13 @@ function HomeLayout() {
             drawerItemStyle: { display: "none" },
           }}
         />
+        <Drawer.Screen
+          name='watchlist'
+          options={{
+            headerShown: false,
+            drawerItemStyle: { display: "none" },
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   )

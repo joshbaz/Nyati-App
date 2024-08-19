@@ -24,7 +24,13 @@ function WatchFlatList() {
           height: 310,
         }}
       >
-        <CategoryHeader title='Your watchlist' viewMoreArrow={true} />
+        <CategoryHeader
+          title='Your watchlist'
+          viewMoreArrow={true}
+          handleMore={() => {
+            router.push("/(home)/watchlist")
+          }}
+        />
 
         <FlatList
           horizontal
