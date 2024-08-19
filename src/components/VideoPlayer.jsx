@@ -11,32 +11,23 @@ import {
   useState,
 } from "react"
 import {
-  Animated,
-  Dimensions,
   ImageBackground,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
-import { BallIndicator } from "react-native-indicators"
+// import { BallIndicator } from "react-native-indicators"
 import { Feather } from "@expo/vector-icons"
 import { invoke } from "../../lib/axios"
 import { COLORS } from "../color/VariableColors"
 import VideoControls from "./VideoControls"
 
-const { width, height } = Dimensions.get("window")
+// const playbackSpeedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
-const videoSource =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-
-const playbackSpeedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
-
-function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
+function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   const router = useRouter()
   const videoRef = useRef(null)
-
   const { source: src } = useVideo()
 
   // video states
@@ -46,7 +37,8 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isLoading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [duration, setDuration] = useState(0)
 
   // forward 10s
   const forward10s = () => {
@@ -73,18 +65,23 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
 
   // Show or hide controls
   const onSingleTap = Gesture.Tap()
-    .maxDuration(100)
-    .onStart((event) => {
-      console.log("Gesture Event Tap", event)
+    .runOnJS(true)
+    .onStart(() => {
       // Toggle show & hide controls
       setShowControls(!showControls)
     })
 
   // Set the current time, if video is finished & film type is series, go to the next video
   const handlePlaybackStatusUpdate = (status) => {
+    // console.log("Playback Status", status)
     setCurrentTime(status.positionMillis)
-    if (status.didJustFinish && type === "series") {
-      // play next video
+    setDuration(status.durationMillis)
+
+    if (status.didJustFinish) {
+      // reset duration and current time
+      // TODO: remove the current film from the watchedlist
+      setCurrentTime(0)
+      setDuration(0)
     }
   }
 
@@ -96,20 +93,6 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
       videoRef.current.playAsync()
     }
     setIsPlaying(!isPlaying)
-  }
-
-  // Play the next Video
-  const playNextVideo = () => {
-    // play next video
-  }
-
-  // Play the previous Video
-  const playPreviousVideo = () => {}
-
-  // Toggle mute
-  const toggleMute = () => {
-    videoRef.current.setIsMutedAsync(isMuted)
-    setIsMuted(!isMuted)
   }
 
   // Toggle fullscreen
@@ -145,7 +128,7 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
   useImperativeHandle(ref, () => {
     return {
       playVideo: () => {
-        if (videoRef.current) {
+        if (videoRef.current && src) {
           // set orientation to landscape
           toggleFullscreen()
           // play video
@@ -200,13 +183,7 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
         )} */}
 
         <View className='h-full w-full'>
-          <GestureDetector
-            gesture={Gesture.Tap()
-              .runOnJS(true)
-              .onStart(() => {
-                setShowControls((prev) => !prev)
-              })}
-          >
+          <GestureDetector gesture={onSingleTap}>
             <Video
               ref={videoRef}
               style={{ flex: 1 }}
@@ -216,45 +193,43 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
               isLooping
               useNativeControls={false}
               resizeMode={ResizeMode.CONTAIN}
-              onLoadStart={() => setLoading(true)}
+              onReadyForDisplay={() => setIsLoading(false)}
+              onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
               posterSource={posterSource}
-              usePoster={true}
-              PosterComponent={({ source, style }) => {
-                console.log("PosterComponent", source)
-                return (
-                  <ImageBackground
-                    source={{
-                      uri: source,
-                    }}
-                    style={{
-                      ...style,
-                      height: "100%",
-                      width: "100%",
-                      position: "relative",
-                      zIndex: 1,
-                      top: 0,
-                    }}
-                    resizeMode='cover'
+              usePoster={!src}
+              PosterComponent={({ source, style }) => (
+                <ImageBackground
+                  source={{
+                    uri: source,
+                  }}
+                  style={{
+                    ...style,
+                    height: "100%",
+                    width: "100%",
+                    position: "relative",
+                    zIndex: 1,
+                    top: 0,
+                  }}
+                  resizeMode='cover'
+                >
+                  <LinearGradient
+                    colors={[
+                      "transparent",
+                      "transparent",
+                      COLORS.generalOpacity,
+                      COLORS.generalOpacity,
+                      COLORS.generalBg,
+                    ]}
+                    style={{ width: "100%", height: "100%" }}
                   >
-                    <LinearGradient
-                      colors={[
-                        "transparent",
-                        "transparent",
-                        COLORS.generalOpacity,
-                        COLORS.generalOpacity,
-                        COLORS.generalBg,
-                      ]}
-                      style={{ width: "100%", height: "100%" }}
-                    >
-                      <View style={styles.arrowBackBtn}>
-                        <TouchableOpacity onPress={() => router.back()}>
-                          <Feather name='arrow-left' size={30} color='white' />
-                        </TouchableOpacity>
-                      </View>
-                    </LinearGradient>
-                  </ImageBackground>
-                )
-              }}
+                    <View style={styles.arrowBackBtn}>
+                      <TouchableOpacity onPress={() => router.back()}>
+                        <Feather name='arrow-left' size={30} color='white' />
+                      </TouchableOpacity>
+                    </View>
+                  </LinearGradient>
+                </ImageBackground>
+              )}
               onError={(error) => console.error("AV Error", error)}
             />
           </GestureDetector>
@@ -278,21 +253,13 @@ function VideoPlayer({ type, duration, posterSource, handleFullscreen }, ref) {
           />
         )}
       </View>
-
-      {/* <View style={styles.arrowBackBtn}>
-        <TouchableOpacity
-          onPress={() => {
-            if (isFullscreen) {
-              toggleFullscreen()
-            }
-            router.back()
-          }}
-        >
-          <Feather name='arrow-left' size={30} color='white' />
-        </TouchableOpacity>
-      </View> */}
     </View>
   )
+}
+
+function WatchListButton({ film }) {
+  // hide the button if the film is already in the watchlist, or if the film is being watched
+  return <View></View>
 }
 
 function useVideo() {
@@ -300,15 +267,17 @@ function useVideo() {
   const [source, setSource] = useState("")
   const [loading, setLoading] = useState(true)
 
+  console.log("params", params)
+
   const getVideoUrl = useCallback(async () => {
     try {
-      if (!params.id) return
+      if (!params.trackid) return
 
       setLoading(true)
 
       const response = await invoke({
         method: "GET",
-        endpoint: `/film/track/${params.id}`,
+        endpoint: `/film/track/${params.trackid}`,
       })
 
       if (response.error) {
@@ -322,15 +291,13 @@ function useVideo() {
     } catch (error) {
       setLoading(false)
     }
-  }, [params.filmId])
+  }, [params.trackid])
 
   useEffect(() => {
     getVideoUrl()
   }, [getVideoUrl])
 
-  return {
-    source,
-  }
+  return { source, loading }
 }
 
 const styles = StyleSheet.create({

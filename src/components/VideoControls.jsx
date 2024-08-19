@@ -15,13 +15,14 @@ const { width, height } = Dimensions.get("window")
 // format time
 const formatTime = (timeInMs) => {
   if (!isNaN(timeInMs)) {
+    console.log("timeInMs", timeInMs)
     const totalSeconds = Math.floor(timeInMs / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
 
-    return `${minutes < 10 ? "0" : ""}${minutes}:${
-      seconds < 10 ? "0" : ""
-    }${seconds}`
+    // return 00:00:00 / 00:00:00 -> hours:min
+    return `${hours > 0 ? `${hours}:` : ""}${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`
   }
 
   return "00:00"
@@ -94,9 +95,11 @@ function VideoControls({
             maximumValue={duration * 1000}
             value={time}
             onValueChange={(value) => {
+              console.log("value", value)
               onSeek(value)
             }}
             onSlidingComplete={(value) => {
+              console.log("value", value)
               onSeek(value)
             }}
             minimumTrackTintColor={COLORS.formBtnBg}

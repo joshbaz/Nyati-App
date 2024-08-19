@@ -1,13 +1,10 @@
-import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
-import * as ScreenOrientation from "expo-screen-orientation"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
-  Animated,
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
-  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,11 +15,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
-import { Ionicons } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
-import useDisclosure from "../../../hooks/useDisclosure"
+import { useAuth } from "../../../context/AuthProvider"
+import { useToast } from "../../../context/ToastProvider"
 // import MoviesDB from "../../../assets/data/db.json"
 import useFilms from "../../../hooks/useFilms"
+import { invoke } from "../../../lib/axios"
 import { COLORS } from "../../../src/color/VariableColors"
 import CategoryHeader from "../../../src/components/CategoryHeader"
 import Loader from "../../../src/components/Loader"
@@ -32,9 +30,17 @@ import VideoPlayer from "../../../src/components/VideoPlayer"
 
 const { width } = Dimensions.get("window")
 
+const getMainVideo = (film) => {
+  if (!film?.video) return null
+  //filter out trailers
+  const mainVideo = film?.video?.find((video) => !video?.isTrailer)
+  if (!mainVideo) return null
+  return mainVideo?.id
+}
+
 function FilmDetails() {
   const videoRef = useRef(null)
-  const { id } = useLocalSearchParams()
+  const { id, trackid } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilms()
   const [showFilm, setshowFilm] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -45,8 +51,8 @@ function FilmDetails() {
   }, [fetchFilm, id])
 
   const playFilm = async () => {
-    setshowFilm(true)
     if (videoRef.current) {
+      router.setParams({ trackid: getMainVideo(film) })
       await videoRef.current.playVideo()
     }
   }
@@ -90,7 +96,7 @@ function FilmDetails() {
 
             {isFullscreen ? null : (
               <VStack style={{ width: "100%", flex: 1 }}>
-                <Details film={film} play={playFilm} showFilm={showFilm} />
+                <Details film={film} play={playFilm} showFilm={!!trackid} />
               </VStack>
             )}
           </ScrollView>
@@ -101,13 +107,56 @@ function FilmDetails() {
 }
 
 function Details({ film, play, showFilm }) {
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const [loading, setLoading] = useState(false)
   const [upcomingFilmList, setUpcomingFilmList] = useState(
     MoviesDB.movies || undefined,
   )
 
-  // useEffect(() => {
-  //   setUpcomingFilmList(() => MoviesDB.movies)
-  // }, [MoviesDB.movies.length])
+  console.log("film", film.watchlist)
+
+  const handleAddToWatchlist = async () => {
+    if (!user) {
+      showToast("You need to be logged in to add to watchlist")
+      return
+    }
+    // add to watchlist
+    try {
+      setLoading(true)
+      const response = await invoke({
+        method: "POST",
+        endpoint: `/film/watchlist/${film.id}/${user?.id}`,
+      })
+
+      if (response.error) {
+        console.log("error", response.error.message)
+        setLoading(false)
+        showToast({
+          type: "danger",
+          message: "Failed to add to watchlist",
+        })
+        return
+      }
+
+      setLoading(false)
+      showToast({
+        type: "success",
+        message: response.res.message,
+      })
+    } catch (error) {
+      setLoading(false)
+      showToast({
+        type: "danger",
+        message: "Failed to add to watchlist",
+      })
+    }
+  }
+
+  const isItemInWatchlist = film?.watchlist?.find(
+    (item) => item?.userId === user?.id,
+  )
+
   return (
     <View style={styles.detailWrap}>
       <View
@@ -140,7 +189,7 @@ function Details({ film, play, showFilm }) {
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
               style={{ backgroundColor: COLORS.formBtnBg }}
-              onPress={() => router.setParams({})}
+              onPress={() => play()}
             >
               <Image
                 source={require("../../../assets/playcircle.png")}
@@ -163,20 +212,28 @@ function Details({ film, play, showFilm }) {
               Free to watch
             </Text>
           </View>
-          <View className='flex flex-row items-center gap-x-4'>
-            <TouchableOpacity
-              onPress={() => props.cardFunction()}
-              className='flex flex-row items-center justify-center gap-x-2 h-14 border-2 border-gray-400 rounded-full bg-gray-500/30'
-              style={{
-                width: 200,
-              }}
-            >
-              <Feather name='plus-circle' size={30} color='white' />
-              <Text className='text-gray-100 font-semibold text-lg'>
-                Watchlist
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {isItemInWatchlist ? null : (
+            <View className='flex flex-row items-center gap-x-4'>
+              <TouchableOpacity
+                onPress={handleAddToWatchlist}
+                className='flex flex-row items-center justify-center gap-x-2 h-14 border-2 border-gray-400 rounded-full bg-gray-500/30'
+                style={{
+                  width: 200,
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color='white' size={30} />
+                ) : (
+                  <>
+                    <Feather name='plus-circle' size={30} color='white' />
+                    <Text className='text-gray-100 font-semibold text-lg'>
+                      Watchlist
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <View className='relative'>
           <ReadMoreCard content={film?.overview} linesToShow={5} />
@@ -211,8 +268,6 @@ function Details({ film, play, showFilm }) {
     </View>
   )
 }
-
-export default FilmDetails
 
 const styles = StyleSheet.create({
   trailerBtnWrap: {
@@ -324,3 +379,5 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 })
+
+export default FilmDetails
