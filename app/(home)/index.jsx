@@ -26,6 +26,7 @@ import ContinueWatchCard from "../../src/components/ContinueWatchCard"
 import FeaturedSlide from "../../src/components/FeaturedSlide"
 import FilmFundCard from "../../src/components/FilmFundCard"
 import UpcomingMovieCard from "../../src/components/UpcomingMovieCard"
+import WatchFlatList from "../../src/components/WatchFlatList"
 
 const { width } = Dimensions.get("window")
 
@@ -184,7 +185,7 @@ function Home() {
                   height: 310,
                 }}
               >
-                <CategoryHeader title={"Recently Added"} viewMoreArrow={true} />
+                <CategoryHeader title='Top Trending' viewMoreArrow={true} />
                 <FlatList
                   horizontal
                   data={films}
@@ -214,6 +215,9 @@ function Home() {
                 />
               </Animated.View>
             </View>
+
+            {/* My watch list */}
+            <WatchFlatList />
             <View>
               <Animated.View
                 style={{
