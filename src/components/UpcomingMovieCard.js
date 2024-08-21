@@ -32,7 +32,12 @@ const UpcomingMovieCard = (props) => {
     >
       <TouchableOpacity
         onPress={() => props.cardFunction()}
-        style={{ width: "100%", height: "100%", backgroundColor: "red" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundColor: COLORS.formBg,
+          borderRadius: 3,
+        }}
       >
         <ImageBackground
           source={{ uri: props.posterUrl }}
@@ -51,27 +56,29 @@ const UpcomingMovieCard = (props) => {
               justifyContent: "space-between",
             }}
           >
-            <View
-              style={[
-                styles.showcaseType,
-                {
-                  paddingVertical: 6,
-                  paddingHorizontal: 6,
-                },
-              ]}
-            >
-              <Text style={styles.showcaseTypeText}>Premering</Text>
-            </View>
+            {props?.status && (
+              <View
+                style={[
+                  styles.showcaseType,
+                  {
+                    paddingVertical: 6,
+                    paddingHorizontal: 6,
+                  },
+                ]}
+              >
+                <Text style={styles.showcaseTypeText}>{props?.status}</Text>
+              </View>
+            )}
 
             <View style={styles.titleTextStack}>
               <VStack>
                 <Text numberOfLines={1} style={styles.titleText}>
                   {props.title}
                 </Text>
-                <HStack spacing={10}>
+                {/* <HStack spacing={10}>
                   <Text style={styles.subtitleText}>12k Views</Text>{" "}
                   <Text style={styles.subtitleText}>31 days ago</Text>
-                </HStack>
+                </HStack> */}
               </VStack>
             </View>
           </View>

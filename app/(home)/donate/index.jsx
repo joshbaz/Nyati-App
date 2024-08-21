@@ -1,99 +1,53 @@
-import Checkbox from "expo-checkbox"
-import { useRouter } from "expo-router"
-
-import React, { useEffect, useState } from "react"
+import { DrawerActions } from "@react-navigation/native"
+import { router, useNavigation } from "expo-router"
+import React from "react"
 import {
-  ActivityIndicator,
   Animated,
+  Dimensions,
+  FlatList,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { HStack, VStack } from "@react-native-material/core"
-
-import { Octicons } from "@expo/vector-icons"
-
-import { Formik } from "formik"
-
-import * as yup from "yup"
-
+import { Feather } from "@expo/vector-icons"
+import useDonateFilms from "../../../hooks/useDonateFilms"
 import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
+import FilmFundCard from "../../../src/components/FilmFundCard"
+import SplashScreen from "../../../src/components/SplashScreen"
+import UpcomingMovieCard from "../../../src/components/UpcomingMovieCard"
 
-const RegularAmounts = [
-  {
-    key: "1",
-    amount: 10000,
-  },
-  {
-    key: "2",
-    amount: 20000,
-  },
-  {
-    key: "3",
-    amount: 40000,
-  },
-  {
-    key: "4",
-    amount: 100000,
-  },
-  {
-    key: "5",
-    amount: 200000,
-  },
-  {
-    key: "6",
-    amount: 400000,
-  },
+const { width } = Dimensions.get("window")
+
+const options = [
+  { label: "All", value: "all" },
+  { label: "Movies", value: "movie" },
+  { label: "TV Shows", value: "series" },
 ]
 
 const Donate = () => {
-  const router = useRouter()
-  const [editedAmount, setEditedAmount] = useState(null)
-  const validationSchema = yup.object().shape({
-    amount: yup.string().required("required"),
-    donateAnonymously: yup.bool().oneOf([true, false], "Field must be checked"),
-    agreeTerms: yup.bool().oneOf([true], "Field must be checked"),
-    agreePrivacyPolicy: yup.bool().oneOf([true], "Field must be checked"),
-  })
+  const nav = useNavigation()
+  const { films, loading } = useDonateFilms()
+  const [type, setType] = React.useState("all")
 
-  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
-  useEffect(() => {
-    if (isSubmittingp) {
-      setTimeout(() => {
-        setIsSubmittingp(() => false)
-        navigation.navigate("PaymentOptions")
-      }, 500)
-    }
-  }, [isSubmittingp])
+  const toggleActive = (value) => {
+    if (value === type) return
+    setType(value)
+  }
 
-  const changeValues = (setFieldValue, val) => {
-    let changeV = typeof val === "string" ? val.replace(/,/g, "") : val
-    let vsi = changeV !== null || changeV !== "" ? parseInt(changeV) : null
-
-    if (isNaN(vsi)) {
-      console.log("Not A NUMBER")
-      setFieldValue("amount", null)
-    } else {
-      let transformedTxt = vsi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-      setFieldValue("amount", transformedTxt)
-    }
+  if (loading && !films.length > 0) {
+    return <SplashScreen hideLogo={true} />
   }
 
   return (
     <View
       style={{
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
+        flex: 1,
         backgroundColor: COLORS.generalBg,
       }}
     >
@@ -132,170 +86,103 @@ const Donate = () => {
                 {/** form -Titles & subtitle */}
                 <HStack
                   spacing={20}
-                  style={{ display: "flex", alignItems: "center" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    paddingVertical: 20,
+                  }}
                 >
-                  <TouchableOpacity onPress={() => router.back()}>
-                    <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
-                  </TouchableOpacity>
-                  <Text style={styles.formTitle}>Donate</Text>
+                  <Pressable
+                    className='flex flex-row items-center justify-center'
+                    onPress={() => nav.dispatch(DrawerActions.openDrawer())}
+                  >
+                    <Feather name='menu' size={24} color='white' />
+                    <Text style={styles.formTitle} className='ml-4'>
+                      Donate
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    className='flex flex-row items-center justify-center'
+                    onPress={() => console.log("search")}
+                  >
+                    <Feather name='search' size={24} color='white' />
+                  </Pressable>
                 </HStack>
-                <Formik
-                  initialValues={{
-                    amount: null,
-                    donateAnonymously: false,
-                    agreeTerms: false,
-                    agreePrivacyPolicy: false,
-                  }}
-                  validationSchema={validationSchema}
-                  onSubmit={(values, helpers) => {
-                    // setHelperFunctions(helpers)
-                    // dispatch(Login(values))
-                    setIsSubmittingp(() => true)
-                  }}
-                >
-                  {({
-                    values,
-                    handleChange,
-                    setFieldValue,
-                    handleBlur,
-                    handleSubmit,
-                  }) => (
-                    <VStack spacing={60}>
-                      {/** form inputs */}
-                      <View spacing={20}>
-                        <VStack spacing={10}>
-                          <Text style={styles.formLabel}>Enter Amount</Text>
-                          <HStack style={styles.amountContainer}>
-                            <View style={styles.amountIcon}>
-                              <Text style={styles.amountIconTxt}>UGX</Text>
-                            </View>
+                <View className='w-full'>
+                  <FlatList
+                    horizontal
+                    data={options}
+                    keyExtractor={(item) => item.value}
+                    contentContainerStyle={{ gap: 10 }}
+                    renderItem={({ item }) => {
+                      return (
+                        <Pressable
+                          aria-selected={type === item.value}
+                          onPress={() => toggleActive(item.value)}
+                          className='rounded-full flex items-center justify-center border border-primary-500 aria-[selected=true]:rounded-sm'
+                          style={[
+                            {
+                              padding: 10,
+                              height: 40,
+                              width: 100,
 
-                            <TextInput
-                              style={styles.amountInput}
-                              enablesReturnKeyAutomatically
-                              keyboardAppearance='dark'
-                              keyboardType='numeric'
-                              value={values.amount}
-                              onChangeText={(e) =>
-                                changeValues(setFieldValue, e)
-                              }
-                              onBlur={handleBlur("amount")}
-                            />
-                          </HStack>
-                        </VStack>
-
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
-                        {/** amount selector */}
-                        <View style={styles.amountSelectorWrap}>
-                          {RegularAmounts.map((data, index) => {
-                            return (
-                              <TouchableOpacity
-                                key={index}
-                                style={styles.amountSelectorBtn}
-                                onPress={() =>
-                                  changeValues(setFieldValue, data.amount)
-                                }
-                              >
-                                <Text style={styles.amountSelectorTxt}>
-                                  {data.amount
-                                    .toString()
-                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                                </Text>
-                              </TouchableOpacity>
-                            )
-                          })}
-                        </View>
-
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
-                        {/** CheckBox policies */}
-                        <VStack spacing={20}>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
+                              backgroundColor:
+                                type === item.value
+                                  ? COLORS.formBtnBg
+                                  : COLORS.formBg,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              {
+                                color:
+                                  type === item.value
+                                    ? COLORS.formBtnText
+                                    : COLORS.formText,
+                                fontFamily: FONTSFAMILIES.formBtnText,
+                                fontSize: 16,
+                                lineHeight: 20,
+                                letterSpacing: 0.1,
+                                fontWeight: "bold",
+                              },
+                            ]}
                           >
-                            <Checkbox
-                              value={values.donateAnonymously}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("donateAnonymously", e)
-                              }}
-                            />
+                            {item.label}
+                          </Text>
+                        </Pressable>
+                      )
+                    }}
+                  />
+                </View>
 
-                            <Text style={styles.checkboxTxt}>
-                              Donate as anonymous
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreeTerms}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreeTerms", e)
-                              }}
-                            />
-                            <Text style={styles.checkboxTxt}>
-                              I agree with the Terms and Conditions
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreePrivacyPolicy}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreePrivacyPolicy", e)
-                              }}
-                            />
-                            <View style={{ flexDirection: "row" }}>
-                              <Text style={styles.checkboxTxt}>
-                                I agree with Nyati Films{" "}
-                              </Text>
-                              <TouchableOpacity style={styles.privacyBtnLink}>
-                                <Text style={styles.privacyPolicy}>
-                                  Privacy Policy
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </VStack>
-                      </View>
-
-                      {/** form buttons */}
-                      <VStack spacing={20} style={{ alignItems: "center" }}>
-                        {isSubmittingp ? (
-                          <View style={styles.formBtn}>
-                            <ActivityIndicator size='small' color='white' />
-                          </View>
-                        ) : (
-                          <TouchableOpacity
-                            style={styles.formBtn}
-                            onPress={handleSubmit}
-                          >
-                            <Text style={styles.formBtnText}>Continue</Text>
-                          </TouchableOpacity>
-                        )}
-                      </VStack>
-                    </VStack>
-                  )}
-                </Formik>
+                {/* Donation Film List */}
+                {films?.length > 0
+                  ? films.map((item, idx) => {
+                      const poster = item.posters
+                        ? item.posters[0]?.url
+                        : item.posterUrl
+                      return (
+                        <FilmFundCard
+                          key={item.id}
+                          shouldMarginatedAtEnd={false}
+                          cardFunction={() => {
+                            router.push({
+                              pathname: "/(home)/donate/[id]",
+                              params: { id: item?.id },
+                            })
+                          }}
+                          title={item.title}
+                          posterUrl={poster}
+                          cardWidth={width / 2 - 25} //
+                          isFirst={idx == 0 ? true : false}
+                          isLast={idx == films?.length - 1 ? true : false}
+                        />
+                      )
+                    })
+                  : null}
               </VStack>
             </Animated.View>
           </KeyboardAvoidingView>

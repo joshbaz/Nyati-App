@@ -17,10 +17,8 @@ import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
 import { useAuth } from "../../../context/AuthProvider"
-import { useToast } from "../../../context/ToastProvider"
-// import MoviesDB from "../../../assets/data/db.json"
 import useFilms from "../../../hooks/useFilms"
-import { invoke } from "../../../lib/axios"
+import useWatchList from "../../../hooks/useWatchList"
 import { COLORS } from "../../../src/color/VariableColors"
 import CategoryHeader from "../../../src/components/CategoryHeader"
 import Loader from "../../../src/components/Loader"
@@ -42,7 +40,6 @@ function FilmDetails() {
   const videoRef = useRef(null)
   const { id, trackid } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilms()
-  const [showFilm, setshowFilm] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
@@ -108,50 +105,10 @@ function FilmDetails() {
 
 function Details({ film, play, showFilm }) {
   const { user } = useAuth()
-  const { showToast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [upcomingFilmList, setUpcomingFilmList] = useState(
-    MoviesDB.movies || undefined,
-  )
+  const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
 
-  console.log("film", film.watchlist)
-
-  const handleAddToWatchlist = async () => {
-    if (!user) {
-      showToast("You need to be logged in to add to watchlist")
-      return
-    }
-    // add to watchlist
-    try {
-      setLoading(true)
-      const response = await invoke({
-        method: "POST",
-        endpoint: `/film/watchlist/${film.id}/${user?.id}`,
-      })
-
-      if (response.error) {
-        console.log("error", response.error.message)
-        setLoading(false)
-        showToast({
-          type: "danger",
-          message: "Failed to add to watchlist",
-        })
-        return
-      }
-
-      setLoading(false)
-      showToast({
-        type: "success",
-        message: response.res.message,
-      })
-    } catch (error) {
-      setLoading(false)
-      showToast({
-        type: "danger",
-        message: "Failed to add to watchlist",
-      })
-    }
-  }
+  // handle watchlist
+  const { handleAddToWatchlist, loading } = useWatchList({ disableFetch: true })
 
   const isItemInWatchlist = film?.watchlist?.find(
     (item) => item?.userId === user?.id,

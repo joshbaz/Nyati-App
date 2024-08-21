@@ -41,7 +41,7 @@ function WatchlistPage() {
   const options = [
     { label: "All", value: "all" },
     { label: "Movies", value: "movie" },
-    { label: "Series", value: "series" },
+    { label: "TV Shows", value: "series" },
   ]
 
   return (

@@ -19,7 +19,10 @@ const CategoryHeader = ({ title, viewMoreArrow, handleMore }) => {
       <Text style={styles.categoryTitle}>{title}</Text>
 
       {viewMoreArrow ? (
-        <TouchableOpacity style={{ height: "100%" }} onPress={handleMore}>
+        <TouchableOpacity
+          style={{ height: "100%" }}
+          onPress={handleMore ? handleMore : () => null}
+        >
           <Octicons name='arrow-right' size={24} color={COLORS.categoryTitle} />
         </TouchableOpacity>
       ) : null}

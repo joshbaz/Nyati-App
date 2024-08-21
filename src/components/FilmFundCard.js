@@ -1,15 +1,14 @@
 import React from "react"
 import {
   ImageBackground,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native"
 import { ProgressBar } from "react-native-paper"
-
 import { Box, HStack, VStack } from "@react-native-material/core"
-
 import { COLORS } from "../color/VariableColors"
 
 const FilmFundCard = (props) => {
@@ -30,16 +29,16 @@ const FilmFundCard = (props) => {
         {
           minWidth: props.cardWidth,
           maxWidth: props.cardWidth,
-          height: 231,
-          borderRadius: 10,
+          height: 235,
+          borderRadius: 5,
           borderWidth: 1,
           borderColor: "transparent",
           overflow: "hidden",
         },
       ]}
     >
-      <TouchableOpacity
-        onPress={() => {}}
+      <Pressable
+        onPress={() => props.cardFunction()}
         style={{
           width: "100%",
           height: "100%",
@@ -49,33 +48,31 @@ const FilmFundCard = (props) => {
           spacing={0}
           style={{
             display: "flex",
-
             height: "100%",
             overflow: "hidden",
+            borderRadius: 5,
           }}
         >
           <View
             style={{
               width: "100%",
-              height: 128,
+              height: 130,
               overflow: "hidden",
-              borderTopEndRadius: 10,
-              borderTopStartRadius: 10,
             }}
           >
             <ImageBackground
               source={{ uri: props.posterUrl }}
               resizeMode='cover'
               objectFit='cover'
-              style={[
-                styles.cardImage,
-                {
-                  width: "100%",
-                  height: "100%",
-                  overflow: "hidden",
-                },
-              ]}
-            ></ImageBackground>
+              backgroundColor={COLORS.formBg}
+              style={{
+                ...styles.cardImage,
+                width: "100%",
+                height: "100%",
+                overflow: "hidden",
+                resizeMode: "cover",
+              }}
+            />
           </View>
 
           <Box style={[styles.fundDetailStack, { height: 231 - 128 }]}>
@@ -85,11 +82,11 @@ const FilmFundCard = (props) => {
             <View style={styles.progressBars}>
               <ProgressBar
                 progress={0.5}
-                color={"#F51D4A"}
+                color={COLORS.formBtnBg}
                 borderRadius={20}
                 style={{
                   backgroundColor: "#EEF1F4",
-                  borderRadius: 20,
+                  borderRadius: 10,
                   width: "100%",
                 }}
               />
@@ -100,7 +97,7 @@ const FilmFundCard = (props) => {
             </HStack>
           </Box>
         </VStack>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   )
 }
@@ -120,7 +117,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "flex-start",
-
     textAlign: "center",
     position: "absolute",
     top: 0,
@@ -137,17 +133,12 @@ const styles = StyleSheet.create({
   fundDetailStack: {
     display: "flex",
     alignItems: "flex-start",
-    justifyContent: "space-between",
-
-    paddingLeft: 20,
-    paddingRight: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
-
+    justifyContent: "flex-start",
+    gap: 10,
+    padding: 12,
     width: "100%",
-
     overflow: "hidden",
-    backgroundColor: "#57545c",
+    backgroundColor: COLORS.formBg,
   },
   titleText: {
     color: COLORS.formSubTitle,
