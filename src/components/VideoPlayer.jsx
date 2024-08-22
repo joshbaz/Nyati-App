@@ -1,6 +1,6 @@
 import { ResizeMode, Video } from "expo-av"
 import { LinearGradient } from "expo-linear-gradient"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { router, useLocalSearchParams, useRouter } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
 import {
   forwardRef,
@@ -28,7 +28,7 @@ import VideoControls from "./VideoControls"
 function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   const router = useRouter()
   const videoRef = useRef(null)
-  const { source: src } = useVideo()
+  const { source: src, clearSrc } = useVideo()
 
   // video states
   const [orientation, setOrientation] = useState(1)
@@ -96,7 +96,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   }
 
   // Toggle fullscreen
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = useCallback(async () => {
     if (!isFullscreen) {
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
@@ -104,6 +104,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
       setIsFullscreen(true)
       handleFullscreen(true)
     } else {
+      console.log("PORTRAIT")
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT_UP,
       )
@@ -111,7 +112,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
       handleFullscreen(false)
     }
     setOrientation(await ScreenOrientation.getOrientationAsync())
-  }
+  }, [handleFullscreen, isFullscreen])
 
   // handle back button press
   const onBackPress = () => {
@@ -122,6 +123,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
     }
 
     // go back
+    clearSrc()
     router.back()
   }
 
@@ -131,8 +133,9 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
         if (videoRef.current && src) {
           // set orientation to landscape
           toggleFullscreen()
+
           // play video
-          videoRef.current.playAsync()
+          togglePlayPause()
         }
       },
     }
@@ -240,7 +243,8 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
             onForward={forward10s}
             onRewind={rewind10s}
             onSeek={(value) => {
-              videoRef.current.setPositionAsync(+value)
+              console.log("Seeking to", value)
+              videoRef.current?.setPositionAsync(+value)
               setCurrentTime(+value)
             }}
             onToggleFullscreen={toggleFullscreen}
@@ -257,17 +261,10 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   )
 }
 
-function WatchListButton({ film }) {
-  // hide the button if the film is already in the watchlist, or if the film is being watched
-  return <View></View>
-}
-
 function useVideo() {
   const params = useLocalSearchParams()
   const [source, setSource] = useState("")
   const [loading, setLoading] = useState(true)
-
-  console.log("params", params)
 
   const getVideoUrl = useCallback(async () => {
     try {
@@ -281,23 +278,30 @@ function useVideo() {
       })
 
       if (response.error) {
-        console.error("Error", response.error)
-        setLoading(false)
-        return
+        throw new Error(response.error)
       }
 
       setSource(response.res?.video?.url)
       setLoading(false)
     } catch (error) {
+      console.error("Error", error)
+    } finally {
       setLoading(false)
     }
   }, [params.trackid])
+
+  const clearSrc = useCallback(() => {
+    if (params?.trackid && source) {
+      setSource("")
+      router.setParams({ trackid: null })
+    }
+  }, [source, params?.trackid])
 
   useEffect(() => {
     getVideoUrl()
   }, [getVideoUrl])
 
-  return { source, loading }
+  return { source, loading, clearSrc }
 }
 
 const styles = StyleSheet.create({

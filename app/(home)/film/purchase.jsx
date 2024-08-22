@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { HStack, VStack } from "@react-native-material/core"
+import { HStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
 import { useAuth } from "../../../context/AuthProvider"
 import { useToast } from "../../../context/ToastProvider"
@@ -19,24 +19,10 @@ import { invoke } from "../../../lib/axios"
 import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
 import PaymentOptions from "../../../src/components/PaymentOptions"
 
-function Options() {
+function Purchase() {
   const { user } = useAuth()
   const { showToast } = useToast()
-  const params = useLocalSearchParams()
-
-  const changeValues = (setFieldValue, val) => {
-    let changeV = val.toString()
-    let vsi = changeV !== "" || changeV !== "+256" ? changeV : ""
-
-    if (vsi === "") {
-      console.log("Not A Value")
-      setFieldValue("phoneNumber", "")
-    } else {
-      let transformedTxt = vsi
-
-      setFieldValue("phoneNumber", transformedTxt)
-    }
-  }
+  const params = useLocalSearchParams() // filmId, amount, accessType (rent, buy) -> if rent we need to set an expiry date
 
   console.log("Params", params)
 
@@ -91,9 +77,7 @@ function Options() {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
-
             width: "100%",
-
             marginTop: 0,
           }}
         >
@@ -124,7 +108,7 @@ function Options() {
                   <Text style={styles.formTitle}>Payment Options</Text>
                 </HStack>
                 <View>
-                  <PaymentOptions onSubmit={onSubmit} />
+                  <PaymentOptions onSubmit={onSubmit} loadSaved={true} />
                 </View>
               </View>
             </Animated.View>
@@ -135,7 +119,7 @@ function Options() {
   )
 }
 
-export default Options
+export default Purchase
 
 const styles = StyleSheet.create({
   formTitle: {

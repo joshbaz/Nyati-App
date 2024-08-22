@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   Dimensions,
@@ -48,10 +48,8 @@ function FilmDetails() {
   }, [fetchFilm, id])
 
   const playFilm = async () => {
-    if (videoRef.current) {
-      router.setParams({ trackid: getMainVideo(film) })
-      await videoRef.current.playVideo()
-    }
+    router.setParams({ trackid: getMainVideo(film) })
+    // await videoRef.current.playVideo()
   }
 
   return (
@@ -85,7 +83,6 @@ function FilmDetails() {
               }}
             >
               <VideoPlayer
-                ref={videoRef}
                 posterSource={film?.posters[0]?.url}
                 handleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
               />
@@ -158,17 +155,7 @@ function Details({ film, play, showFilm }) {
           )}
         </View>
         <View className='space-y-2'>
-          <View className='flex flex-row items-center gap-x-2'>
-            <Image
-              source={require("../../../assets/bagheart.png")}
-              style={{ width: 24, height: 24 }}
-              resizeMode='contain'
-            />
-
-            <Text className='text-gray-300 font-medium tracking-tight text-lg'>
-              Free to watch
-            </Text>
-          </View>
+          <AccessSection film={film} />
           {isItemInWatchlist ? null : (
             <View className='flex flex-row items-center gap-x-4'>
               <TouchableOpacity
@@ -221,6 +208,119 @@ function Details({ film, play, showFilm }) {
             )}
           />
         </View>
+      </View>
+    </View>
+  )
+}
+
+function AccessSection({ film }) {
+  console.log(film?.access)
+  const access = useMemo(() => {
+    if (film?.access === "free") return "Free to watch"
+    return "Available to rent or buy"
+  }, [film?.access])
+
+  const shouldShowPurchaseBtn = useMemo(() => {
+    if (film?.access === "free") return false
+    return true
+  }, [film?.access])
+
+  const numFormat = new Intl.NumberFormat("en-UG", {
+    currency: "UGX",
+    style: "decimal",
+  })
+
+  const options = [
+    {
+      label: "Play Trailer",
+      icon: "play",
+      onPress: () => {
+        console.log("play trailer")
+      },
+    },
+    {
+      label: "Watch List",
+      icon: "plus",
+      onPress: () => {
+        console.log("add to watchlist")
+      },
+    },
+    {
+      label: "Like",
+      icon: "thumbs-up",
+      onPress: () => {
+        console.log("play trailer")
+      },
+    },
+    {
+      label: "Not for me",
+      icon: "thumbs-down",
+      onPress: () => {
+        console.log("play trailer")
+      },
+    },
+  ]
+  return (
+    <View className='w-full space-y-6'>
+      <View className='flex flex-row items-center gap-x-2'>
+        <Image
+          source={require("../../../assets/bagheart.png")}
+          style={{ width: 26, height: 26 }}
+          resizeMode='contain'
+        />
+
+        <Text className='text-white font-medium tracking-tight text-lg'>
+          {access}
+        </Text>
+      </View>
+      {shouldShowPurchaseBtn ? (
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/(home)/film/purchase",
+              params: {
+                filmId: film?.id,
+                amount: film?.price,
+                access: film?.access,
+              },
+            })
+          }
+          className='flex flex-row items-center justify-center gap-x-2 h-16 border-2 border-primary-500 rounded-3xl w-3/4'
+          style={{
+            backgroundColor: COLORS.formBg,
+          }}
+        >
+          <Text className='text-primary-500 font-semibold text-xl'>
+            {film?.access === "rent" ? "Rent @ " : "Buy @ "}{" "}
+            {`UGX ${numFormat.format(film?.price)}`}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
+
+      <View className='flex flex-row items-center justify-between gap-x-4'>
+        <FlatList
+          data={options}
+          horizontal
+          keyExtractor={(item) => item.label}
+          contentContainerStyle={{ gap: 20 }}
+          style={{ width: width / 4 }}
+          renderItem={({ item }) => (
+            <View
+              key={item?.label}
+              className='space-y-3 flex flex-col justify-center items-center w-auto'
+            >
+              <Pressable
+                className='flex flex-row items-center justify-center h-14 w-14 rounded-full p-2 bg-gray-500/50 border border-white'
+                onPress={item?.onPress}
+              >
+                <View className='border border-white rounded-full p-1.5 flex items-center justify-center'>
+                  <Feather name={item.icon} size={16} color='white' />
+                </View>
+              </Pressable>
+              <Text className='text-white'>{item.label}</Text>
+            </View>
+          )}
+        />
       </View>
     </View>
   )
