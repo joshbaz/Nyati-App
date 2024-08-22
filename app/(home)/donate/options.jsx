@@ -1,52 +1,28 @@
-import Checkbox from "expo-checkbox"
-
-import React, { useEffect, useState } from "react"
+import { router, useLocalSearchParams } from "expo-router"
+import React from "react"
 import {
-  ActivityIndicator,
   Animated,
-  Image,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native"
-import { BallIndicator } from "react-native-indicators"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 import { HStack, VStack } from "@react-native-material/core"
-
 import { Octicons } from "@expo/vector-icons"
-
-import { Formik } from "formik"
-
-import * as yup from "yup"
-
-import AirtelMMImage from "../../../assets/AirtelMoney.png"
-import MomoPayImage from "../../../assets/MtnMoMo.png"
+import { useAuth } from "../../../context/AuthProvider"
+import { useToast } from "../../../context/ToastProvider"
+import { invoke } from "../../../lib/axios"
 import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
+import PaymentOptions from "../../../src/components/PaymentOptions"
 
-const PaymentOptions = ({ navigation }) => {
-  const [editedAmount, setEditedAmount] = useState(null)
-  const validationSchema = yup.object().shape({
-    phoneNumber: yup.string().required("required"),
-    payOption: yup.string().required("required"),
-    savePayment: yup.bool().oneOf([true, false], "Field must be checked"),
-  })
-
-  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
-  useEffect(() => {
-    if (isSubmittingp) {
-      setTimeout(() => {
-        setIsSubmittingp(() => false)
-        navigation.navigate("PaymentComplete")
-      }, 5000)
-    }
-  }, [isSubmittingp])
+function Options({ navigation }) {
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const params = useLocalSearchParams()
 
   const changeValues = (setFieldValue, val) => {
     let changeV = val.toString()
@@ -61,6 +37,42 @@ const PaymentOptions = ({ navigation }) => {
       setFieldValue("phoneNumber", transformedTxt)
     }
   }
+
+  console.log("Params", params)
+
+  const onSubmit = async (values, hp) => {
+    try {
+      hp.setSubmitting(true)
+      console.log("Values", values)
+      // const response = await invoke({
+      //   method: "POST",
+      //   url: `/film/${params?.filmId}/donate`,
+      //   data: {
+      //     ...values,
+      //     userId: user.id,
+      //     amount: params?.amount,
+      //   },
+      // })
+
+      // if (response.error) {
+      //   throw new Error(response.error)
+      // }
+
+      setTimeout(() => {
+        router.push("/(home)/donate/complete")
+      }, 2000)
+    } catch (e) {
+      console.error(e)
+      showToast({
+        type: "error",
+        message: "An error occurred. Please try again",
+      })
+      return
+    } finally {
+      hp.setSubmitting(false)
+    }
+  }
+
   return (
     <View
       style={{
@@ -87,7 +99,7 @@ const PaymentOptions = ({ navigation }) => {
         >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
+            style={{ flex: 1, width: "100%" }}
           >
             <Animated.View
               style={[
@@ -95,248 +107,35 @@ const PaymentOptions = ({ navigation }) => {
                   flex: 1,
                   alignItems: "center",
                   justifyContent: "flex-start",
+                  width: "100%",
+                  padding: 20,
                 },
               ]}
             >
-              <VStack
-                spacing={30}
-                style={{
-                  width: "95%",
-                }}
-              >
+              <View className='w-full space-y-4'>
                 {/** form -Titles & subtitle */}
                 <HStack
                   spacing={20}
                   style={{ display: "flex", alignItems: "center" }}
                 >
-                  <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <TouchableOpacity onPress={() => router.back()}>
                     <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
                   </TouchableOpacity>
                   <Text style={styles.formTitle}>Payment Options</Text>
                 </HStack>
-                <Formik
-                  initialValues={{
-                    phoneNumber: "",
-                    payOption: "",
-                    savePayment: false,
-                  }}
-                  validationSchema={validationSchema}
-                  onSubmit={(values, helpers) => {
-                    // setHelperFunctions(helpers)
-                    // dispatch(Login(values))
-                    setIsSubmittingp(() => true)
-                  }}
-                >
-                  {({
-                    values,
-                    handleChange,
-                    setFieldValue,
-                    handleBlur,
-                    handleSubmit,
-                  }) => (
-                    <VStack spacing={60}>
-                      {/** form inputs */}
-                      <View spacing={20}>
-                        {/** payment selector */}
-                        <VStack spacing={23}>
-                          <Text style={styles.formTitle}>
-                            Select Payment Method
-                          </Text>
-                          <View style={styles.amountSelectorWrap}>
-                            <View
-                              style={{
-                                marginBottom: 10,
-
-                                width: "100%",
-                              }}
-                            >
-                              <TouchableOpacity
-                                style={[
-                                  styles.radioBtnWrap,
-                                  { marginBottom: 10 },
-                                ]}
-                                onPress={() =>
-                                  setFieldValue("payOption", "Mtn")
-                                }
-                              >
-                                <HStack
-                                  spacing={21}
-                                  style={{
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <View>
-                                    <Image source={MomoPayImage} />
-                                  </View>
-                                  <Text style={styles.radioTxt}>MTN MOMO</Text>
-                                </HStack>
-
-                                <View
-                                  value='Mtn'
-                                  style={[
-                                    styles.radioBtn,
-                                    values.payOption === "Mtn"
-                                      ? {
-                                          backgroundColor: "#EE5170",
-                                        }
-                                      : {},
-                                  ]}
-                                />
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                style={styles.radioBtnWrap}
-                                onPress={() =>
-                                  setFieldValue("payOption", "Airtel")
-                                }
-                              >
-                                <HStack
-                                  spacing={21}
-                                  style={{
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <View>
-                                    <Image source={AirtelMMImage} />
-                                  </View>
-                                  <Text style={styles.radioTxt}>
-                                    Airtel Money
-                                  </Text>
-                                </HStack>
-                                <View
-                                  style={[
-                                    styles.radioBtn,
-                                    values.payOption === "Airtel"
-                                      ? {
-                                          backgroundColor: "#EE5170",
-                                        }
-                                      : {},
-                                  ]}
-                                />
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </VStack>
-
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
-
-                        {/** Mobile Number */}
-                        <VStack spacing={23} style={{ marginBottom: 20 }}>
-                          <Text style={styles.formTitle}>
-                            Add Mobile Number
-                          </Text>
-
-                          <VStack spacing={10}>
-                            <Text style={styles.formLabel}>Mobile Number</Text>
-                            <HStack style={styles.amountContainer}>
-                              <View style={styles.amountIcon}>
-                                <Text style={styles.amountIconTxt}>+256</Text>
-                              </View>
-
-                              <TextInput
-                                style={styles.amountInput}
-                                enablesReturnKeyAutomatically
-                                keyboardAppearance='dark'
-                                keyboardType='number-pad'
-                                value={values.phoneNumber}
-                                onChangeText={(e) =>
-                                  changeValues(setFieldValue, e)
-                                }
-                                onBlur={handleBlur("phoneNumber")}
-                              />
-                            </HStack>
-                          </VStack>
-                        </VStack>
-
-                        {/** CheckBox policies */}
-                        <VStack spacing={20}>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.savePayment}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("savePayment", e)
-                              }}
-                            />
-
-                            <Text style={styles.checkboxTxt}>
-                              Keep the info for the next payment
-                            </Text>
-                          </View>
-                        </VStack>
-                      </View>
-
-                      {/** form buttons */}
-                      <VStack spacing={20} style={{ alignItems: "center" }}>
-                        {isSubmittingp ? (
-                          <View style={styles.formBtn}>
-                            <ActivityIndicator size='small' color='white' />
-                          </View>
-                        ) : (
-                          <TouchableOpacity
-                            style={styles.formBtn}
-                            onPress={handleSubmit}
-                          >
-                            <Text style={styles.formBtnText}>Continue</Text>
-                          </TouchableOpacity>
-                        )}
-                      </VStack>
-                    </VStack>
-                  )}
-                </Formik>
-              </VStack>
+                <View>
+                  <PaymentOptions onSubmit={onSubmit} />
+                </View>
+              </View>
             </Animated.View>
           </KeyboardAvoidingView>
         </ScrollView>
       </SafeAreaView>
-
-      <Modal
-        transparent={true}
-        visible={isSubmittingp ? true : false}
-        animationType='slide'
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-        }}
-      >
-        <View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              backgroundColor: "rgba(21, 21, 21, 0.6)",
-            },
-          ]}
-        >
-          <Animated.View
-            style={{
-              position: "relative",
-              width: 50,
-              height: 50,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
-        </View>
-      </Modal>
     </View>
   )
 }
 
-export default PaymentOptions
+export default Options
 
 const styles = StyleSheet.create({
   formTitle: {

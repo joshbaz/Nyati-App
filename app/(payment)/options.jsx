@@ -1,136 +1,61 @@
 import { router, useLocalSearchParams } from "expo-router"
 import React from "react"
-import {
-  Animated,
-  Dimensions,
-  Image,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native"
+import { Animated, Dimensions, Text, View } from "react-native"
 import { KeyboardAvoidingView, Platform } from "react-native"
-import { BallIndicator } from "react-native-indicators"
-// import { Checkbox } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useFormik } from "formik"
-import * as yup from "yup"
-import AIRTELMONEY from "../../assets/AirtelMoney.png"
-import MTNMOMO from "../../assets/MtnMoMo.png"
-import PESAPAL from "../../assets/pesapal.png"
-import { useAuth } from "../../context/AuthProvider"
-import { Toast, useToast } from "../../context/ToastProvider"
+import { useToast } from "../../context/ToastProvider"
 import { invoke } from "../../lib/axios"
 import { COLORS } from "../../src/color/VariableColors"
-import Checkbox from "../../src/components/Checkbox"
-import RadioGroup from "../../src/components/RadioGroup"
+import PaymentOptions from "../../src/components/PaymentOptions"
 
 const { width, height } = Dimensions.get("window")
 
-const validationSchema = yup.object().shape({
-  option: yup.string().required("Select a payment option"),
-  paymentNumber: yup
-    .string()
-    .test("is-email-or-phone", "Invalid phone number", (value) => {
-      // phone number regex with the country code
-      const phoneRegex = /^(\+|00)[1-9][0-9 \-\(\)\.]{7,32}$/
-      const isPhone = phoneRegex.test(value)
-      return isPhone
-    }),
-  saveDetails: yup.boolean().default(false),
-})
-
-const options = [
-  {
-    label: "MTN MOMO",
-    value: "mtnmomo",
-    comingSoon: false,
-    logo: Image.resolveAssetSource(MTNMOMO).uri,
-  },
-  {
-    label: "Airtel Money",
-    value: "airtelmoney",
-    comingSoon: true,
-    logo: Image.resolveAssetSource(AIRTELMONEY).uri,
-  },
-  {
-    label: "Visa | Mastercard",
-    value: "pesapal",
-    comingSoon: true,
-    logo: Image.resolveAssetSource(PESAPAL).uri,
-  },
-]
-
 function Options() {
-  const { toast, showToast } = useToast()
+  const { showToast } = useToast()
   const localParams = useLocalSearchParams()
 
-  const {
-    handleBlur,
-    handleChange,
-    setFieldValue,
-    handleSubmit,
-    values,
-    isSubmitting,
-    errors,
-    touched,
-    isValid,
-  } = useFormik({
-    initialValues: {
-      option: options[0].value,
-      paymentNumber: "",
-      saveDetails: false,
-      plan: localParams.selectedPlan || "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: async (values, hp) => {
-      try {
-        hp.setSubmitting(true)
+  // handleSubmit function
+  const onSubmit = async (values, hp) => {
+    try {
+      hp.setSubmitting(true)
 
-        const body = {
-          ...values,
-          userId: localParams.userId,
-        }
-        const response = await invoke({
-          method: "POST",
-          endpoint: "/payment/subscription",
-          data: body,
-        })
-
-        if (response.error) {
-          showToast({
-            type: "danger",
-            message: response.error?.message,
-          })
-          return
-        }
-
-        showToast({
-          type: "success",
-          message: "Payment processed successfully",
-        })
-
-        setTimeout(() => {
-          hp.resetForm()
-          hp.setSubmitting(false)
-          router.push("/(home)")
-        }, 3000)
-      } catch (e) {
-        console.error(e)
-        hp.setSubmitting(false)
-        showToast({
-          type: "danger",
-          message: "An error occurred trying to process your payment",
-        })
+      const body = {
+        ...values,
+        plan: localParams.selectedPlan || "",
+        userId: localParams.userId,
       }
-    },
-  })
+      const response = await invoke({
+        method: "POST",
+        endpoint: "/payment/subscription",
+        data: body,
+      })
 
-  const formattedOptions = options.map((option) => ({
-    ...option,
-    disabled: option.comingSoon,
-  }))
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      showToast({
+        type: "success",
+        message: "Payment processed successfully",
+      })
+
+      setTimeout(() => {
+        hp.resetForm()
+        hp.setSubmitting(false)
+        router.push("/(home)")
+      }, 3000)
+    } catch (e) {
+      console.error(e)
+      showToast({
+        type: "danger",
+        message: "An error occurred trying to process your payment",
+      })
+      return
+    } finally {
+      hp.setSubmitting(false)
+    }
+  }
+
   return (
     <View
       style={{
@@ -141,7 +66,6 @@ function Options() {
       }}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <Toast toast={toast} />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
@@ -153,7 +77,8 @@ function Options() {
                 Select a payment option
               </Text>
             </View>
-            <View className='space-y-3'>
+            <PaymentOptions onSubmit={onSubmit} />
+            {/* <View className='space-y-3'>
               <Text className='text-white text-base'>
                 Select Payment Method
               </Text>
@@ -245,11 +170,11 @@ function Options() {
                   <Text className='text-white text-lg'>Continue</Text>
                 </Pressable>
               </View>
-            </View>
+            </View> */}
           </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-      <Modal transparent={true} visible={isSubmitting} animationType='slide'>
+      {/* <Modal transparent={true} visible={isSubmitting} animationType='slide'>
         <View
           style={[
             {
@@ -273,7 +198,7 @@ function Options() {
             <BallIndicator color='#ED3F62' count={9} />
           </Animated.View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   )
 }

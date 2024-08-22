@@ -60,8 +60,6 @@ function useDonateFilms(disableFetch = false) {
           endpoint: `/film/${id}?donation=true`,
         })
 
-        console.log("Response", response)
-
         if (response?.error) {
           throw new Error(response.error)
         }

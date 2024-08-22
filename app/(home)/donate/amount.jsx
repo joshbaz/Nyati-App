@@ -1,12 +1,11 @@
-import Checkbox from "expo-checkbox"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,8 +14,8 @@ import {
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { HStack, VStack } from "@react-native-material/core"
-import { Octicons } from "@expo/vector-icons"
-import { Formik } from "formik"
+import { Ionicons } from "@expo/vector-icons"
+import { useFormik } from "formik"
 import * as yup from "yup"
 import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
 
@@ -47,29 +46,37 @@ const RegularAmounts = [
   },
 ]
 
+const { height } = Dimensions.get("window")
+
 function AmountPage() {
   const router = useRouter()
   const { filmId } = useLocalSearchParams()
-  const [editedAmount, setEditedAmount] = useState(null)
-
-  console.log("filmId", filmId)
 
   const validationSchema = yup.object().shape({
     amount: yup.string().required("required"),
-    donateAnonymously: yup.bool().oneOf([true, false], "Field must be checked"),
-    agreeTerms: yup.bool().oneOf([true], "Field must be checked"),
-    agreePrivacyPolicy: yup.bool().oneOf([true], "Field must be checked"),
   })
 
-  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
-  useEffect(() => {
-    if (isSubmittingp) {
-      setTimeout(() => {
-        setIsSubmittingp(() => false)
-        navigation.navigate("PaymentOptions")
-      }, 500)
-    }
-  }, [isSubmittingp])
+  const { handleSubmit, isSubmitting, handleBlur, setFieldValue, values } =
+    useFormik({
+      initialValues: {
+        amount: null,
+      },
+      validationSchema: validationSchema,
+      onSubmit: (values, hp) => {
+        if (!values.amount) return
+        hp.setSubmitting(true)
+
+        router.push({
+          pathname: "/(home)/donate/options",
+          params: {
+            amount: values.amount.replace(/,/g, ""),
+            filmId,
+          },
+        })
+
+        hp.setSubmitting(false)
+      },
+    })
 
   const changeValues = (setFieldValue, val) => {
     let changeV = typeof val === "string" ? val.replace(/,/g, "") : val
@@ -77,7 +84,7 @@ function AmountPage() {
 
     if (isNaN(vsi)) {
       console.log("Not A NUMBER")
-      setFieldValue("amount", null)
+      setFieldValue("amount", "")
     } else {
       let transformedTxt = vsi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
       setFieldValue("amount", transformedTxt)
@@ -96,208 +103,131 @@ function AmountPage() {
       }}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-
-            width: "100%",
-
-            marginTop: 0,
-          }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
+          <Animated.View
+            style={[
+              {
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "flex-start",
+              },
+            ]}
           >
-            <Animated.View
-              style={[
-                {
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                },
-              ]}
+            <VStack
+              spacing={30}
+              style={{
+                width: "95%",
+              }}
             >
-              <VStack
-                spacing={30}
+              {/** form -Titles & subtitle */}
+              <HStack
+                spacing={20}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <TouchableOpacity onPress={() => router.back()}>
+                  <Ionicons name='arrow-back' size={24} color={"#FFFAF6"} />
+                </TouchableOpacity>
+                <Text style={styles.formTitle}>Donate</Text>
+              </HStack>
+
+              <View
+                className='flex flex-col items-start justify-between '
                 style={{
-                  width: "95%",
+                  height: height - 200,
                 }}
               >
-                {/** form -Titles & subtitle */}
-                <HStack
-                  spacing={20}
-                  style={{ display: "flex", alignItems: "center" }}
-                >
-                  <TouchableOpacity onPress={() => router.back()}>
-                    <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
-                  </TouchableOpacity>
-                  <Text style={styles.formTitle}>Donate</Text>
-                </HStack>
-                <Formik
-                  initialValues={{
-                    amount: null,
-                    donateAnonymously: false,
-                    agreeTerms: false,
-                    agreePrivacyPolicy: false,
-                  }}
-                  validationSchema={validationSchema}
-                  onSubmit={(values, helpers) => {
-                    // setHelperFunctions(helpers)
-                    // dispatch(Login(values))
-                    setIsSubmittingp(() => true)
-                  }}
-                >
-                  {({
-                    values,
-                    handleChange,
-                    setFieldValue,
-                    handleBlur,
-                    handleSubmit,
-                  }) => (
-                    <VStack spacing={60}>
-                      {/** form inputs */}
-                      <View spacing={20}>
-                        <VStack spacing={10}>
-                          <Text style={styles.formLabel}>Enter Amount</Text>
-                          <HStack style={styles.amountContainer}>
-                            <View style={styles.amountIcon}>
-                              <Text style={styles.amountIconTxt}>UGX</Text>
-                            </View>
-
-                            <TextInput
-                              style={styles.amountInput}
-                              enablesReturnKeyAutomatically
-                              keyboardAppearance='dark'
-                              keyboardType='numeric'
-                              value={values.amount}
-                              onChangeText={(e) =>
-                                changeValues(setFieldValue, e)
-                              }
-                              onBlur={handleBlur("amount")}
-                            />
-                          </HStack>
-                        </VStack>
-
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
-                        {/** amount selector */}
-                        <View style={styles.amountSelectorWrap}>
-                          {RegularAmounts.map((data, index) => {
-                            return (
-                              <TouchableOpacity
-                                key={index}
-                                style={styles.amountSelectorBtn}
-                                onPress={() =>
-                                  changeValues(setFieldValue, data.amount)
-                                }
-                              >
-                                <Text style={styles.amountSelectorTxt}>
-                                  {data.amount
-                                    .toString()
-                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                                </Text>
-                              </TouchableOpacity>
-                            )
-                          })}
-                        </View>
-
-                        {/** divider */}
-                        <View style={styles.horizontalLine} />
-                        {/** CheckBox policies */}
-                        <VStack spacing={20}>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.donateAnonymously}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("donateAnonymously", e)
-                              }}
-                            />
-
-                            <Text style={styles.checkboxTxt}>
-                              Donate as anonymous
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreeTerms}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreeTerms", e)
-                              }}
-                            />
-                            <Text style={styles.checkboxTxt}>
-                              I agree with the Terms and Conditions
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              gap: 10,
-                            }}
-                          >
-                            <Checkbox
-                              value={values.agreePrivacyPolicy}
-                              color={COLORS.formBtnBg}
-                              style={{ width: 24, height: 24 }}
-                              onValueChange={(e) => {
-                                setFieldValue("agreePrivacyPolicy", e)
-                              }}
-                            />
-                            <View style={{ flexDirection: "row" }}>
-                              <Text style={styles.checkboxTxt}>
-                                I agree with Nyati Films{" "}
-                              </Text>
-                              <TouchableOpacity style={styles.privacyBtnLink}>
-                                <Text style={styles.privacyPolicy}>
-                                  Privacy Policy
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </VStack>
+                {/** form inputs */}
+                <View spacing={20}>
+                  <VStack spacing={10}>
+                    <Text style={styles.formLabel}>Enter Amount</Text>
+                    <HStack style={styles.amountContainer}>
+                      <View style={styles.amountIcon}>
+                        <Text style={styles.amountIconTxt}>UGX</Text>
                       </View>
 
-                      {/** form buttons */}
-                      <VStack spacing={20} style={{ alignItems: "center" }}>
-                        {isSubmittingp ? (
-                          <View style={styles.formBtn}>
-                            <ActivityIndicator size='small' color='white' />
-                          </View>
-                        ) : (
-                          <TouchableOpacity
-                            style={styles.formBtn}
-                            onPress={handleSubmit}
+                      <TextInput
+                        style={styles.amountInput}
+                        enablesReturnKeyAutomatically
+                        keyboardAppearance='dark'
+                        keyboardType='numeric'
+                        value={values.amount}
+                        onChangeText={(e) => changeValues(setFieldValue, e)}
+                        onBlur={handleBlur("amount")}
+                      />
+                    </HStack>
+                  </VStack>
+
+                  {/** divider */}
+                  <View style={styles.horizontalLine} />
+                  {/** amount selector */}
+                  <View style={styles.amountSelectorWrap}>
+                    {RegularAmounts.map((data) => {
+                      const isActive = values.amount
+                        ? values.amount?.replace(",", "") ===
+                          data.amount.toString()
+                        : false
+
+                      return (
+                        <TouchableOpacity
+                          key={data.key}
+                          style={{
+                            ...styles.amountSelectorBtn,
+                            backgroundColor: isActive
+                              ? COLORS.formBtnBg
+                              : "transparent",
+                          }}
+                          onPress={() =>
+                            changeValues(setFieldValue, data.amount)
+                          }
+                        >
+                          <Text
+                            style={{
+                              ...styles.amountSelectorTxt,
+                              color: isActive ? COLORS.formBtnText : "#ED3F62",
+                            }}
                           >
-                            <Text style={styles.formBtnText}>Continue</Text>
-                          </TouchableOpacity>
-                        )}
-                      </VStack>
-                    </VStack>
+                            {data.amount
+                              .toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </Text>
+                        </TouchableOpacity>
+                      )
+                    })}
+                  </View>
+
+                  {/** divider */}
+                  <View style={styles.horizontalLine} />
+                </View>
+
+                {/** form buttons */}
+                <VStack
+                  spacing={20}
+                  style={{ alignItems: "center", width: "100%" }}
+                >
+                  {isSubmitting ? (
+                    <View style={styles.formBtn}>
+                      <ActivityIndicator size='small' color='white' />
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      disabled={!values.amount}
+                      style={{
+                        ...styles.formBtn,
+                        opacity: values.amount || isSubmitting ? 1 : 0.6,
+                      }}
+                      onPress={handleSubmit}
+                    >
+                      <Text style={styles.formBtnText}>Continue</Text>
+                    </TouchableOpacity>
                   )}
-                </Formik>
-              </VStack>
-            </Animated.View>
-          </KeyboardAvoidingView>
-        </ScrollView>
+                </VStack>
+              </View>
+            </VStack>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   )
@@ -351,10 +281,10 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   amountContainer: {
-    height: 48,
+    height: 60,
     width: "100%",
     backgroundColor: COLORS.formBg,
-    borderRadius: 6,
+    borderRadius: 10,
     borderColor: "#EE5170",
     borderWidth: 1,
     overflow: "hidden",
@@ -400,11 +330,13 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    width: 120,
+    height: 44,
   },
   amountSelectorTxt: {
     color: "#ED3F62",
     fontFamily: "Inter-ExtraBold",
-    fontSize: 14,
+    fontSize: 15,
   },
   formBtn: {
     backgroundColor: COLORS.formBtnBg,

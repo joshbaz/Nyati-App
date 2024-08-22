@@ -93,7 +93,7 @@ function DonationFilmPage() {
                 <View>
                   {isItemInWatchlist ? null : (
                     <TouchableOpacity
-                      onPress={handleAddToWatchlist}
+                      onPress={() => handleAddToWatchlist(film?.id)}
                       className='flex flex-row items-center justify-center h-14 border-2 border-white rounded-full bg-gray-50/30 backdrop-blur-sm w-full'
                     >
                       {isLoading ? (

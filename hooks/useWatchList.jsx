@@ -7,8 +7,8 @@ import { invoke } from "../lib/axios"
  * @typedef {Object} Returns
  * @property {boolean} loading - loading state
  * @property {Array} watchList - watchlist
- * @property {Function} fetchWatchList - fetch watchlist
- * @property {Function} handleAddToWatchlist - add to watchlist
+ * @property {()=> void} fetchWatchList - fetch watchlist
+ * @property {(param: string)=> void} handleAddToWatchlist - add to watchlist
  */
 
 /**
@@ -48,6 +48,13 @@ function useWatchList({ limit, filters, disableFetch }) {
 
     return watchList.filter((item) => item.type === filters.type)
   }, [watchList, filters?.type])
+
+  /**
+   * @name handleAddToWatchlist
+   * @description function to add film to watchlist
+   * @param {string} filmId
+   * @returns {Promise<void>}
+   * */
 
   const handleAddToWatchlist = useCallback(
     /**
