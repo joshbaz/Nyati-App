@@ -57,31 +57,6 @@ const validationSchema = yup.object().shape({
   saveDetails: yup.boolean().default(false),
 })
 
-const addCountryCode = (number) => {
-  if (!number) return ""
-  if (number.startsWith("+256")) return number
-  // 0716390878 -> add the country code and remove the leading zero
-  if (number.startsWith("0")) return `+256${number.slice(1)}`
-  return `+256${number}`
-}
-
-const formatTextInput = (value) => {
-  // 0716390878 -> remove the zero and add space after every 3 digits
-  let val = value
-  if (!value) return ""
-  if (value.startsWith("+256")) {
-    val = value.replace("+256", "")
-  }
-  if (val.startsWith("0")) {
-    val = val.slice(1)
-  }
-  // slice the value into 3s
-  const first = val.slice(0, 3)
-  const second = val.slice(3, 6)
-  const third = val.slice(6, 10)
-  return `${first} ${second} ${third}`
-}
-
 function PaymentOptions({ onSubmit }) {
   const {
     handleBlur,
