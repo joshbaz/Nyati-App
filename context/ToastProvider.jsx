@@ -8,7 +8,6 @@ import React, {
 import { Text, View } from "react-native"
 import Animated, { FadeInUp, FadeOutUp } from "react-native-reanimated"
 import { FontAwesome5 } from "@expo/vector-icons"
-import { COLORS } from "../src/color/VariableColors"
 
 /**
  * @typedef {Object} Toast
@@ -155,7 +154,7 @@ export const Toast = ({ toast }) => {
       <FontAwesome5 name={icon} size={30} color='#FFF' />
 
       <View style={{ marginLeft: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: "400", color: "#FFF" }}>
+        <Text style={{ fontSize: 18, fontWeight: "600", color: "white" }}>
           {toast.message}
         </Text>
       </View>

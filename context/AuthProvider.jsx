@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { jwtDecode } from "jwt-decode"
 import React, {
@@ -27,6 +26,7 @@ import { Toast, useToast } from "./ToastProvider"
  * @property {(params: {contact: string, isEmail: boolean, password: string}) => void} login - A function to log in the user.
  * @property {(token: string, fetchProfile?: boolean) => void} setToken - A function to set the user's authentication token.
  * @property {(id: [string]) => void} logout - A function to log out the user.
+ * @property {(data: any) => void} updateUser - A function to update the user's information.
  * @property {boolean} isAuthenticated - A boolean indicating whether the user is authenticated.
  */
 
@@ -43,6 +43,7 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   setToken: () => {},
+  updateUser: () => {},
   isAuthenticated: false,
 })
 
@@ -53,8 +54,6 @@ function AuthProvider({ children }) {
   const [isFetching, setIsFetching] = useState(true)
   const [authError, setAuthError] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  const router = useRouter()
 
   const TOKEN_KEY = "_user_token"
   const endpoint = "/user"
@@ -206,6 +205,11 @@ function AuthProvider({ children }) {
     setIsFetching(false)
   }, [endpoint, user?.id])
 
+  const updateUser = useCallback((data) => {
+    if (!data) return
+    setUser((prev) => ({ ...prev, ...data }))
+  }, [])
+
   useEffect(() => {
     fetchUserProfile()
   }, [fetchUserProfile])
@@ -227,6 +231,7 @@ function AuthProvider({ children }) {
         loading,
         setToken,
         isFetching,
+        updateUser,
         isAuthenticated,
       }}
     >

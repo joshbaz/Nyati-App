@@ -103,7 +103,7 @@ function HomeLayout() {
           }}
         />
         <Drawer.Screen
-          name='mylist'
+          name='watchlist'
           options={{
             headerShown: false,
             drawerLabel: "My List",
@@ -120,7 +120,7 @@ function HomeLayout() {
           name='settings'
           options={{
             headerShown: false,
-            drawerLabel: "Account Settings",
+            drawerLabel: "Profile & Accounts",
           }}
         />
         <Drawer.Screen
@@ -144,13 +144,6 @@ function HomeLayout() {
         />
         <Drawer.Screen
           name='film'
-          options={{
-            headerShown: false,
-            drawerItemStyle: { display: "none" },
-          }}
-        />
-        <Drawer.Screen
-          name='watchlist'
           options={{
             headerShown: false,
             drawerItemStyle: { display: "none" },
