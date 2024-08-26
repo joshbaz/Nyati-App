@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
 import { useFormik } from "formik"
 import * as yup from "yup"
 import { useAuth } from "../../../context/AuthProvider"

@@ -56,9 +56,12 @@ function LandingPage() {
         >
           <LinearGradient
             colors={[
+              "transparent",
+              "transparent",
+              // COLORS.generalOpacity,
+              // COLORS.generalOpacity,
               COLORS.generalOpacity,
               COLORS.generalOpacity2,
-              COLORS.generalBg,
             ]}
             style={{ width: "100%", height: "100%" }}
           ></LinearGradient>

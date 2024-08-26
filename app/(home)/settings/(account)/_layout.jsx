@@ -1,15 +1,13 @@
 import { Stack } from "expo-router"
 import React from "react"
 
-function SettingsLayout() {
+function AccountSettingsLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name='index' />
-      <Stack.Screen name='profile' />
-      <Stack.Screen name='(membership)' />
-      <Stack.Screen name='(account)' />
+      <Stack.Screen name='change-password' />
     </Stack>
   )
 }
 
-export default SettingsLayout
+export default AccountSettingsLayout
