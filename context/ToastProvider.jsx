@@ -147,14 +147,17 @@ export const Toast = ({ toast }) => {
         shadowRadius: 3.84,
         elevation: 5,
         zIndex: 1000,
+        paddingHorizontal: 20,
       }}
       entering={FadeInUp.delay(200)}
       exiting={FadeOutUp}
     >
-      <FontAwesome5 name={icon} size={30} color='#FFF' />
+      <View className='w-[10%] flex items-center justify-center rounded-full bg-white'>
+        <FontAwesome5 name={icon} size={30} color='#FFF' />
+      </View>
 
-      <View style={{ marginLeft: 12 }}>
-        <Text style={{ fontSize: 18, fontWeight: "600", color: "white" }}>
+      <View style={{ marginLeft: 12, width: "90%" }}>
+        <Text style={{ fontSize: 16, fontWeight: "600", color: "white" }}>
           {toast.message}
         </Text>
       </View>

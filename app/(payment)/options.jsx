@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router"
 import React from "react"
-import { Animated, Dimensions, Text, View } from "react-native"
+import { Animated, Dimensions, Modal, Text, View } from "react-native"
 import { KeyboardAvoidingView, Platform } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useToast } from "../../context/ToastProvider"
@@ -78,103 +78,10 @@ function Options() {
               </Text>
             </View>
             <PaymentOptions onSubmit={onSubmit} />
-            {/* <View className='space-y-3'>
-              <Text className='text-white text-base'>
-                Select Payment Method
-              </Text>
-              <View className='flex flex-col gap-y-4 py-2'>
-                <RadioGroup
-                  options={formattedOptions}
-                  value={values.option}
-                  onSelect={(value) => {
-                    setFieldValue("option", value)
-                  }}
-                >
-                  {(option) => (
-                    <View className='flex flex-row items-center justify-between w-auto '>
-                      <Image
-                        source={{ uri: option.logo }}
-                        className='w-24 h-14 rounded bg-cover'
-                      />
-                      <View className='flex flex-col items-start ml-4'>
-                        <Text className='text-base text-white '>
-                          {option.label}
-                        </Text>
-                        {option.comingSoon ? (
-                          <Text className='text-red-400 text-sm'>
-                            Coming Soon
-                          </Text>
-                        ) : null}
-                      </View>
-                    </View>
-                  )}
-                </RadioGroup>
-                {errors.option && touched.option ? (
-                  <Text className='text-red-400 text-sm'>{errors.option}</Text>
-                ) : null}
-              </View>
-              <View className='w-full border-t-2 border-gray-400' />
-              <View className='flex flex-col gap-y-2 py-2'>
-                <View className='space-y-2'>
-                  <Text className='text-white text-base'>
-                    Add Mobile Number
-                  </Text>
-                  <View className='flex flex-col items-start gap-x-3 w-full space-y-2 '>
-                    <Text className='text-gray-400 text-sm'>Mobile Number</Text>
-                    <TextInput
-                      type='text'
-                      id='paymentNumber'
-                      name='paymentNumber'
-                      enablesReturnKeyAutomatically
-                      keyboardAppearance='dark'
-                      onChangeText={handleChange("paymentNumber")}
-                      onBlur={handleBlur("paymentNumber")}
-                      value={values.paymentNumber}
-                      className='w-full rounded-md text-white text-base h-12 px-4 pb-2'
-                      style={{
-                        borderColor: values.paymentNumber
-                          ? COLORS.formBtnBg
-                          : "transparent",
-                        backgroundColor: COLORS.formBg,
-                        color: COLORS.formLabel,
-                      }}
-                    />
-                    {errors.paymentNumber && touched.paymentNumber ? (
-                      <Text className='text-red-400 text-sm'>
-                        {errors.paymentNumber}
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
-              <View className='w-full border-t-2 border-gray-400' />
-              <View className='flex flex-row items-center justify-start w-full'>
-                <Checkbox
-                  onPress={() =>
-                    setFieldValue("saveDetails", !values.saveDetails)
-                  }
-                  status={values.saveDetails ? "checked" : "unchecked"}
-                />
-
-                <Text className='text-gray-400 text-sm ml-2'>
-                  Keep the info for the next payment
-                </Text>
-              </View>
-              <View>
-                <Pressable
-                  onPress={handleSubmit}
-                  disabled={!isValid}
-                  className='flex items-center justify-center w-full h-12 rounded-full disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
-                  style={{ backgroundColor: COLORS.formBtnBg }}
-                >
-                  <Text className='text-white text-lg'>Continue</Text>
-                </Pressable>
-              </View>
-            </View> */}
           </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-      {/* <Modal transparent={true} visible={isSubmitting} animationType='slide'>
+      <Modal transparent={true} visible={isSubmitting} animationType='slide'>
         <View
           style={[
             {
@@ -198,7 +105,7 @@ function Options() {
             <BallIndicator color='#ED3F62' count={9} />
           </Animated.View>
         </View>
-      </Modal> */}
+      </Modal>
     </View>
   )
 }

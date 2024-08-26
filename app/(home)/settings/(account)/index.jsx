@@ -1,14 +1,20 @@
 import { router } from "expo-router"
-import React from "react"
+import React, { useState } from "react"
 import {
+  ActivityIndicator,
+  Animated,
   Dimensions,
+  Modal,
   Pressable,
   Text,
   TouchableOpacity,
   View,
 } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
+import { FontAwesome, Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../../../../context/AuthProvider"
+import { Toast, useToast } from "../../../../context/ToastProvider"
+import useDisclosure from "../../../../hooks/useDisclosure"
+import { invoke } from "../../../../lib/axios"
 import { COLORS } from "../../../../src/color/VariableColors"
 import PageLayoutWrapper from "../../../../src/components/PageLayoutWrapper"
 import TopNav from "../../../../src/components/TopNav"
@@ -16,10 +22,42 @@ import TopNav from "../../../../src/components/TopNav"
 const { height } = Dimensions.get("window")
 
 function AccountSettings() {
-  const { user } = useAuth()
-  const handleAccountDelete = () => {
-    console.log("Account deleted")
+  const { user, logout } = useAuth()
+  const { showToast, toast } = useToast()
+  const { isOpen, onToggle } = useDisclosure(false)
+
+  const [loading, setLoading] = useState(false)
+
+  const handleAccountDelete = async () => {
+    try {
+      setLoading(true)
+
+      const response = await invoke({
+        method: "DELETE",
+        endpoint: `/user/${user.id}`,
+      })
+
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      showToast({
+        type: "success",
+        message: "Account deleted successfully, logging you out...",
+      })
+      setTimeout(() => {
+        logout()
+      }, 2000)
+    } catch (err) {
+      showToast({
+        type: "danger",
+        message: err.message,
+      })
+    } finally {
+      setLoading(false)
+    }
   }
+
   return (
     <PageLayoutWrapper>
       <View className='space-y-4 h-full '>
@@ -57,7 +95,7 @@ function AccountSettings() {
             </View>
           </TouchableOpacity>
           <Pressable
-            onPress={handleAccountDelete}
+            onPress={onToggle}
             className='h-12 flex items-center justify-center border border-primary-500 rounded w-full'
           >
             <Text className='text-lg text-primary-500 font-medium'>
@@ -65,6 +103,84 @@ function AccountSettings() {
             </Text>
           </Pressable>
         </View>
+        <Modal
+          transparent={true}
+          visible={isOpen}
+          animationType='slide'
+          style={{
+            flex: 1,
+            backgroundColor: COLORS.generalBg,
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              // alignItems: "center",
+              // justifyContent: "center",
+              backgroundColor: COLORS.generalOpacity2,
+            }}
+          >
+            <Animated.View
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 10,
+                marginTop: 70,
+              }}
+            >
+              <View className='h-72 w-full bg-red-100 flex flex-row rounded-md overflow-hidden'>
+                <Toast toast={toast} />
+                <View className='w-[15%] py-4 flex items-center '>
+                  <FontAwesome
+                    name='exclamation-circle'
+                    size={28}
+                    color='red'
+                  />
+                </View>
+                <View className='w-[85%] h-full bg-white p-5 space-y-6'>
+                  <View className='space-y-2'>
+                    <Text className='text-lg text-black font-semibold'>
+                      Please confirm to delete account
+                    </Text>
+                    <Text className='text-base text-black font-normal'>
+                      To delete your account your must press "Confirm"; once
+                      your account is deleted you will be logged out.
+                    </Text>
+                  </View>
+                  <View className='space-y-4'>
+                    <Pressable
+                      onPress={handleAccountDelete}
+                      className='w-full rounded border-2 border-primary-600 h-12 flex items-center justify-center px-4'
+                    >
+                      {loading ? (
+                        <ActivityIndicator
+                          size='small'
+                          color={COLORS.formBtnBg}
+                        />
+                      ) : (
+                        <Text className='text-primary-600 text-lg text-sans font-semibold'>
+                          Confirm
+                        </Text>
+                      )}
+                    </Pressable>
+                    <Pressable
+                      onPress={onToggle}
+                      className='w-full flex items-center justify-center px-4'
+                    >
+                      <Text className='text-gray-500 text-base text-sans font-semibold'>
+                        Cancel & Go back
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
       </View>
     </PageLayoutWrapper>
   )
