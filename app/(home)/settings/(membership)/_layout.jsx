@@ -5,7 +5,7 @@ function MembershipLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name='index' />
-      {/* <Stack.Screen name='profile' /> */}
+      <Stack.Screen name='subplans' />
     </Stack>
   )
 }

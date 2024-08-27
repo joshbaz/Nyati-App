@@ -1,11 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router"
 import React from "react"
-import { Animated, Dimensions, Modal, Text, View } from "react-native"
+import { Animated, Dimensions, Text, View } from "react-native"
 import { KeyboardAvoidingView, Platform } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useToast } from "../../context/ToastProvider"
 import { invoke } from "../../lib/axios"
 import { COLORS } from "../../src/color/VariableColors"
+import PageLayoutWrapper from "../../src/components/PageLayoutWrapper"
 import PaymentOptions from "../../src/components/PaymentOptions"
 
 const { width, height } = Dimensions.get("window")
@@ -57,56 +58,17 @@ function Options() {
   }
 
   return (
-    <View
-      style={{
-        width,
-        height,
-        backgroundColor: COLORS.generalBg,
-        color: "white",
-      }}
-    >
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <Animated.View className='space-y-8 p-6'>
-            <View className='text-white space-y-5'>
-              <Text className='text-white uppercase'>Step 2 of 2</Text>
-              <Text className='text-4xl font-bold text-white'>
-                Select a payment option
-              </Text>
-            </View>
-            <PaymentOptions onSubmit={onSubmit} />
-          </Animated.View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-      <Modal transparent={true} visible={isSubmitting} animationType='slide'>
-        <View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              backgroundColor: "rgba(21, 21, 21, 0.6)",
-            },
-          ]}
-        >
-          <Animated.View
-            style={{
-              position: "relative",
-              width: 50,
-              height: 50,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
+    <PageLayoutWrapper>
+      <Animated.View className='space-y-8 py-6'>
+        <View className='text-white space-y-5'>
+          <Text className='text-white uppercase'>Step 2 of 2</Text>
+          <Text className='text-4xl font-bold text-white'>
+            Select a payment option
+          </Text>
         </View>
-      </Modal>
-    </View>
+        <PaymentOptions onSubmit={onSubmit} />
+      </Animated.View>
+    </PageLayoutWrapper>
   )
 }
 

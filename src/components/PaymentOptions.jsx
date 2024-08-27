@@ -2,6 +2,7 @@ import { router } from "expo-router"
 import React from "react"
 import {
   Animated,
+  Dimensions,
   Image,
   Modal,
   Pressable,
@@ -17,6 +18,8 @@ import usePayments from "../../hooks/usePayments"
 import { COLORS } from "../color/VariableColors"
 import Checkbox from "./Checkbox"
 import RadioGroup from "./RadioGroup"
+
+const { width } = Dimensions.get("window")
 
 const validationSchema = yup.object().shape({
   option: yup.string().required("Select a payment option"),
@@ -55,13 +58,8 @@ function PaymentOptions({ onSubmit, loadSaved }) {
 
   return (
     <>
-      <View
-        className='space-y-5 w-full flex flex-col items-start justify-between'
-        style={{
-          height: "95%",
-        }}
-      >
-        <View className='w-full space-y-5'>
+      <View className='space-y-5 w-full py-3'>
+        <View className='w-full space-y-2'>
           <Text className='text-white text-base'>Select Payment Method</Text>
           <View className='flex flex-col gap-y-4 py-2'>
             <RadioGroup
@@ -93,7 +91,7 @@ function PaymentOptions({ onSubmit, loadSaved }) {
             ) : null}
           </View>
           <View className='w-full border-t-2 border-gray-400' />
-          <View className='flex flex-col gap-y-2 py-2'>
+          <View className='flex flex-col py-2'>
             <View className='space-y-4'>
               <Text className='text-white text-base'>Add Mobile Number</Text>
               <View className='flex flex-col items-start gap-x-3 w-full space-y-2 '>
@@ -147,7 +145,7 @@ function PaymentOptions({ onSubmit, loadSaved }) {
               </View>
             </View>
           </View>
-          <View className='w-full border-t-2 border-gray-400' />
+          <View className='w-full h-2 bg-slate-300' />
           {loadSaved ? null : (
             <View className='flex flex-row items-center justify-start w-full'>
               <Checkbox
@@ -178,12 +176,16 @@ function PaymentOptions({ onSubmit, loadSaved }) {
             </View>
           ) : null}
         </View>
-        <View className='w-full'>
+        <View
+          style={{
+            width: width - 40, // 20px padding on each side set in PageLayoutWrapper
+          }}
+        >
           <Pressable
             onPress={handleSubmit}
             disabled={!isValid}
-            className='flex items-center justify-center w-full h-12 rounded-full disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
-            style={{ backgroundColor: COLORS.formBtnBg }}
+            className='flex items-center justify-center h-12 rounded-full disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 px-6 w-full'
+            style={{ backgroundColor: COLORS.formBtnBg, width: "100%" }}
           >
             <Text className='text-white text-lg'>Continue</Text>
           </Pressable>
