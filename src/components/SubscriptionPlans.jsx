@@ -1,18 +1,23 @@
 import React from "react"
-import { Pressable, Text, View } from "react-native"
+import { ActivityIndicator, Pressable, Text, View } from "react-native"
 import useSubscription from "../../hooks/useSubscription"
 import { COLORS } from "../color/VariableColors"
 
 function SubscriptionPlans({ onSelect, selected = "" }) {
-  const { plans } = useSubscription()
+  const { plans, loading } = useSubscription()
   return (
     <View className='space-y-6'>
       {plans.map((plan, idx) => {
         const isSelected = selected === plan.value ? true : false
+        const bgClass = plan.selected
+          ? "bg-secondary-400"
+          : isSelected
+            ? "bg-primary-600"
+            : "bg-primary-500"
         return (
           <View
             key={idx}
-            className='flex flex-col justify-between items-start p-6 rounded-lg min-h-[120px]'
+            className={`flex flex-col justify-between items-start p-6 rounded-lg min-h-[120px] border border-secondary-700 ${isSelected ? " border-primary-500" : ""}`}
             style={{
               backgroundColor: COLORS.formBg,
             }}
@@ -33,13 +38,17 @@ function SubscriptionPlans({ onSelect, selected = "" }) {
               <Pressable
                 disabled={plan.selected}
                 onPress={() => onSelect(plan)}
-                className={`flex items-center justify-center rounded px-4 h-11 ${isSelected ? "bg-primary-600" : "bg-primary-500"}`}
+                className={`flex items-center justify-center rounded px-4 h-11 ${bgClass}`}
               >
-                <Text
-                  className={`text-base text-white ${isSelected ? "font-semibold" : "font-normal"}`}
-                >
-                  {isSelected || plan?.selected ? "Selected" : "Select Plan"}
-                </Text>
+                {loading ? (
+                  <ActivityIndicator color='white' size={24} />
+                ) : (
+                  <Text
+                    className={`text-base text-white ${isSelected ? "font-semibold" : "font-normal"}`}
+                  >
+                    {isSelected || plan?.selected ? "Selected" : "Select Plan"}
+                  </Text>
+                )}
               </Pressable>
             </View>
             <View className='flex flex-row items-end justify-between gap-x-1'>
