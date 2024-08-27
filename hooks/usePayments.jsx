@@ -43,7 +43,7 @@ function usePayments(loadSaved) {
       setLoading(true)
 
       const response = await invoke({
-        endpoint: `/user/${user.id}/payment-methods`,
+        endpoint: `/payment/${user.id}/paymentMethods`,
       })
 
       if (response.error) {

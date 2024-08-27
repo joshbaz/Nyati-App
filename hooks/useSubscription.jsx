@@ -29,7 +29,7 @@ function useSubscription(disableFetch = false) {
     if (disableFetch) return // prevent automatic fetching
     try {
       const response = await invoke({
-        endpoint: `/user/${user?.id}/subscription`,
+        endpoint: `/payment/${user?.id}/subscription`,
       })
 
       if (response.error) {

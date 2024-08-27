@@ -18,7 +18,6 @@ function SubPlans() {
     try {
       setIsSubmitting(true)
       // some code here
-
       let response = null
 
       if (params?.new === "true") {
@@ -35,7 +34,7 @@ function SubPlans() {
       } else {
         response = await invoke({
           method: "PUT",
-          endpoint: `/user/${user?.id}/subscription`,
+          endpoint: `/payment/${user?.id}/subscription`,
           data: {
             plan: params?.plan,
           },
@@ -63,8 +62,6 @@ function SubPlans() {
       setIsSubmitting(false)
     }
   }, [params?.plan])
-
-  console.log(params)
 
   return (
     <PageLayoutWrapper>

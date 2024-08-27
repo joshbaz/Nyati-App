@@ -1,11 +1,10 @@
 import React from "react"
-import { Pressable, Text, TouchableOpacity, View } from "react-native"
+import { Pressable, Text, View } from "react-native"
 import useSubscription from "../../hooks/useSubscription"
 import { COLORS } from "../color/VariableColors"
 
 function SubscriptionPlans({ onSelect, selected = "" }) {
   const { plans } = useSubscription()
-  console.log("Selected", selected)
   return (
     <View className='space-y-6'>
       {plans.map((plan, idx) => {
