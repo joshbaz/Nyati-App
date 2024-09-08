@@ -1,5 +1,5 @@
 import { router } from "expo-router"
-import React from "react"
+import React, { useState } from "react"
 import {
   Animated,
   Dimensions,
@@ -14,6 +14,7 @@ import {
 import { BallIndicator } from "react-native-indicators"
 import { useFormik } from "formik"
 import * as yup from "yup"
+import { useMembership } from "../../context/MembershipProvider"
 import usePayments from "../../hooks/usePayments"
 import { COLORS } from "../color/VariableColors"
 import Checkbox from "./Checkbox"
@@ -31,11 +32,12 @@ const validationSchema = yup.object().shape({
       const isPhone = phoneRegex.test(value)
       return isPhone
     }),
+  phoneCode: yup.string().default("+256"),
   saveDetails: yup.boolean().default(false),
 })
 
-function PaymentOptions({ onSubmit, loadSaved }) {
-  const { methods } = usePayments(loadSaved)
+function PaymentOptions({ onSubmit, loadSaved, initial }) {
+  const { paymentOptions: methods } = useMembership()
   const {
     handleBlur,
     handleChange,
@@ -50,7 +52,9 @@ function PaymentOptions({ onSubmit, loadSaved }) {
     initialValues: {
       option: methods[0].value,
       paymentNumber: "",
+      phoneCode: "+256",
       saveDetails: false,
+      ...initial, // Override the initial values with the passed in values
     },
     validationSchema: validationSchema,
     onSubmit: onSubmit,
@@ -111,7 +115,7 @@ function PaymentOptions({ onSubmit, loadSaved }) {
                     }}
                   >
                     <Text className='text-white text-lg font-semibold'>
-                      +256
+                      {values.phoneCode}
                     </Text>
                   </View>
 
@@ -145,7 +149,7 @@ function PaymentOptions({ onSubmit, loadSaved }) {
               </View>
             </View>
           </View>
-          <View className='w-full h-2 bg-slate-300' />
+          <View className='w-full h-0.5 bg-slate-400 my-3' />
           {loadSaved ? null : (
             <View className='flex flex-row items-center justify-start w-full'>
               <Checkbox
@@ -162,11 +166,11 @@ function PaymentOptions({ onSubmit, loadSaved }) {
           )}
 
           {loadSaved ? (
-            <View className='w-full py-4 '>
+            <View className='w-full py-4'>
               <TouchableOpacity
                 onPress={() =>
                   router.push({
-                    pathname: "/(home)/settings/membership",
+                    pathname: "/(home)/settings/(membership)/[method]",
                   })
                 }
                 className='border border-gray-400 rounded-lg p-4 flex flex-row items-center justify-center'
@@ -183,39 +187,46 @@ function PaymentOptions({ onSubmit, loadSaved }) {
         >
           <Pressable
             onPress={handleSubmit}
-            disabled={!isValid}
+            disabled={!isValid || isSubmitting}
             className='flex items-center justify-center h-12 rounded-full disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 px-6 w-full'
-            style={{ backgroundColor: COLORS.formBtnBg, width: "100%" }}
+            style={{
+              backgroundColor: COLORS.formBtnBg,
+              width: "100%",
+              opacity: isValid ? 1 : 0.5,
+              cursor: isValid ? "pointer" : "not-allowed",
+            }}
           >
             <Text className='text-white text-lg'>Continue</Text>
           </Pressable>
         </View>
       </View>
-      <Modal transparent={true} visible={isSubmitting} animationType='slide'>
-        <View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              backgroundColor: "rgba(21, 21, 21, 0.6)",
-            },
-          ]}
-        >
-          <Animated.View
-            style={{
-              position: "relative",
-              width: 50,
-              height: 50,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+      {isSubmitting ? (
+        <Modal transparent={true} visible={isSubmitting} animationType='slide'>
+          <View
+            style={[
+              {
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "space-around",
+                backgroundColor: "rgba(21, 21, 21, 0.6)",
+              },
+            ]}
           >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
-        </View>
-      </Modal>
+            <Animated.View
+              style={{
+                position: "relative",
+                width: 50,
+                height: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <BallIndicator color='#ED3F62' count={9} />
+            </Animated.View>
+          </View>
+        </Modal>
+      ) : null}
     </>
   )
 }

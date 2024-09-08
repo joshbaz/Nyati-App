@@ -90,7 +90,7 @@ function ContactForm() {
       } catch (error) {
         console.log(error)
         showToast({
-          type: "danger",
+          type: "error",
           message: "Something went wrong, please try again",
         })
         hp.setSubmitting(false)

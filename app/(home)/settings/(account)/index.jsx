@@ -50,7 +50,7 @@ function AccountSettings() {
       }, 2000)
     } catch (err) {
       showToast({
-        type: "danger",
+        type: "error",
         message: err.message,
       })
     } finally {

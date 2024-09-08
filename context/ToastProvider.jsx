@@ -11,7 +11,7 @@ import { FontAwesome5 } from "@expo/vector-icons"
 
 /**
  * @typedef {Object} Toast
- * @property {"success" | "danger" | "info" | "warning"} type
+ * @property {"success" | "error" | "info" | "warning"} type
  * @property {string} message
  * @property {boolean} showToast
  * @property {number} duration
@@ -108,7 +108,7 @@ export const Toast = ({ toast }) => {
       backgroundColor: "#2ecc71",
       icon: "check-circle",
     },
-    danger: {
+    error: {
       backgroundColor: "#e74c3c",
       icon: "exclamation-circle",
     },

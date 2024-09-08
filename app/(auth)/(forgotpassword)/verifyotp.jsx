@@ -81,7 +81,7 @@ function VerifyOtp() {
 
           if (!userId) {
             showToast({
-              type: "danger",
+              type: "error",
               message: "Something went wrong, please try again",
             })
             hp.setSubmitting(false)
@@ -101,7 +101,7 @@ function VerifyOtp() {
         } catch (error) {
           console.log("Errors", error)
           showToast({
-            type: "danger",
+            type: "error",
             message: "Something went wrong, please try again",
           })
           hp.setSubmitting(false)
@@ -126,7 +126,7 @@ function VerifyOtp() {
 
       if (response.error) {
         showToast({
-          type: "danger",
+          type: "error",
           message: "Something went wrong, please try again",
         })
         setFieldValue("isResending", false)
@@ -145,7 +145,7 @@ function VerifyOtp() {
       count = 1 // reset the count
       setFieldValue("timer", 0) // reset the timer
       showToast({
-        type: "danger",
+        type: "error",
         message: "Something went wrong, please try again",
       })
       setFieldValue("isResending", false)

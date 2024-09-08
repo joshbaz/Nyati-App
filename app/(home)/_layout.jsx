@@ -35,7 +35,7 @@ function CustomDrawerContent(props) {
         >
           <AntDesign name='close' size={24} color='white' />
         </Pressable>
-        <Pressable onPress={() => router.push("/home/settings")}>
+        <Pressable onPress={() => router.push("/(home)/settings")}>
           <Avatar hideInfo={true} isSmall />
         </Pressable>
       </View>

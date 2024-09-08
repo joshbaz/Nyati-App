@@ -110,7 +110,7 @@ const Register = () => {
       } catch (error) {
         console.log(error)
         showToast({
-          type: "danger",
+          type: "error",
           message: "Error creating account, try again",
         })
       }

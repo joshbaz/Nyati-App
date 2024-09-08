@@ -64,7 +64,7 @@ const VerifyAccount = () => {
         if (response.error) {
           hp.setSubmitting(false)
           showToast({
-            type: "danger",
+            type: "error",
             message: "Something went wrong, please try again",
           })
           return
@@ -81,7 +81,7 @@ const VerifyAccount = () => {
 
         if (!userId) {
           showToast({
-            type: "danger",
+            type: "error",
             message: "Something went wrong, please try again",
           })
           hp.setSubmitting(false)
@@ -101,7 +101,7 @@ const VerifyAccount = () => {
       } catch (error) {
         console.log("error", error)
         showToast({
-          type: "danger",
+          type: "error",
           message: "Something went wrong, please try again",
         })
         hp.setSubmitting(false)
@@ -143,7 +143,7 @@ const VerifyAccount = () => {
         setFieldValue("timer", 0)
         setIsSubmitResending(false)
         showToast({
-          type: "danger",
+          type: "error",
           message: "Error sending OTP code",
         })
         return

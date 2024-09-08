@@ -1,69 +1,61 @@
-import React, { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useAuth } from "../context/AuthProvider"
+import { useToast } from "../context/ToastProvider"
 import { invoke } from "../lib/axios"
-
-const plansList = [
-  {
-    label: "Monthly",
-    value: "monthly",
-    price: 1530,
-    currency: "UGX", // Ugandan Shilling
-    selected: false,
-  },
-  {
-    label: "Weekly",
-    value: "weekly",
-    price: 100,
-    currency: "UGX",
-    selected: false,
-  },
-]
 
 function useSubscription(disableFetch = false) {
   const { user } = useAuth()
-  const [subscription, setSubscription] = useState(null)
+  const { showToast } = useToast()
+  const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
-  const [plans, setPlans] = useState(plansList)
+  const [currentPlan, setCurrentPlan] = useState(null)
 
-  const fetchSubscription = useCallback(async () => {
+  const getCurrentPlan = useCallback(async () => {
     if (disableFetch) return // prevent automatic fetching
     try {
       const response = await invoke({
-        endpoint: `/payment/${user?.id}/subscription`,
+        endpoint: `/subscription/${user?.id}`,
       })
 
       if (response.error) {
         throw new Error(response.error)
       }
 
-      // update the plans with the selected plan
-      const updatedPlans = plans.map((plan) => {
-        if (!response.res.subscription) return plan
-
-        const selectedPlan = response.res?.subscription?.plan ?? null
-        if (selectedPlan && selectedPlan === plan.value) {
-          return { ...plan, selected: true }
-        }
-
-        return plan
-      })
-
-      setPlans(updatedPlans)
-      setSubscription(response.res.subscription)
+      setCurrentPlan(response.res.subscription)
     } catch (error) {
-      setSubscription(null)
+      setCurrentPlan(null)
     } finally {
       setLoading(false)
     }
-  }, [user?.id])
+  }, [user?.id, disableFetch])
 
-  const updateSubscription = useCallback(
+  const fetchPlans = useCallback(async () => {
+    if (disableFetch) return // prevent automatic fetching
+    try {
+      setLoading(true)
+      const response = await invoke({
+        endpoint: `/subscription/${user?.id}/plans`,
+      })
+
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      setPlans(response.res.plans)
+    } catch (error) {
+      setPlans([])
+    } finally {
+      setLoading(false)
+    }
+  }, [disableFetch, user?.id])
+
+  const updatePlan = useCallback(
     async (data) => {
       try {
         setLoading(true)
         const response = await invoke({
           method: "PUT",
-          endpoint: `/user/${user?.id}/subscription`,
+          endpoint: `/subscription/${user?.id}/update`,
           data,
         })
 
@@ -71,10 +63,39 @@ function useSubscription(disableFetch = false) {
           throw new Error(response.error)
         }
 
-        setSubscription(response.res.subscription)
+        setCurrentPlan(response.res.subscription)
       } catch (error) {
-        console.error("Error - something is not right", error)
-        setSubscription(null)
+        setCurrentPlan(null)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [user?.id],
+  )
+
+  const assignPlan = useCallback(
+    /**
+     * @param {string} planId
+     */
+    async (planId) => {
+      try {
+        setLoading(true)
+        const response = await invoke({
+          method: "PUT",
+          endpoint: `/subscription/${user?.id}/assign/${planId}`,
+        })
+
+        if (response.error) {
+          const err = new Error(response.error.message)
+          err.statusCode = response.status
+          throw err
+        }
+
+        showToast({ type: "success", message: response.res.message })
+        getCurrentPlan()
+        fetchPlans()
+      } catch (error) {
+        showToast({ type: "error", message: error.message })
       } finally {
         setLoading(false)
       }
@@ -83,9 +104,10 @@ function useSubscription(disableFetch = false) {
   )
 
   useEffect(() => {
-    fetchSubscription()
-  }, [fetchSubscription])
-  return { subscription, loading, updateSubscription, plans }
+    fetchPlans()
+    getCurrentPlan()
+  }, [getCurrentPlan, fetchPlans])
+  return { plans, currentPlan, loading, updatePlan, assignPlan }
 }
 
 export default useSubscription

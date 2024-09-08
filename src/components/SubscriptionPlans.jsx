@@ -1,14 +1,15 @@
 import React from "react"
 import { ActivityIndicator, Pressable, Text, View } from "react-native"
-import useSubscription from "../../hooks/useSubscription"
+import { useMembership } from "../../context/MembershipProvider"
 import { COLORS } from "../color/VariableColors"
 
 function SubscriptionPlans({ onSelect, selected = "" }) {
-  const { plans, loading } = useSubscription()
+  const { plans, loading } = useMembership()
+
   return (
     <View className='space-y-6'>
       {plans.map((plan, idx) => {
-        const isSelected = selected === plan.value ? true : false
+        const isSelected = selected === plan.id ? true : false
         const bgClass = plan.selected
           ? "bg-secondary-400"
           : isSelected
@@ -28,17 +29,15 @@ function SubscriptionPlans({ onSelect, selected = "" }) {
                   <Text className='text-base text-primary-500'>
                     Current Plan:
                   </Text>
-                  <Text className='text-base text-white ml-2'>
-                    {plan.label}
-                  </Text>
+                  <Text className='text-base text-white ml-2'>{plan.name}</Text>
                 </View>
               ) : (
-                <Text className='text-base text-white'>{plan.label}</Text>
+                <Text className='text-base text-white'>{plan.name}</Text>
               )}
               <Pressable
                 disabled={plan.selected}
                 onPress={() => onSelect(plan)}
-                className={`flex items-center justify-center rounded px-4 h-11 ${bgClass}`}
+                className={`flex items-center justify-center rounded-lg px-4 h-11 ${bgClass}`}
               >
                 {loading ? (
                   <ActivityIndicator color='white' size={24} />

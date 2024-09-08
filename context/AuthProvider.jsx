@@ -97,7 +97,7 @@ function AuthProvider({ children }) {
     if (!credentials) {
       setLoading(false)
       showToast({
-        type: "danger",
+        type: "error",
         message: "Please provide your credentials",
       })
       return
@@ -112,7 +112,7 @@ function AuthProvider({ children }) {
     if (response?.error) {
       setLoading(false)
       showToast({
-        type: "danger",
+        type: "error",
         message: response?.error?.message,
       })
       return
@@ -131,28 +131,45 @@ function AuthProvider({ children }) {
    * @returns Promise<void>
    */
   const logout = async (id = user?.id) => {
-    setLoading(true)
-    if (!id) return
-
-    const response = await invoke({
-      method: "POST",
-      endpoint: `${endpoint}/logout/${id}`,
-    })
-
-    if (response?.error) {
-      setLoading(false)
-      showToast({
-        type: "danger",
-        message: response?.error?.message,
+    try {
+      setLoading(true)
+      if (!id) return
+      const response = await invoke({
+        method: "POST",
+        endpoint: `${endpoint}/logout/${id}`,
       })
-      return
-    }
 
-    await SecureStore.deleteItemAsync(TOKEN_KEY)
-    setUser(null)
-    setLoading(false)
-    setIsAuthenticated(false)
-    // router.replace("/")
+      if (response?.error) {
+        setLoading(false)
+        showToast({
+          type: "error",
+          message: response?.error?.message,
+        })
+        return
+      }
+
+      await SecureStore.deleteItemAsync(TOKEN_KEY)
+      setUser(null)
+      setLoading(false)
+      setIsAuthenticated(false)
+    } catch (error) {
+      if ([401, 403, 404].includes(error.statusCode) && authToken) {
+        await SecureStore.deleteItemAsync(TOKEN_KEY)
+        setIsAuthenticated(false)
+        setUser(null)
+        showToast({
+          type: "error",
+          message: "An authentication error occurred. Please try again.",
+        })
+        return
+      }
+      showToast({
+        type: "error",
+        message: error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   /**
@@ -162,47 +179,48 @@ function AuthProvider({ children }) {
    */
   const fetchUserProfile = useCallback(async () => {
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
-    if (!authToken) {
-      setIsAuthenticated(false)
-      setIsFetching(false)
-      return
-    }
+    try {
+      setIsFetching(true)
+      if (!authToken) {
+        setIsAuthenticated(false)
+        return
+      }
 
-    if (user?.id) {
-      setIsFetching(false)
+      if (user?.id) {
+        setIsFetching(false)
+        setIsAuthenticated(true)
+        return
+      }
+
+      const payload = jwtDecode(authToken)
+      const response = await invoke({
+        method: "GET",
+        endpoint: `${endpoint}/me/${payload?.id}`,
+      })
+
+      if (response?.error) {
+        const err = new Error(response?.error.message)
+        err.statusCode = response?.status
+        throw err
+      }
+
       setIsAuthenticated(true)
-      return
-    }
-
-    const payload = jwtDecode(authToken)
-    const response = await invoke({
-      method: "GET",
-      endpoint: `${endpoint}/me/${payload?.id}`,
-    })
-
-    if (response?.error) {
+      setUser(response?.res.user)
       setIsFetching(false)
-      if ([401, 403, 404].includes(response?.status) && authToken) {
+    } catch (error) {
+      if ([401, 403, 404].includes(error.statusCode) && authToken) {
         await SecureStore.deleteItemAsync(TOKEN_KEY)
         setIsAuthenticated(false)
         setUser(null)
-        showToast({
-          type: "danger",
-          message: "An authentication error occurred. Please try again.",
-        })
         return
       }
       showToast({
-        type: "danger",
+        type: "error",
         message: response?.error?.message,
       })
-      setIsAuthenticated(false)
-      return
+    } finally {
+      setIsFetching(false)
     }
-
-    setIsAuthenticated(true)
-    setUser(response?.res.user)
-    setIsFetching(false)
   }, [endpoint, user?.id])
 
   const updateUser = useCallback((data) => {

@@ -35,13 +35,11 @@ function usePayments(loadSaved) {
       disabled: option.comingSoon,
     }))
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const loadSavedMethods = useCallback(async () => {
     if (!loadSaved) return
     try {
-      setLoading(true)
-
       const response = await invoke({
         endpoint: `/payment/${user.id}/paymentMethods`,
       })
@@ -63,11 +61,8 @@ function usePayments(loadSaved) {
         }
       })
 
-      console.log("Formatted Methods", formattedMethods)
-
       setMethods(formattedMethods)
     } catch (error) {
-      console.error("Error", error)
       setMethods([]) // set methods to empty array to allow user to select a method
     } finally {
       setLoading(false)

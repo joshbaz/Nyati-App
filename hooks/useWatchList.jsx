@@ -78,7 +78,7 @@ function useWatchList({ limit, filters, disableFetch }) {
         })
       } catch (error) {
         showToast({
-          type: "danger",
+          type: "error",
           message: "Unable to add to watchlist",
         })
       } finally {

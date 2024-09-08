@@ -92,7 +92,7 @@ function ChangePassword() {
         }, 2000)
       } catch (error) {
         showToast({
-          type: "danger",
+          type: "error",
           message: "Something went wrong, please try again",
         })
         hp.setSubmitting(false)

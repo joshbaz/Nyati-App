@@ -1,66 +1,22 @@
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useCallback, useState } from "react"
+import React, { useCallback } from "react"
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native"
-import { useAuth } from "../../../../context/AuthProvider"
-import { useToast } from "../../../../context/ToastProvider"
-import { invoke } from "../../../../lib/axios"
+import { useMembership } from "../../../../context/MembershipProvider"
 import PageLayoutWrapper from "../../../../src/components/PageLayoutWrapper"
 import SubscriptionPlans from "../../../../src/components/SubscriptionPlans"
 import TopNav from "../../../../src/components/TopNav"
 
 function SubPlans() {
-  const { user } = useAuth()
-  const { showToast } = useToast()
   const params = useLocalSearchParams()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { assignPlan, subloading } = useMembership()
 
   const handleSubmit = useCallback(async () => {
-    try {
-      setIsSubmitting(true)
-      // some code here
-      let response = null
+    if (!params?.plan) return
+    assignPlan(params.plan)
 
-      if (params?.new === "true") {
-        response = await invoke({
-          method: "POST",
-          endpoint: "/payment/subscription",
-          data: {
-            plan: params?.plan,
-            userId: user?.id,
-            paymentNumber: null,
-            saveDetails: false,
-          },
-        })
-      } else {
-        response = await invoke({
-          method: "PUT",
-          endpoint: `/payment/${user?.id}/subscription`,
-          data: {
-            plan: params?.plan,
-          },
-        })
-      }
-
-      if (response.error) {
-        throw new Error(response.error)
-      }
-
-      showToast({
-        type: "success",
-        message: "Successfully saved",
-      })
-
+    setTimeout(() => {
       router.replace("/(home)/settings/(membership)")
-    } catch (error) {
-      console.error(error)
-      showToast({
-        type: "danger",
-        message: "An error occurred try again, later",
-      })
-      return
-    } finally {
-      setIsSubmitting(false)
-    }
+    }, 1000)
   }, [params?.plan])
 
   return (
@@ -77,21 +33,21 @@ function SubPlans() {
           />
           <View>
             <SubscriptionPlans
-              onSelect={(plan) => router.setParams({ plan: plan.value })}
               selected={params?.plan}
+              onSelect={(plan) => router.setParams({ plan: plan.id })}
             />
           </View>
         </View>
         <View className='flex flex-col items-center justify-center gap-y-6 pt-36'>
           <TouchableOpacity
-            disabled={isSubmitting || !params?.plan}
+            disabled={subloading || !params?.plan}
             onPress={() => handleSubmit()}
             className='w-full rounded-full bg-primary-500 h-12 flex items-center justify-center px-4'
             style={{
-              opacity: isSubmitting || !params?.plan ? 0.5 : 1,
+              opacity: subloading || !params?.plan ? 0.5 : 1,
             }}
           >
-            {isSubmitting ? (
+            {subloading ? (
               <ActivityIndicator size='small' color='white' />
             ) : (
               <Text className='text-white text-lg text-sans font-semibold'>
@@ -100,6 +56,7 @@ function SubPlans() {
             )}
           </TouchableOpacity>
           <TouchableOpacity
+            disabled={subloading}
             onPress={() => router.back()}
             className='w-fit h-fit flex items-center justify-center px-4'
           >

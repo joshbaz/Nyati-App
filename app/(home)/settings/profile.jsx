@@ -90,7 +90,7 @@ function Profile() {
       } catch (error) {
         console.log("Error", error)
         showToast({
-          type: "danger",
+          type: "error",
           message: error.message,
         })
       } finally {

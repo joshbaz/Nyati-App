@@ -1,18 +1,14 @@
 import { router, useLocalSearchParams } from "expo-router"
 import React from "react"
-import { Animated, Dimensions, Text, View } from "react-native"
-import { KeyboardAvoidingView, Platform } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { Animated, Text, View } from "react-native"
+import { useMembership } from "../../context/MembershipProvider"
 import { useToast } from "../../context/ToastProvider"
-import { invoke } from "../../lib/axios"
-import { COLORS } from "../../src/color/VariableColors"
 import PageLayoutWrapper from "../../src/components/PageLayoutWrapper"
 import PaymentOptions from "../../src/components/PaymentOptions"
 
-const { width, height } = Dimensions.get("window")
-
 function Options() {
   const { showToast } = useToast()
+  const { addNewPaymentMethod } = useMembership()
   const localParams = useLocalSearchParams()
 
   // handleSubmit function
@@ -23,32 +19,20 @@ function Options() {
       const body = {
         ...values,
         plan: localParams.selectedPlan || "",
-        userId: localParams.userId,
-      }
-      const response = await invoke({
-        method: "POST",
-        endpoint: "/payment/subscription",
-        data: body,
-      })
-
-      if (response.error) {
-        throw new Error(response.error)
+        paymentNumber: values.phoneCode + values.paymentNumber,
       }
 
-      showToast({
-        type: "success",
-        message: "Payment processed successfully",
-      })
+      delete body.phoneCode
 
+      addNewPaymentMethod(body)
       setTimeout(() => {
         hp.resetForm()
         hp.setSubmitting(false)
         router.push("/(home)")
-      }, 3000)
+      }, 2000)
     } catch (e) {
-      console.error(e)
       showToast({
-        type: "danger",
+        type: "error",
         message: "An error occurred trying to process your payment",
       })
       return
