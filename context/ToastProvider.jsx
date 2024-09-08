@@ -153,7 +153,7 @@ export const Toast = ({ toast }) => {
       exiting={FadeOutUp}
     >
       <View className='w-[10%] flex items-center justify-center rounded-full bg-white'>
-        <FontAwesome5 name={icon} size={30} color='#FFF' />
+        <FontAwesome5 name={icon} size={28} color='white' />
       </View>
 
       <View style={{ marginLeft: 12, width: "90%" }}>

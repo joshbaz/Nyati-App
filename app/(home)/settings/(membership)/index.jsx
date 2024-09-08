@@ -10,7 +10,7 @@ import PaymentInfoCard from "../../../../src/components/PaymentInfoCard"
 import TopNav from "../../../../src/components/TopNav"
 
 function Membership() {
-  const { currentPlan, loading } = useMembership()
+  const { currentPlan, subloading } = useMembership()
 
   return (
     <PageLayoutWrapper>
@@ -27,7 +27,7 @@ function Membership() {
                 ? `Subscribed to the ${currentPlan?.plan?.name} plan`
                 : "Subscribe to a plan"}
             </Text>
-            {loading ? (
+            {subloading ? (
               <View className='flex items-center justify-center'>
                 <BallIndicator color={COLORS.formBtnBg} size={32} />
               </View>
@@ -58,7 +58,7 @@ function Membership() {
               onPress={() =>
                 router.push({
                   pathname: "/(home)/settings/(membership)/payment-methods",
-                  params: { plan: currentPlan?.plan },
+                  params: { plan: currentPlan?.plan?.id },
                 })
               }
               className='w-full rounded-lg'

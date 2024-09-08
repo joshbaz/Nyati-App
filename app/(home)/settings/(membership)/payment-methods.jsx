@@ -12,13 +12,14 @@ import { breakParams } from "../../../../src/utils/breakParams"
 function PaymentMethod() {
   const { showToast } = useToast()
   const params = useLocalSearchParams()
+
   const {
-    loading,
-    savedMethods: methods,
+    payloading,
     deletePaymentMethod,
+    savedMethods: methods,
   } = useMembership()
 
-  if (loading && !methods) {
+  if (payloading && !methods) {
     return <SplashScreen hideLogo={true} />
   }
 
@@ -53,11 +54,11 @@ function PaymentMethod() {
                     </View>
                   </View>
                   <TouchableOpacity
-                    disabled={method?.defaultStatus}
+                    // disabled={method?.defaultStatus}
                     onPress={() => {
                       if (method?.defaultStatus) {
                         showToast({
-                          type: "error",
+                          type: "warning",
                           message:
                             "Change your default payment method before deleting",
                         })
@@ -65,7 +66,7 @@ function PaymentMethod() {
                       }
                       deletePaymentMethod(method?.id)
                     }}
-                    className={`w-10 h-10 flex flex-row items-center justify-center ${method?.defaultStatus ? "opacity-30" : "opacity-100"}`}
+                    className={`w-10 h-10 flex flex-row items-center justify-center`}
                   >
                     <Feather name='trash-2' size={24} color='white' />
                   </TouchableOpacity>

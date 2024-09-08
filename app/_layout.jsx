@@ -8,6 +8,7 @@ import { Provider as PaperProvider } from "react-native-paper"
 import { RootSiblingParent } from "react-native-root-siblings"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import AuthProvider from "../context/AuthProvider"
+import MembershipProvider from "../context/MembershipProvider"
 import ToastProvider from "../context/ToastProvider"
 import SplashScreen from "../src/components/SplashScreen"
 
@@ -70,7 +71,9 @@ function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <ToastProvider>
               <AuthProvider>
-                <Slot initialRouteName='index' />
+                <MembershipProvider>
+                  <Slot initialRouteName='index' />
+                </MembershipProvider>
               </AuthProvider>
             </ToastProvider>
           </GestureHandlerRootView>

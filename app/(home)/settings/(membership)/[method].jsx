@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import {
   ActivityIndicator,
   Image,
@@ -35,7 +35,7 @@ function EditMethod() {
   const { showToast } = useToast()
   const params = useLocalSearchParams()
   const {
-    loading,
+    payloading,
     updatePaymentMethod,
     savedMethods: methods,
   } = useMembership()
@@ -180,14 +180,14 @@ function EditMethod() {
         <View>
           <View className='flex flex-col items-center justify-center gap-y-6 pt-36'>
             <TouchableOpacity
-              disabled={isSubmitting || !isValid || loading}
+              disabled={isSubmitting || !isValid || payloading}
               onPress={() => handleSubmit()}
               className='w-full rounded-full bg-primary-500 h-12 flex items-center justify-center px-4'
               style={{
-                opacity: isSubmitting || !isValid || loading ? 0.5 : 1,
+                opacity: isSubmitting || !isValid || payloading ? 0.5 : 1,
               }}
             >
-              {isSubmitting || loading ? (
+              {isSubmitting || payloading ? (
                 <ActivityIndicator size='small' color='white' />
               ) : (
                 <Text className='text-white text-lg text-sans font-semibold'>
