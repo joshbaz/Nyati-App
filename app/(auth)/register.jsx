@@ -20,11 +20,13 @@ import { HStack, VStack } from "@react-native-material/core"
 import { Ionicons } from "@expo/vector-icons"
 import { useFormik } from "formik"
 import * as yup from "yup"
+import { useAuth } from "../../context/AuthProvider"
 import { useToast } from "../../context/ToastProvider"
 import { invoke } from "../../lib/axios"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 
 const Register = () => {
+  const { user, fetchUserProfile } = useAuth()
   const { showToast } = useToast()
   const [textSecure, setTextSecure] = React.useState(true)
   const onChangeSecure = () => {
@@ -98,8 +100,10 @@ const Register = () => {
           throw new Error(response.error)
         }
 
-        hp.setSubmitting(false)
         hp.resetForm()
+
+        fetchUserProfile()
+        // fetch the user's account if we have a user
         router.push({
           pathname: "/(auth)/verifyaccount",
           params: {
@@ -108,11 +112,12 @@ const Register = () => {
           },
         })
       } catch (error) {
-        console.log(error)
         showToast({
           type: "error",
           message: "Error creating account, try again",
         })
+      } finally {
+        hp.setSubmitting(false)
       }
     },
   })

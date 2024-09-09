@@ -28,6 +28,7 @@ import { Toast, useToast } from "./ToastProvider"
  * @property {(id: [string]) => void} logout - A function to log out the user.
  * @property {(data: any) => void} updateUser - A function to update the user's information.
  * @property {boolean} isAuthenticated - A boolean indicating whether the user is authenticated.
+ * @property {() => void} fetchUserProfile - A function to fetch the user's profile.
  */
 
 /**
@@ -179,12 +180,12 @@ function AuthProvider({ children }) {
    */
   const fetchUserProfile = useCallback(async () => {
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
+    if (!authToken) {
+      setIsAuthenticated(false)
+      return
+    }
     try {
       setIsFetching(true)
-      if (!authToken) {
-        setIsAuthenticated(false)
-        return
-      }
 
       if (user?.id) {
         setIsFetching(false)
@@ -221,7 +222,7 @@ function AuthProvider({ children }) {
     } finally {
       setIsFetching(false)
     }
-  }, [endpoint, user?.id])
+  }, [endpoint, user?.id, isAuthenticated])
 
   const updateUser = useCallback((data) => {
     if (!data) return
@@ -251,6 +252,7 @@ function AuthProvider({ children }) {
         isFetching,
         updateUser,
         isAuthenticated,
+        fetchUserProfile,
       }}
     >
       {children}

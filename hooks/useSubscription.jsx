@@ -10,8 +10,42 @@ function useSubscription(disableFetch = false) {
   const [loading, setLoading] = useState(true)
   const [currentPlan, setCurrentPlan] = useState(null)
 
+  const createSubscription = useCallback(
+    async (data) => {
+      try {
+        setLoading(true)
+        const response = await invoke({
+          method: "POST",
+          endpoint: `/subscription/${user?.id}/new`,
+          data,
+        })
+
+        if (response.error) {
+          throw new Error(response.error)
+        }
+
+        setCurrentPlan(response.res.subscription)
+        showToast({
+          type: "success",
+          message: response.res?.message || "Subscription add successfully",
+        })
+        return !!response.res.subscription
+      } catch (error) {
+        setCurrentPlan(null)
+        showToast({
+          type: "error",
+          message: error?.message || "An error occurred",
+        })
+        return false
+      } finally {
+        setLoading(false)
+      }
+    },
+    [user?.id],
+  )
+
   const getCurrentPlan = useCallback(async () => {
-    if (disableFetch) return // prevent automatic fetching
+    if (disableFetch || !user?.id) return // prevent automatic fetching
     try {
       const response = await invoke({
         endpoint: `/subscription/${user?.id}`,
@@ -30,7 +64,7 @@ function useSubscription(disableFetch = false) {
   }, [user?.id, disableFetch])
 
   const fetchPlans = useCallback(async () => {
-    if (disableFetch) return // prevent automatic fetching
+    if (disableFetch || !user?.id) return // prevent automatic fetching
     try {
       setLoading(true)
       const response = await invoke({
@@ -107,7 +141,14 @@ function useSubscription(disableFetch = false) {
     fetchPlans()
     getCurrentPlan()
   }, [getCurrentPlan, fetchPlans])
-  return { plans, currentPlan, loading, updatePlan, assignPlan }
+  return {
+    createSubscription,
+    plans,
+    currentPlan,
+    loading,
+    updatePlan,
+    assignPlan,
+  }
 }
 
 export default useSubscription

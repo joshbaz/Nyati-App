@@ -8,7 +8,7 @@ import PaymentOptions from "../../src/components/PaymentOptions"
 
 function Options() {
   const { showToast } = useToast()
-  const { addNewPaymentMethod } = useMembership()
+  const { createSubscription } = useMembership()
   const localParams = useLocalSearchParams()
 
   // handleSubmit function
@@ -18,18 +18,15 @@ function Options() {
 
       const body = {
         ...values,
-        plan: localParams.selectedPlan || "",
+        planId: localParams.selectedPlan || "",
         paymentNumber: values.phoneCode + values.paymentNumber,
       }
 
       delete body.phoneCode
+      createSubscription(body)
 
-      addNewPaymentMethod(body)
-      setTimeout(() => {
-        hp.resetForm()
-        hp.setSubmitting(false)
-        router.push("/(home)")
-      }, 2000)
+      hp.resetForm()
+      router.push("/(home)")
     } catch (e) {
       showToast({
         type: "error",

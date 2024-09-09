@@ -1,12 +1,19 @@
 import { Link, router, useLocalSearchParams } from "expo-router"
 import React from "react"
 import { Text, View } from "react-native"
+import { useMembership } from "../../context/MembershipProvider"
 import { COLORS } from "../../src/color/VariableColors"
 import PageLayoutWrapper from "../../src/components/PageLayoutWrapper"
+import SplashScreen from "../../src/components/SplashScreen"
 import SubscriptionPlans from "../../src/components/SubscriptionPlans"
 
 function Plans() {
   const localParams = useLocalSearchParams()
+  const { subloading, plans } = useMembership()
+
+  if (!plans.length > 0 && subloading) {
+    return <SplashScreen hideLogo={true} />
+  }
   return (
     <PageLayoutWrapper>
       <View className='space-y-6 py-6'>
@@ -22,7 +29,7 @@ function Plans() {
               router.push({
                 pathname: "/(payment)/options",
                 params: {
-                  selectedPlan: plan.value,
+                  selectedPlan: plan.id,
                   userId: localParams.userId,
                 },
               })

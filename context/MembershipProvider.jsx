@@ -14,6 +14,7 @@ import useSubscription from "../hooks/useSubscription"
  * @property {Array} savedMethods
  * @property {(data: Object) => void} updatePlan
  * @property {(planId: string) => void} assignPlan
+ * @property {(data: Object) => void} createSubscription
  * @property {(data: Object) => void} addNewPaymentMethod
  * @property {(id: string, data: Object) => void} updatePaymentMethod
  * @property {(id: string) => void} deletePaymentMethod
@@ -48,6 +49,7 @@ function MembershipProvider({ children, disableFetchOnMount = false }) {
     assignPlan,
     updatePlan,
     currentPlan,
+    createSubscription,
     loading: subloading,
   } = useSubscription(disableFetchOnMount)
 
@@ -75,6 +77,7 @@ function MembershipProvider({ children, disableFetchOnMount = false }) {
         savedMethods,
         updatePlan,
         assignPlan,
+        createSubscription,
         addNewPaymentMethod,
         updatePaymentMethod,
         deletePaymentMethod,

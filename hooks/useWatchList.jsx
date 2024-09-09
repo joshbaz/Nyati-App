@@ -24,7 +24,7 @@ function useWatchList({ limit, filters, disableFetch }) {
   const [loading, setLoading] = useState(false)
 
   const fetchWatchList = useCallback(async () => {
-    if (disableFetch) return // cancel fetching on mount
+    if (disableFetch || !user?.id) return // cancel fetching on mount
     try {
       setLoading(true)
       const response = await invoke({

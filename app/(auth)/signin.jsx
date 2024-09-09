@@ -23,7 +23,7 @@ import { useAuth } from "../../context/AuthProvider"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
 
 function SignIn() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, loading } = useAuth()
   const params = useLocalSearchParams()
   const [textSecure, setTextSecure] = React.useState(true)
   const onChangeSecure = () => {
@@ -69,11 +69,15 @@ function SignIn() {
         })
 
         if (isAuthenticated) {
-          hp.setSubmitting(false)
           hp.resetForm()
           router.push("/(home)")
         }
       } catch (error) {
+        showToast({
+          type: "error",
+          message: error.message,
+        })
+      } finally {
         hp.setSubmitting(false)
       }
     },
@@ -202,7 +206,7 @@ function SignIn() {
                 </VStack>
 
                 <VStack spacing={20} style={{ alignItems: "center" }}>
-                  {isSubmitting ? (
+                  {isSubmitting || loading ? (
                     <View style={styles.formBtn}>
                       <ActivityIndicator size='small' color='white' />
                     </View>
@@ -244,10 +248,10 @@ function SignIn() {
         </KeyboardAvoidingView>
       </SafeAreaView>
 
-      {isSubmitting ? (
+      {isSubmitting || loading ? (
         <Modal
           transparent={true}
-          visible={isSubmitting ? true : false}
+          visible={isSubmitting || loading ? true : false}
           animationType='slide'
           style={{
             position: "absolute",
