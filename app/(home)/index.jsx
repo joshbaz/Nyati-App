@@ -156,7 +156,7 @@ function Home() {
                   </Text>
                 </View>
 
-                <Link href='/home/donations'>
+                <Link href='/(home)/donate'>
                   <View className='flex flex-row items-center gap-x-2'>
                     <Text
                       className='font-semibold text-lg text-sans'

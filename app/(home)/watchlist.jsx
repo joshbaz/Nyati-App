@@ -1,8 +1,16 @@
 import { router } from "expo-router"
 import React from "react"
-import { Dimensions, FlatList, Pressable, Text, View } from "react-native"
+import {
+  Animated,
+  Dimensions,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native"
 import useWatchList from "../../hooks/useWatchList"
 import { COLORS, FONTSFAMILIES } from "../../src/color/VariableColors"
+import CategoryHeader from "../../src/components/CategoryHeader"
 import PageLayoutWrapper from "../../src/components/PageLayoutWrapper"
 import SplashScreen from "../../src/components/SplashScreen"
 import TopNav from "../../src/components/TopNav"
@@ -80,40 +88,96 @@ function WatchlistPage() {
           }}
         />
       </View>
-      {list && list.length > 1 ? (
-        <View className='w-full flex flex-2 flex-row' style={{ gap: 20 }}>
-          {list.map((item, idx) => {
-            const poster = item.posters[0]?.url ?? item.posterUrl
-            return (
-              <View key={item?.id} className='even:ml-10'>
-                <UpcomingMovieCard
-                  shouldMarginatedAtEnd={false}
-                  cardFunction={() => {
-                    router.push({
-                      pathname: "/(home)/film/[id]",
-                      params: { id: item?.id },
-                    })
-                  }}
-                  title={item.title}
-                  posterUrl={poster}
-                  cardWidth={width / 2 - 25} //
-                  isFirst={idx == 0 ? true : false}
-                  isLast={idx == list?.length - 1 ? true : false}
-                />
-                <View>
-                  <Text className='text-white text-lg'>Watchlist</Text>
-                </View>
-              </View>
-            )
-          })}
-        </View>
-      ) : (
+
+      {list?.saved.length === 0 && list?.purchased.length === 0 && (
         <View className='max-h-96 h-full flex flex-col items-center justify-center'>
           <Text className='text-white text-lg'>
             No {active === "all" ? "films" : active} in your watchlist
           </Text>
         </View>
       )}
+
+      {list.saved.length > 0 ? (
+        <View className='w-full mt-4'>
+          <Animated.View
+            style={{
+              display: "flex",
+              height: 310,
+              width: "100%",
+            }}
+          >
+            <CategoryHeader title='Saved films' viewMoreArrow={false} />
+            <FlatList
+              horizontal
+              data={list.saved}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ gap: 10 }}
+              renderItem={({ item, index }) => {
+                const poster = item.poster?.url ?? null
+                return (
+                  <View className='space-y-2'>
+                    <UpcomingMovieCard
+                      shouldMarginatedAtEnd={false}
+                      cardFunction={() => {
+                        router.push({
+                          pathname: "/(home)/film/[id]",
+                          params: { id: item?.id },
+                        })
+                      }}
+                      title={item.title}
+                      posterUrl={poster}
+                      cardWidth={width / 2}
+                      isFirst={index == 0 ? true : false}
+                      isLast={index == list.saved?.length - 1 ? true : false}
+                    />
+                    <View>
+                      <Text className='text-white text-sm'>Watchlist</Text>
+                    </View>
+                  </View>
+                )
+              }}
+            />
+          </Animated.View>
+        </View>
+      ) : null}
+      {list?.purchased.length > 0 ? (
+        <View className='w-full mt-6'>
+          <Animated.View
+            style={{
+              display: "flex",
+              height: 310,
+              width: "100%",
+            }}
+          >
+            <CategoryHeader title='Rented & Purchased' viewMoreArrow={false} />
+            <FlatList
+              horizontal
+              data={list.purchased}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ gap: 10 }}
+              renderItem={({ item, index }) => {
+                const poster = item.poster?.url ?? null
+                return (
+                  <UpcomingMovieCard
+                    shouldMarginatedAtEnd={false}
+                    cardFunction={() => {
+                      router.push({
+                        pathname: "/(home)/film/[id]",
+                        params: { id: item?.id },
+                      })
+                    }}
+                    title={item.title}
+                    posterUrl={poster}
+                    cardWidth={width / 2}
+                    isFirst={index == 0 ? true : false}
+                    isLast={index == list.saved?.length - 1 ? true : false}
+                  />
+                )
+              }}
+            />
+          </Animated.View>
+        </View>
+      ) : null}
     </PageLayoutWrapper>
   )
 }

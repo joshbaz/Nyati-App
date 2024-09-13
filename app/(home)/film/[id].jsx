@@ -100,7 +100,7 @@ function FilmDetails() {
   )
 }
 
-function Details({ film, play, showFilm }) {
+function Details({ film, play, showFilm, fetchFilm }) {
   const { user } = useAuth()
   const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
 
@@ -159,7 +159,7 @@ function Details({ film, play, showFilm }) {
           {isItemInWatchlist ? null : (
             <View className='flex flex-row items-center gap-x-4'>
               <TouchableOpacity
-                onPress={handleAddToWatchlist}
+                onPress={() => handleAddToWatchlist(film?.id, fetchFilm)}
                 className='flex flex-row items-center justify-center gap-x-2 h-14 border-2 border-gray-400 rounded-full bg-gray-500/30'
                 style={{
                   width: 200,
@@ -214,7 +214,6 @@ function Details({ film, play, showFilm }) {
 }
 
 function AccessSection({ film }) {
-  console.log(film?.access)
   const access = useMemo(() => {
     if (film?.access === "free") return "Free to watch"
     return "Available to rent or buy"
