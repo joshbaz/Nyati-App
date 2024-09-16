@@ -37,7 +37,6 @@ const getMainVideo = (film) => {
 }
 
 function FilmDetails() {
-  const videoRef = useRef(null)
   const { id, trackid } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilms()
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -49,7 +48,6 @@ function FilmDetails() {
 
   const playFilm = async () => {
     router.setParams({ trackid: getMainVideo(film) })
-    // await videoRef.current.playVideo()
   }
 
   return (
@@ -214,6 +212,10 @@ function Details({ film, play, showFilm, fetchFilm }) {
 }
 
 function AccessSection({ film }) {
+  const { fetchFilm } = useFilms()
+  const { removeItemFromWatchList, handleAddToWatchlist } = useWatchList({
+    disableFetch: true,
+  })
   const access = useMemo(() => {
     if (film?.access === "free") return "Free to watch"
     return "Available to rent or buy"
@@ -229,6 +231,16 @@ function AccessSection({ film }) {
     style: "decimal",
   })
 
+  const watchlistId = useMemo(() => {
+    if (!film?.watchlist) return false
+    const item = film?.watchlist.find((item) => {
+      const available = item?.filmId === film?.id
+      if (available && item?.type === "SAVED") return item?.id
+      return null
+    })
+    return item?.id
+  }, [film])
+
   const options = [
     {
       label: "Play Trailer",
@@ -238,10 +250,15 @@ function AccessSection({ film }) {
       },
     },
     {
-      label: "Watch List",
-      icon: "plus",
+      label: watchlistId ? "Remove Watchlist" : "Watch List",
+      icon: watchlistId ? "x" : "plus",
       onPress: () => {
-        console.log("add to watchlist")
+        if (watchlistId) {
+          console.log("removing from watchlist", watchlistId)
+          removeItemFromWatchList(watchlistId, fetchFilm)
+          return
+        }
+        handleAddToWatchlist(film?.id, fetchFilm)
       },
     },
     {
@@ -259,6 +276,7 @@ function AccessSection({ film }) {
       },
     },
   ]
+
   return (
     <View className='w-full space-y-6'>
       <View className='flex flex-row items-center gap-x-2'>
@@ -284,7 +302,7 @@ function AccessSection({ film }) {
               },
             })
           }
-          className='flex flex-row items-center justify-center gap-x-2 h-16 border-2 border-primary-500 rounded-3xl w-3/4'
+          className='flex flex-row items-center justify-center h-16 border-2 border-primary-500 rounded-3xl w-full'
           style={{
             backgroundColor: COLORS.formBg,
           }}

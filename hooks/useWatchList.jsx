@@ -25,7 +25,8 @@ import { invoke } from "../lib/axios"
  * @property {boolean} loading - loading state
  * @property {{ saved: item[], purchased: item[] }} watchList - watchlist
  * @property {()=> void} fetchWatchList - fetch watchlist
- * @property {(param: string)=> void} handleAddToWatchlist - add to watchlist
+ * @property {(filmId: string, cb: (filmId: string)=>void)=> void} handleAddToWatchlist - add to watchlist
+ * @property {(id: string, cb: (filmId: string)=>void)=> void} removeItemFromWatchList - remove from watchlist
  */
 
 /**
@@ -121,6 +122,41 @@ function useWatchList({ limit, filters, disableFetch = false }) {
     [user?.id, showToast],
   )
 
+  const removeItemFromWatchList = useCallback(
+    /**
+     * @param {string} id
+     * @param {(id: string)} cb
+     * @returns {Promise<void>}
+     */
+    async (id, cb) => {
+      try {
+        console.log("Sending...", id)
+        setLoading(true)
+        const response = await invoke({
+          method: "DELETE",
+          endpoint: `/film/watchlist/${id}/${user?.id}`,
+        })
+
+        if (response.error) {
+          throw new Error(response.error)
+        }
+        showToast({
+          type: "success",
+          message: "Removed from watchlist",
+        })
+        if (typeof cb === "function") cb(filmId)
+      } catch (error) {
+        showToast({
+          type: "error",
+          message: "Unable to remove from watchlist",
+        })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [user?.id, showToast],
+  )
+
   useEffect(() => {
     fetchWatchList()
   }, [fetchWatchList])
@@ -129,6 +165,7 @@ function useWatchList({ limit, filters, disableFetch = false }) {
     loading,
     fetchWatchList,
     handleAddToWatchlist,
+    removeItemFromWatchList,
     watchList: filteredWatchList,
   }
 }

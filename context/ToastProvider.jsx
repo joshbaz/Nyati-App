@@ -81,9 +81,11 @@ function ToastProvider({ children }) {
     }
   }, [toast.showToast, toast.duration])
 
+  const memoizedChildren = React.useMemo(() => children, [children])
+
   return (
     <ToastContext.Provider value={{ showToast, toast }}>
-      {children}
+      {memoizedChildren}
     </ToastContext.Provider>
   )
 }

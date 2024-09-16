@@ -241,6 +241,8 @@ function AuthProvider({ children }) {
     }
   }, [authError])
 
+  const memoizedChildren = React.useMemo(() => children, [children])
+
   return (
     <AuthContext.Provider
       value={{
@@ -255,7 +257,7 @@ function AuthProvider({ children }) {
         fetchUserProfile,
       }}
     >
-      {children}
+      {memoizedChildren}
       <Toast toast={toast} />
     </AuthContext.Provider>
   )

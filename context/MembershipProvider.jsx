@@ -64,6 +64,8 @@ function MembershipProvider({ children, disableFetchOnMount = false }) {
     loading: payloading,
   } = usePayments(disableFetchOnMount)
 
+  const memoizedChildren = React.useMemo(() => children, [children])
+
   return (
     <MembershipContext.Provider
       value={{
@@ -83,7 +85,7 @@ function MembershipProvider({ children, disableFetchOnMount = false }) {
         deletePaymentMethod,
       }}
     >
-      {children}
+      {memoizedChildren}
     </MembershipContext.Provider>
   )
 }

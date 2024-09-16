@@ -14,8 +14,10 @@ import { invoke } from "../lib/axios"
 
 /**
  * @typedef {Object} filmResponse
+ * @property {Film} film - A film object.
  * @property {Array<Film>} films - An array of film objects.
- * @property {() => Promise<void>} fetchFilms - A function to fetch the films.
+ * @property {() => void} fetchFilms - A function to fetch the films.
+ * @property {(id: string) => void} fetchFilm - A function to fetch a single film.
  */
 
 /**
@@ -51,22 +53,25 @@ function useFilms() {
   const fetchFilm = useCallback(
     async (id) => {
       if (!id) return
-      if (film?.id == id) return // prevent re-fetching if the film is already fetched
+      try {
+        setIsFetching(true)
+        const response = await invoke({
+          method: "GET",
+          endpoint: `/film/${id}`,
+        })
 
-      setIsFetching(true)
-      const response = await invoke({
-        method: "GET",
-        endpoint: `/film/${id}`,
-      })
+        if (response?.error) {
+          const error = new Error(response.error.message)
+          throw error
+        }
 
-      if (response?.error) {
+        setFilm(response?.res?.film ?? null)
         setIsFetching(false)
-        console.error("Error - something is not right", response.error)
-        return
+      } catch (error) {
+        setFilm((prev) => prev)
+      } finally {
+        setIsFetching(false)
       }
-
-      setFilm(response?.res?.film ?? null)
-      setIsFetching(false)
     },
     [film?.id],
   )
