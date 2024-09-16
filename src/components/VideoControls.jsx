@@ -72,9 +72,7 @@ function VideoControls({
           <View className='flex flex-row items-center justify-start'>
             <Text className='text-sm text-white'>{formatTime(time)}</Text>
             <Text className='text-sm text-white mx-1'>/</Text>
-            <Text className='text-sm text-white'>
-              {formatTime(duration * 1000)}
-            </Text>
+            <Text className='text-sm text-white'>{formatTime(duration)}</Text>
           </View>
           <TouchableOpacity onPress={() => onToggleFullscreen()}>
             {fullScreenValue ? (
@@ -89,16 +87,15 @@ function VideoControls({
           <Slider
             containerStyle={{
               marginHorizontal: 10,
+              width: width - 35,
             }}
             minimumValue={0}
-            maximumValue={duration * 1000}
+            maximumValue={duration}
             value={time}
             onValueChange={(value) => {
-              console.log("value", value)
               onSeek(value)
             }}
             onSlidingComplete={(value) => {
-              console.log("value", value)
               onSeek(value)
             }}
             minimumTrackTintColor={COLORS.formBtnBg}
