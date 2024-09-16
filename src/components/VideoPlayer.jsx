@@ -28,7 +28,6 @@ import VideoControls from "./VideoControls"
 function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   const router = useRouter()
   const videoRef = useRef(null)
-  const { source: src, clearSrc } = useVideo()
 
   // video states
   const [orientation, setOrientation] = useState(1)
@@ -104,7 +103,6 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
       setIsFullscreen(true)
       handleFullscreen(true)
     } else {
-      console.log("PORTRAIT")
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT_UP,
       )
@@ -113,6 +111,16 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
     }
     setOrientation(await ScreenOrientation.getOrientationAsync())
   }, [handleFullscreen, isFullscreen])
+
+  // change orientation and play video
+  const playVideo = () => {
+    // set orientation to landscape
+    toggleFullscreen()
+    // play video
+    togglePlayPause()
+  }
+
+  const { source: src, clearSrc } = useVideo(playVideo)
 
   // handle back button press
   const onBackPress = () => {
@@ -261,7 +269,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   )
 }
 
-function useVideo() {
+function useVideo(cb) {
   const params = useLocalSearchParams()
   const [source, setSource] = useState("")
   const [loading, setLoading] = useState(true)
@@ -282,9 +290,13 @@ function useVideo() {
       }
 
       setSource(response.res?.video?.url)
-      setLoading(false)
+
+      if (typeof cb === "function") {
+        cb()
+      }
     } catch (error) {
-      console.error("Error", error)
+      // clear the trackid for the use to try again
+      router.setParams({ trackid: null })
     } finally {
       setLoading(false)
     }

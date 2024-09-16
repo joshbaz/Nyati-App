@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -16,9 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
-import { useAuth } from "../../../context/AuthProvider"
 import { useFilmCtx } from "../../../context/FilmProvider"
-import useFilms from "../../../hooks/useFilms"
 import useWatchList from "../../../hooks/useWatchList"
 import { COLORS } from "../../../src/color/VariableColors"
 import CategoryHeader from "../../../src/components/CategoryHeader"
@@ -100,17 +97,7 @@ function FilmDetails() {
 }
 
 function Details({ film, play, showFilm }) {
-  const { user } = useAuth()
-  const { fetchFilm } = useFilmCtx()
   const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
-
-  // handle watchlist
-  const { handleAddToWatchlist, loading } = useWatchList({ disableFetch: true })
-
-  const isItemInWatchlist = film?.watchlist?.find(
-    (item) => item?.userId === user?.id,
-  )
-
   return (
     <View style={styles.detailWrap}>
       <View
@@ -154,33 +141,16 @@ function Details({ film, play, showFilm }) {
             </Pressable>
           )}
         </View>
-        <View className='space-y-2'>
+        <View>
           <AccessSection film={film} />
-          {isItemInWatchlist ? null : (
-            <View className='flex flex-row items-center gap-x-4'>
-              <TouchableOpacity
-                onPress={() => handleAddToWatchlist(film?.id, fetchFilm)}
-                className='flex flex-row items-center justify-center gap-x-2 h-14 border-2 border-gray-400 rounded-full bg-gray-500/30'
-                style={{
-                  width: 200,
-                }}
-              >
-                {loading ? (
-                  <ActivityIndicator color='white' size={30} />
-                ) : (
-                  <>
-                    <Feather name='plus-circle' size={30} color='white' />
-                    <Text className='text-gray-100 font-semibold text-lg'>
-                      Watchlist
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
-        <View className='relative'>
-          <ReadMoreCard content={film?.overview} linesToShow={5} />
+        <View className='relative space-y-2 py-4'>
+          <Text className='text-white font-semibold text-xl'>
+            Film Information
+          </Text>
+          <View>
+            <ReadMoreCard content={film?.overview} linesToShow={5} />
+          </View>
         </View>
         {/** divider */}
         {/* <View style={styles.horizontalLine} /> */}
@@ -215,6 +185,7 @@ function Details({ film, play, showFilm }) {
 
 function AccessSection({ film }) {
   const { fetchFilm } = useFilmCtx()
+  const [currentTrailer, setCurrentTrailer] = useState(0)
   const { removeItemFromWatchList, handleAddToWatchlist } = useWatchList({
     disableFetch: true,
   })
@@ -243,13 +214,28 @@ function AccessSection({ film }) {
     return item?.id
   }, [film])
 
+  // get the trailer videos ids and play each keeping track of the current playing video
+  const trailerIds = useMemo(() => {
+    if (!film?.video) return []
+    const trailers = film?.video.filter((video) => video?.isTrailer)
+    return trailers.map((trailer) => trailer && trailer?.id)
+  }, [film?.video])
+
   const options = [
     {
       label: "Play Trailer",
       icon: "play",
       onPress: () => {
-        console.log("play trailer")
+        if (trailerIds.length === 0) return
+        router.setParams({ trackid: trailerIds[currentTrailer] })
+        if (currentTrailer < trailerIds.length - 1) {
+          setCurrentTrailer(currentTrailer + 1)
+        } else {
+          // reset to the first trailer
+          setCurrentTrailer(0)
+        }
       },
+      disabled: trailerIds.length === 0,
     },
     {
       label: watchlistId ? "Remove Watchlist" : "Watch List",
@@ -262,6 +248,7 @@ function AccessSection({ film }) {
           handleAddToWatchlist(film?.id, fetchFilm)
         }
       },
+      disabled: false,
     },
     {
       label: "Like",
@@ -269,6 +256,7 @@ function AccessSection({ film }) {
       onPress: () => {
         console.log("play trailer")
       },
+      disabled: false,
     },
     {
       label: "Not for me",
@@ -276,6 +264,7 @@ function AccessSection({ film }) {
       onPress: () => {
         console.log("play trailer")
       },
+      disabled: false,
     },
   ]
 
@@ -323,12 +312,15 @@ function AccessSection({ film }) {
           keyExtractor={(item) => item.label}
           contentContainerStyle={{ gap: 20 }}
           style={{ width: width / 4 }}
+          scrollToOverflowEnabled={false}
           renderItem={({ item }) => (
             <View
               key={item?.label}
-              className='space-y-3 flex flex-col justify-center items-center w-auto'
+              className='space-y-3 flex flex-col justify-start items-center max-w-[60px]'
+              style={{ opacity: item?.disabled ? 0.5 : 1 }}
             >
               <Pressable
+                disabled={item?.disabled}
                 className='flex flex-row items-center justify-center h-14 w-14 rounded-full p-2 bg-gray-500/50 border border-white'
                 onPress={item?.onPress}
               >
@@ -336,7 +328,9 @@ function AccessSection({ film }) {
                   <Feather name={item.icon} size={16} color='white' />
                 </View>
               </Pressable>
-              <Text className='text-white'>{item.label}</Text>
+              <Text className='text-white w-full text-center'>
+                {item.label}
+              </Text>
             </View>
           )}
         />
