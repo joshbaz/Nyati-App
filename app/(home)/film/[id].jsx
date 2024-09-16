@@ -39,7 +39,6 @@ function FilmDetails() {
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
-    console.log("I am running...")
     if (!id) return
     fetchFilm(id)
   }, [fetchFilm, id])

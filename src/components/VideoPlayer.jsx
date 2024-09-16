@@ -275,9 +275,8 @@ function useVideo(cb) {
   const [loading, setLoading] = useState(true)
 
   const getVideoUrl = useCallback(async () => {
+    if (!params.trackid) return
     try {
-      if (!params.trackid) return
-
       setLoading(true)
 
       const response = await invoke({
