@@ -19,6 +19,7 @@ import { invoke } from "../lib/axios"
  * @property {() => void} fetchFilms - A function to fetch the films.
  * @property {(id: string) => void} fetchFilm - A function to fetch a single film.
  * @property {boolean} isFetching - A boolean indicating whether the films are currently being fetched.
+ * @property {(filmId: string, likeType: "THUMBS_UP" | "THUMBS_DOWN" | "NONE") => void} likeRateFilm - A function to like or rate a film.
  */
 
 /**
@@ -27,7 +28,7 @@ import { invoke } from "../lib/axios"
  * @returns {filmResponse} A promise that resolves when the films have been fetched.
  */
 function useFilms() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [films, setFilms] = React.useState([])
   const [film, setFilm] = React.useState(null)
   const [isFetching, setIsFetching] = React.useState(false)
@@ -57,6 +58,7 @@ function useFilms() {
   const fetchFilm = useCallback(
     async (id) => {
       if (!id) return
+
       try {
         setIsFetching(true)
         const response = await invoke({
@@ -69,7 +71,7 @@ function useFilms() {
           throw error
         }
 
-        setFilm(response?.res?.film ?? null)
+        setFilm(response?.res.film)
         setIsFetching(false)
       } catch (error) {
         setFilm((prev) => prev)
@@ -80,7 +82,33 @@ function useFilms() {
     [film?.id],
   )
 
-  return { films, fetchFilms, film, fetchFilm, isFetching }
+  const likeRateFilm = useCallback(
+    /**
+     * @param {string} filmId
+     * @param {"THUMBS_UP" | "THUMBS_DOWN" | "NONE"} likeType
+     */
+    async (filmId, likeType = "NONE") => {
+      try {
+        if (!user?.id || !filmId) return
+        const response = await invoke({
+          method: "PUT",
+          endpoint: `/film/likerate/${filmId}/${user.id}`,
+          data: { likeType },
+        })
+
+        if (response?.error) {
+          throw new Error(response.error.message)
+        }
+
+        fetchFilm(filmId)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    [user?.id],
+  )
+
+  return { films, fetchFilms, film, fetchFilm, isFetching, likeRateFilm }
 }
 
 export default useFilms

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Dimensions,
   FlatList,
@@ -8,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -16,9 +15,9 @@ import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
 import { useFilmCtx } from "../../../context/FilmProvider"
-import useWatchList from "../../../hooks/useWatchList"
 import { COLORS } from "../../../src/color/VariableColors"
 import CategoryHeader from "../../../src/components/CategoryHeader"
+import FilmActions from "../../../src/components/FilmActions"
 import Loader from "../../../src/components/Loader"
 import ReadMoreCard from "../../../src/components/ReadMore"
 import UpcomingMovieCard from "../../../src/components/UpcomingMovieCard"
@@ -40,13 +39,14 @@ function FilmDetails() {
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
+    console.log("I am running...")
     if (!id) return
     fetchFilm(id)
   }, [fetchFilm, id])
 
   const playFilm = useCallback(async () => {
     router.setParams({ trackid: getMainVideo(film) })
-  }, [film.id])
+  }, [film?.id])
 
   return (
     <Loader isLoading={!film && isFetching}>
@@ -142,7 +142,7 @@ function Details({ film, play, showFilm }) {
           )}
         </View>
         <View>
-          <AccessSection film={film} />
+          <FilmActions film={film} />
         </View>
         <View className='relative space-y-2 py-4'>
           <Text className='text-white font-semibold text-xl'>
@@ -178,162 +178,6 @@ function Details({ film, play, showFilm }) {
             )}
           />
         </View>
-      </View>
-    </View>
-  )
-}
-
-function AccessSection({ film }) {
-  const { fetchFilm } = useFilmCtx()
-  const [currentTrailer, setCurrentTrailer] = useState(0)
-  const { removeItemFromWatchList, handleAddToWatchlist } = useWatchList({
-    disableFetch: true,
-  })
-  const access = useMemo(() => {
-    if (film?.access === "free") return "Free to watch"
-    return "Available to rent or buy"
-  }, [film?.access])
-
-  const shouldShowPurchaseBtn = useMemo(() => {
-    if (film?.access === "free") return false
-    return true
-  }, [film?.access])
-
-  const numFormat = new Intl.NumberFormat("en-UG", {
-    currency: "UGX",
-    style: "decimal",
-  })
-
-  const watchlistId = useMemo(() => {
-    if (!film?.watchlist) return false
-    const item = film?.watchlist.find((item) => {
-      const available = item?.filmId === film?.id
-      if (available && item?.type === "SAVED") return item?.id
-      return null
-    })
-    return item?.id
-  }, [film])
-
-  // get the trailer videos ids and play each keeping track of the current playing video
-  const trailerIds = useMemo(() => {
-    if (!film?.video) return []
-    const trailers = film?.video.filter((video) => video?.isTrailer)
-    return trailers.map((trailer) => trailer && trailer?.id)
-  }, [film?.video])
-
-  const options = [
-    {
-      label: "Play Trailer",
-      icon: "play",
-      onPress: () => {
-        if (trailerIds.length === 0) return
-        router.setParams({ trackid: trailerIds[currentTrailer] })
-        if (currentTrailer < trailerIds.length - 1) {
-          setCurrentTrailer(currentTrailer + 1)
-        } else {
-          // reset to the first trailer
-          setCurrentTrailer(0)
-        }
-      },
-      disabled: trailerIds.length === 0,
-    },
-    {
-      label: watchlistId ? "Remove Watchlist" : "Watch List",
-      icon: watchlistId ? "x" : "plus",
-      onPress: () => {
-        if (watchlistId) {
-          console.log("removing from watchlist", watchlistId)
-          removeItemFromWatchList(watchlistId, film?.id, fetchFilm)
-        } else {
-          handleAddToWatchlist(film?.id, fetchFilm)
-        }
-      },
-      disabled: false,
-    },
-    {
-      label: "Like",
-      icon: "thumbs-up",
-      onPress: () => {
-        console.log("play trailer")
-      },
-      disabled: false,
-    },
-    {
-      label: "Not for me",
-      icon: "thumbs-down",
-      onPress: () => {
-        console.log("play trailer")
-      },
-      disabled: false,
-    },
-  ]
-
-  return (
-    <View className='w-full space-y-6'>
-      <View className='flex flex-row items-center gap-x-2'>
-        <Image
-          source={require("../../../assets/bagheart.png")}
-          style={{ width: 26, height: 26 }}
-          resizeMode='contain'
-        />
-
-        <Text className='text-white font-medium tracking-tight text-lg'>
-          {access}
-        </Text>
-      </View>
-      {shouldShowPurchaseBtn ? (
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/(home)/film/purchase",
-              params: {
-                filmId: film?.id,
-                amount: film?.price,
-                access: film?.access,
-              },
-            })
-          }
-          className='flex flex-row items-center justify-center h-16 border-2 border-primary-500 rounded-3xl w-full'
-          style={{
-            backgroundColor: COLORS.formBg,
-          }}
-        >
-          <Text className='text-primary-500 font-semibold text-xl'>
-            {film?.access === "rent" ? "Rent @ " : "Buy @ "}{" "}
-            {`UGX ${numFormat.format(film?.price)}`}
-          </Text>
-        </TouchableOpacity>
-      ) : null}
-
-      <View className='flex flex-row items-center justify-between gap-x-4'>
-        <FlatList
-          data={options}
-          horizontal
-          keyExtractor={(item) => item.label}
-          contentContainerStyle={{ gap: 20 }}
-          style={{ width: width / 4 }}
-          scrollToOverflowEnabled={false}
-          renderItem={({ item }) => (
-            <View
-              key={item?.label}
-              className='space-y-3 flex flex-col justify-start items-center max-w-[60px]'
-              style={{ opacity: item?.disabled ? 0.5 : 1 }}
-            >
-              <Pressable
-                disabled={item?.disabled}
-                className='flex flex-row items-center justify-center h-14 w-14 rounded-full p-2 bg-gray-500/50 border border-white'
-                onPress={item?.onPress}
-              >
-                <View className='border border-white rounded-full p-1.5 flex items-center justify-center'>
-                  <Feather name={item.icon} size={16} color='white' />
-                </View>
-              </Pressable>
-              <Text className='text-white w-full text-center'>
-                {item.label}
-              </Text>
-            </View>
-          )}
-        />
       </View>
     </View>
   )

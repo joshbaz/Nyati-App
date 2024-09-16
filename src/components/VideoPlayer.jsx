@@ -300,7 +300,7 @@ function useVideo(cb) {
     } finally {
       setLoading(false)
     }
-  }, [params.trackid])
+  }, [params?.trackid])
 
   const clearSrc = useCallback(() => {
     if (params?.trackid && source) {
