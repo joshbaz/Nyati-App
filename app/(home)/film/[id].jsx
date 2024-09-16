@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   ActivityIndicator,
   Dimensions,
@@ -17,6 +17,7 @@ import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import MoviesDB from "../../../assets/data/db.json"
 import { useAuth } from "../../../context/AuthProvider"
+import { useFilmCtx } from "../../../context/FilmProvider"
 import useFilms from "../../../hooks/useFilms"
 import useWatchList from "../../../hooks/useWatchList"
 import { COLORS } from "../../../src/color/VariableColors"
@@ -38,7 +39,7 @@ const getMainVideo = (film) => {
 
 function FilmDetails() {
   const { id, trackid } = useLocalSearchParams()
-  const { film, fetchFilm, isFetching } = useFilms()
+  const { film, fetchFilm, isFetching } = useFilmCtx()
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
@@ -46,12 +47,12 @@ function FilmDetails() {
     fetchFilm(id)
   }, [fetchFilm, id])
 
-  const playFilm = async () => {
+  const playFilm = useCallback(async () => {
     router.setParams({ trackid: getMainVideo(film) })
-  }
+  }, [film.id])
 
   return (
-    <Loader isLoading={!film || isFetching}>
+    <Loader isLoading={!film && isFetching}>
       <View
         style={{
           position: "relative",
@@ -98,8 +99,9 @@ function FilmDetails() {
   )
 }
 
-function Details({ film, play, showFilm, fetchFilm }) {
+function Details({ film, play, showFilm }) {
   const { user } = useAuth()
+  const { fetchFilm } = useFilmCtx()
   const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
 
   // handle watchlist
@@ -212,7 +214,7 @@ function Details({ film, play, showFilm, fetchFilm }) {
 }
 
 function AccessSection({ film }) {
-  const { fetchFilm } = useFilms()
+  const { fetchFilm } = useFilmCtx()
   const { removeItemFromWatchList, handleAddToWatchlist } = useWatchList({
     disableFetch: true,
   })
@@ -255,10 +257,10 @@ function AccessSection({ film }) {
       onPress: () => {
         if (watchlistId) {
           console.log("removing from watchlist", watchlistId)
-          removeItemFromWatchList(watchlistId, fetchFilm)
-          return
+          removeItemFromWatchList(watchlistId, film?.id, fetchFilm)
+        } else {
+          handleAddToWatchlist(film?.id, fetchFilm)
         }
-        handleAddToWatchlist(film?.id, fetchFilm)
       },
     },
     {

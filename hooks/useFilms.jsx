@@ -18,6 +18,7 @@ import { invoke } from "../lib/axios"
  * @property {Array<Film>} films - An array of film objects.
  * @property {() => void} fetchFilms - A function to fetch the films.
  * @property {(id: string) => void} fetchFilm - A function to fetch a single film.
+ * @property {boolean} isFetching - A boolean indicating whether the films are currently being fetched.
  */
 
 /**
@@ -34,20 +35,23 @@ function useFilms() {
   const fetchFilms = useCallback(async () => {
     if (!isAuthenticated) return
     if (films.length > 0) return // prevent re-fetching if the films are already fetched
-    setIsFetching(true)
-    const response = await invoke({
-      method: "GET",
-      endpoint: "/film/all",
-    })
+    try {
+      setIsFetching(true)
+      const response = await invoke({
+        method: "GET",
+        endpoint: "/film/all",
+      })
 
-    if (response?.error) {
+      if (response?.error) {
+        throw new Error(response.error.message)
+      }
+
+      setFilms(response?.res.films)
+    } catch (error) {
+      setFilms((prev) => prev)
+    } finally {
       setIsFetching(false)
-      console.error("Error- somethingis not right", response.error)
-      return
     }
-
-    setFilms(response?.res.films)
-    setIsFetching(false)
   }, [isAuthenticated])
 
   const fetchFilm = useCallback(

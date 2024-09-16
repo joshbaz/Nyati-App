@@ -1,15 +1,15 @@
 import { Stack } from "expo-router"
 import React from "react"
-import MembershipProvider from "../../../context/MembershipProvider"
+import FilmProvider from "../../../context/FilmProvider"
 
 function FilmLayout() {
   return (
-    <MembershipProvider disableFetchOnMount>
+    <FilmProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name='[id]' options={{ headerTitle: "Film" }} />
         <Stack.Screen name='purchase' />
       </Stack>
-    </MembershipProvider>
+    </FilmProvider>
   )
 }
 

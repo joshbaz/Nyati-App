@@ -26,7 +26,7 @@ import { invoke } from "../lib/axios"
  * @property {{ saved: item[], purchased: item[] }} watchList - watchlist
  * @property {()=> void} fetchWatchList - fetch watchlist
  * @property {(filmId: string, cb: (filmId: string)=>void)=> void} handleAddToWatchlist - add to watchlist
- * @property {(id: string, cb: (filmId: string)=>void)=> void} removeItemFromWatchList - remove from watchlist
+ * @property {(id: string, filmId: string, cb: (filmId: string)=>void)=> void} removeItemFromWatchList - remove from watchlist
  */
 
 /**
@@ -53,7 +53,7 @@ function useWatchList({ limit, filters, disableFetch = false }) {
       })
 
       if (response.error) {
-        throw new Error(response.error)
+        throw new Error(response.error.message)
       }
       setWatchList({
         saved: response.res.watchlist?.SAVED || [],
@@ -103,17 +103,19 @@ function useWatchList({ limit, filters, disableFetch = false }) {
         })
 
         if (response.error) {
-          throw new Error(response.error)
+          throw new Error(response.error.message)
         }
-        showToast({
-          type: "success",
-          message: "Added to watchlist",
-        })
-        if (typeof cb === "function") cb(filmId)
+        // showToast({
+        //   type: "success",
+        //   message: "Added to watchlist",
+        // })
+        if (typeof cb === "function") {
+          cb(filmId)
+        }
       } catch (error) {
         showToast({
           type: "error",
-          message: "Unable to add to watchlist",
+          message: "Unable to add to watchlist!!",
         })
       } finally {
         setLoading(false)
@@ -125,12 +127,12 @@ function useWatchList({ limit, filters, disableFetch = false }) {
   const removeItemFromWatchList = useCallback(
     /**
      * @param {string} id
+     * @param {string} filmId
      * @param {(id: string)} cb
      * @returns {Promise<void>}
      */
-    async (id, cb) => {
+    async (id, filmId, cb) => {
       try {
-        console.log("Sending...", id)
         setLoading(true)
         const response = await invoke({
           method: "DELETE",
@@ -140,10 +142,10 @@ function useWatchList({ limit, filters, disableFetch = false }) {
         if (response.error) {
           throw new Error(response.error)
         }
-        showToast({
-          type: "success",
-          message: "Removed from watchlist",
-        })
+        // showToast({
+        //   type: "success",
+        //   message: "Removed from watchlist",
+        // })
         if (typeof cb === "function") cb(filmId)
       } catch (error) {
         showToast({
