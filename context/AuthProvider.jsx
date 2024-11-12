@@ -188,14 +188,23 @@ function AuthProvider({ children }) {
       setIsFetching(false)
       return
     }
+
+    // if we have a user id, but no token, log the user out
+    if (!authToken && user?.id) {
+      await logout(user?.id)
+      return
+    }
+
+    // if we have a token and a user id set the user as authenticated
+    if (authToken && user?.id) {
+      setIsAuthenticated(true)
+      setIsFetching(false)
+      return
+    }
+
+    // if we have token and no user id, fetch the user's profile
     try {
       setIsFetching(true)
-
-      if (user?.id) {
-        setIsFetching(false)
-        setIsAuthenticated(true)
-        return
-      }
 
       const payload = jwtDecode(authToken)
       const response = await invoke({
@@ -212,6 +221,7 @@ function AuthProvider({ children }) {
       setIsAuthenticated(true)
       setUser(response?.res.user ?? null)
     } catch (error) {
+      // if we get a 401, 403, or 404 error, delete the token and log the user out
       if ([401, 403, 404].includes(error.statusCode) && authToken) {
         await SecureStore.deleteItemAsync(TOKEN_KEY)
         setIsAuthenticated(false)
