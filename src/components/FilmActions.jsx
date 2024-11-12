@@ -24,7 +24,7 @@ function FilmActions() {
   })
   const access = useMemo(() => {
     if (film?.access === "free") return "Free to watch"
-    return "Available to rent or buy"
+    return "Available to rent"
   }, [film?.access])
 
   const shouldShowPurchaseBtn = useMemo(() => {

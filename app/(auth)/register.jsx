@@ -51,7 +51,7 @@ const Register = () => {
     isEmail: yup.boolean().when("contact", {
       is: (contact) => contact && yup.string().email().isValidSync(contact),
       then: (schema) => schema.default(true),
-      otherwise: (schema) => schema.default(false),
+      otherwise: (schema) => schema.default(true), // TODO: update this when we have phone number validation setup ( should be false )
     }),
   })
 
@@ -191,9 +191,7 @@ const Register = () => {
                   {/** form inputs */}
                   <VStack spacing={20}>
                     <VStack spacing={4}>
-                      <Text style={styles.formLabel}>
-                        Mobile Number or Email
-                      </Text>
+                      <Text style={styles.formLabel}>Email</Text>
                       <TextInput
                         style={styles.formInputs}
                         enablesReturnKeyAutomatically

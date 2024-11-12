@@ -1,3 +1,4 @@
+import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { jwtDecode } from "jwt-decode"
 import React, {
@@ -128,7 +129,7 @@ function AuthProvider({ children }) {
   /**
    * @name logout
    * @description Logs out the user.
-   * @param {string} id - The user's ID.
+   * @param {[string]} id - The user's ID.
    * @returns Promise<void>
    */
   const logout = async (id = user?.id) => {
@@ -151,8 +152,10 @@ function AuthProvider({ children }) {
 
       await SecureStore.deleteItemAsync(TOKEN_KEY)
       setUser(null)
-      setLoading(false)
       setIsAuthenticated(false)
+
+      // navigate to the login screen
+      router.replace("/")
     } catch (error) {
       if ([401, 403, 404].includes(error.statusCode) && authToken) {
         await SecureStore.deleteItemAsync(TOKEN_KEY)
@@ -182,6 +185,7 @@ function AuthProvider({ children }) {
     const authToken = await SecureStore.getItemAsync(TOKEN_KEY)
     if (!authToken) {
       setIsAuthenticated(false)
+      setIsFetching(false)
       return
     }
     try {
@@ -206,8 +210,7 @@ function AuthProvider({ children }) {
       }
 
       setIsAuthenticated(true)
-      setUser(response?.res.user)
-      setIsFetching(false)
+      setUser(response?.res.user ?? null)
     } catch (error) {
       if ([401, 403, 404].includes(error.statusCode) && authToken) {
         await SecureStore.deleteItemAsync(TOKEN_KEY)
@@ -215,9 +218,10 @@ function AuthProvider({ children }) {
         setUser(null)
         return
       }
+
       showToast({
         type: "error",
-        message: response?.error?.message,
+        message: error?.message ?? "An error occurred. Please try again.",
       })
     } finally {
       setIsFetching(false)

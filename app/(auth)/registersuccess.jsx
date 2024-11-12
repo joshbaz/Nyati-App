@@ -69,7 +69,7 @@ function RegisterSuccess() {
             <TouchableOpacity
               onPress={() => {
                 router.replace({
-                  pathname: "/(payment)/plans",
+                  pathname: "/(home)",
                   params: {
                     userId: localParams.userId,
                   },

@@ -1,5 +1,5 @@
 import { Link, Redirect, router, useLocalSearchParams } from "expo-router"
-import React, { useEffect } from "react"
+import React from "react"
 import {
   ActivityIndicator,
   Animated,
@@ -51,11 +51,11 @@ function SignIn() {
     handleChange,
     handleBlur,
     handleSubmit,
-    setFieldValue,
+    // setFieldValue,
   } = useFormik({
     initialValues: {
       password: "",
-      isEmail: params?.isEmail ? params?.isEmail : false,
+      isEmail: params?.isEmail ? params?.isEmail : true, // TODO: when phone number validation and OTP is ready change this code to check is its email or phone number
       contact: params?.contact ? params?.contact : "",
     },
     validationSchema,
@@ -83,12 +83,13 @@ function SignIn() {
     },
   })
 
-  useEffect(() => {
-    if (values.contact && values.contact.length > 0) {
-      const isEmail = yup.string().email().isValidSync(values.contact)
-      setFieldValue("isEmail", isEmail)
-    }
-  }, [values.contact])
+  //TODO: when phone number validation and OTP is ready uncomment this code to check is its email or phone number
+  // useEffect(() => {
+  //   if (values.contact && values.contact.length > 0) {
+  //     const isEmail = yup.string().email().isValidSync(values.contact)
+  //     setFieldValue("isEmail", true)
+  //   }
+  // }, [values.contact])
 
   if (isAuthenticated) {
     // redirect to home page if user is authenticated
@@ -144,14 +145,15 @@ function SignIn() {
                 <VStack spacing={20}>
                   <VStack spacing={10} alignSelf={"stretch"}>
                     <Text style={styles.formLabel}>
-                      Mobile Number, Username or Email
+                      {/* Mobile Number, Username or Email */}
+                      Email
                     </Text>
                     <TextInput
                       style={styles.formInputs}
                       enablesReturnKeyAutomatically
                       keyboardAppearance='dark'
                       value={values.contact}
-                      placeholder='some@email.com or 1234567890'
+                      placeholder='some@email.com'
                       placeholderTextColor={COLORS.formBorder}
                       onChangeText={handleChange("contact")}
                       onBlur={handleBlur("contact")}

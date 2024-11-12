@@ -8,19 +8,19 @@ export const PAYMENT_OPTIONS = [
     label: "MTN MOMO",
     value: "mtnmomo",
     comingSoon: false,
-    logo: Image.resolveAssetSource(MTNMOMO).uri,
+    logo: Image.resolveAssetSource(MTNMOMO)?.uri ?? "",
   },
   {
     label: "Airtel Money",
     value: "airtelmoney",
     comingSoon: true,
-    logo: Image.resolveAssetSource(AIRTELMONEY).uri,
+    logo: Image.resolveAssetSource(AIRTELMONEY)?.uri ?? "",
   },
   {
     label: "Visa | Mastercard",
     value: "pesapal",
     comingSoon: true,
-    logo: Image.resolveAssetSource(PESAPAL).uri,
+    logo: Image.resolveAssetSource(PESAPAL)?.uri ?? "",
   },
 ]
 

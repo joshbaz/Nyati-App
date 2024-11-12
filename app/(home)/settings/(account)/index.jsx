@@ -46,8 +46,8 @@ function AccountSettings() {
         message: "Account deleted successfully, logging you out...",
       })
       setTimeout(() => {
-        logout()
-      }, 2000)
+        logout(user?.id)
+      }, 1000)
     } catch (err) {
       showToast({
         type: "error",
@@ -147,8 +147,8 @@ function AccountSettings() {
                       Please confirm to delete account
                     </Text>
                     <Text className='text-base text-black font-normal'>
-                      To delete your account your must press "Confirm"; once
-                      your account is deleted you will be logged out.
+                      To delete your account your must press "Confirm" once your
+                      account is deleted you will be logged out.
                     </Text>
                   </View>
                   <View className='space-y-4'>

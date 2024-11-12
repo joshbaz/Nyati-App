@@ -54,6 +54,7 @@ function useLoadFonts() {
 
     loadFont()
   }, [])
+
   return { loaded }
 }
 
