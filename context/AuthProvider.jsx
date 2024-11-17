@@ -30,6 +30,7 @@ import { Toast, useToast } from "./ToastProvider"
  * @property {(data: any) => void} updateUser - A function to update the user's information.
  * @property {boolean} isAuthenticated - A boolean indicating whether the user is authenticated.
  * @property {() => void} fetchUserProfile - A function to fetch the user's profile.
+ * @property {()=> string} getAuthToken - A function to get the user's authentication token.
  */
 
 /**
@@ -45,6 +46,7 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   setToken: () => {},
+  getAuthToken: () => "",
   updateUser: () => {},
   isAuthenticated: false,
 })
@@ -83,6 +85,15 @@ function AuthProvider({ children }) {
       await fetchUserProfile()
     }
   }
+
+  /**
+   * @name getAuthToken
+   * @description Fetches the user's authentication token from the secure store.
+   * @returns string
+   * */
+  const getAuthToken = useCallback(async () => {
+    return await SecureStore.getItemAsync(TOKEN_KEY)
+  }, [TOKEN_KEY])
 
   /**
    *@name login
@@ -267,6 +278,7 @@ function AuthProvider({ children }) {
         setToken,
         isFetching,
         updateUser,
+        getAuthToken,
         isAuthenticated,
         fetchUserProfile,
       }}

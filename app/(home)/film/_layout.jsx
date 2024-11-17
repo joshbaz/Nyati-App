@@ -6,8 +6,9 @@ function FilmLayout() {
   return (
     <FilmProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='[id]' options={{ headerTitle: "Film" }} />
-        <Stack.Screen name='purchase' />
+        <Stack.Screen name='[id]/index' />
+        <Stack.Screen name='[id]/watch/[videoId]' />
+        <Stack.Screen name='[id]/purchase' />
       </Stack>
     </FilmProvider>
   )

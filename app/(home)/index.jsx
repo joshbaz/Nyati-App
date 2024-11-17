@@ -172,7 +172,7 @@ function Home() {
                   </View>
                 </Link>
               </View>
-              <FeaturedSlide films={upcomingFilmList} />
+              <FeaturedSlide films={films} />
             </View>
 
             {/** upcoming films */}

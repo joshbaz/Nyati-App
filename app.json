@@ -19,7 +19,8 @@
       "supportsTablet": true,
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "com.newtou.NyatiFilms"
     },
     "android": {
       "adaptiveIcon": {
@@ -49,8 +50,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "6c1aa9da-4c0e-48fe-b2f2-ce689ed1c628"
+        "projectId": "c78bb3ed-ac64-4cf0-8b3a-4ed804c9aa26"
       }
-    }
+    },
+    "owner": "nyati_motion_pictures"
   }
 }

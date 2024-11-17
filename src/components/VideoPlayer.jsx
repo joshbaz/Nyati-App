@@ -1,3 +1,4 @@
+import { useAuth } from "context/AuthProvider"
 import { ResizeMode, Video } from "expo-av"
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams, useRouter } from "expo-router"
@@ -7,27 +8,41 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react"
 import {
+  Button,
+  Dimensions,
   ImageBackground,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
+import { SafeAreaView } from "react-native-safe-area-context"
 // import { BallIndicator } from "react-native-indicators"
 import { Feather } from "@expo/vector-icons"
-import { invoke } from "../../lib/axios"
+import { BASE_API_URL, invoke } from "../../lib/axios"
 import { COLORS } from "../color/VariableColors"
 import VideoControls from "./VideoControls"
 
 // const playbackSpeedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
+const testsrc =
+  "https://newtou.nyc3.digitaloceanspaces.com/66ba92032df5ff8a0a4574ac/Fair Play_360p.mp4"
 
 function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   const router = useRouter()
   const videoRef = useRef(null)
+  const { getAuthToken } = useAuth()
+  const { width, height } = Dimensions.get("window")
+  const { id, videoId } = useLocalSearchParams()
+
+  const token = getAuthToken()
+
+  const videoSource = `${BASE_API_URL}/api/v1/film/stream/${videoId}`
 
   // video states
   const [orientation, setOrientation] = useState(1)
@@ -35,7 +50,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [duration, setDuration] = useState(0)
 
@@ -44,7 +59,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
     if (videoRef.current) {
       videoRef.current.getStatusAsync().then((status) => {
         const newPosition = Math.max(
-          status.positionMillis + 10000,
+          status.positionMillis + 10000, // 10s
           status.durationMillis,
         )
         videoRef.current.setPositionAsync(newPosition)
@@ -67,32 +82,48 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
     .runOnJS(true)
     .onStart(() => {
       // Toggle show & hide controls
-      setShowControls(!showControls)
+      setShowControls(true)
     })
 
   // Set the current time, if video is finished & film type is series, go to the next video
-  const handlePlaybackStatusUpdate = (status) => {
+  const handlePlaybackStatusUpdate = useCallback((status) => {
     // console.log("Playback Status", status)
     setCurrentTime(status.positionMillis)
     setDuration(status.durationMillis)
 
+    if (status.isLoaded) {
+      setIsLoading(false)
+    }
+
+    // if (status.isBuffering) {
+    //   setIsLoading(true)
+    // }
+
     if (status.didJustFinish) {
       // reset duration and current time
-      // TODO: remove the current film from the watchedlist
+      // TODO: remove the current film from the
       setCurrentTime(0)
       setDuration(0)
     }
-  }
+  }, [])
 
   // Toggle play/pause
   const togglePlayPause = () => {
-    if (isPlaying) {
-      videoRef.current.pauseAsync()
-    } else {
-      videoRef.current.playAsync()
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pauseAsync()
+      } else {
+        videoRef.current.playAsync()
+      }
     }
     setIsPlaying(!isPlaying)
   }
+  // When the video is ready for display
+  const onReadyForDisplay = useCallback((evt) => {
+    if (evt.status.isLoaded && videoRef.current) {
+      videoRef.current.playAsync()
+    }
+  }, [])
 
   // Toggle fullscreen
   const toggleFullscreen = useCallback(async () => {
@@ -101,52 +132,38 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
         ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
       )
       setIsFullscreen(true)
-      handleFullscreen(true)
+
+      if (typeof handleFullscreen === "function") {
+        handleFullscreen(true)
+      }
     } else {
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT_UP,
       )
       setIsFullscreen(false)
-      handleFullscreen(false)
+      if (typeof handleFullscreen === "function") {
+        handleFullscreen(false)
+      }
     }
     setOrientation(await ScreenOrientation.getOrientationAsync())
   }, [handleFullscreen, isFullscreen])
 
   // change orientation and play video
   const playVideo = () => {
-    // set orientation to landscape
-    toggleFullscreen()
-    // play video
     togglePlayPause()
   }
 
   const { source: src, clearSrc } = useVideo(playVideo)
 
   // handle back button press
-  const onBackPress = () => {
-    // if its fullscreen, exit fullscreen
-    if (isFullscreen) {
-      toggleFullscreen()
-      return
-    }
+  const onBackPress = useCallback(async () => {
+    // TODO: save the video progress / position
 
-    // go back
-    clearSrc()
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP,
+    )
+
     router.back()
-  }
-
-  useImperativeHandle(ref, () => {
-    return {
-      playVideo: () => {
-        if (videoRef.current && src) {
-          // set orientation to landscape
-          toggleFullscreen()
-
-          // play video
-          togglePlayPause()
-        }
-      },
-    }
   }, [])
 
   useEffect(() => {
@@ -160,93 +177,59 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
     }
   }, [isPlaying, showControls])
 
-  return (
-    <View className='flex flex-1 items-start justify-start w-full h-full'>
-      <View className='h-full w-full bg-black relative'>
-        {/* {isLoading && (
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              zIndex: 10,
-              width,
-              height,
-              backgroundColor: COLORS.generalOpacity,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Animated.View
-              style={{
-                position: "relative",
-                width: 50,
-                height: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <BallIndicator color='#ED3F62' count={9} />
-            </Animated.View>
-          </View>
-        )} */}
+  const isBufferControlsShowing = isLoading || showControls
 
-        <View className='h-full w-full'>
-          <GestureDetector gesture={onSingleTap}>
-            <Video
-              ref={videoRef}
-              style={{ flex: 1 }}
-              source={{
-                uri: src,
-              }}
-              isLooping
-              useNativeControls={false}
-              resizeMode={ResizeMode.CONTAIN}
-              onReadyForDisplay={() => setIsLoading(false)}
-              onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-              posterSource={posterSource}
-              usePoster={!src}
-              PosterComponent={({ source, style }) => (
-                <ImageBackground
-                  source={{
-                    uri: source,
-                  }}
-                  style={{
-                    ...style,
-                    height: "100%",
-                    width: "100%",
-                    position: "relative",
-                    zIndex: 1,
-                    top: 0,
-                  }}
-                  resizeMode='cover'
-                >
-                  <LinearGradient
-                    colors={[
-                      "transparent",
-                      "transparent",
-                      COLORS.generalOpacity,
-                      COLORS.generalOpacity,
-                      COLORS.generalBg,
-                    ]}
-                    style={{ width: "100%", height: "100%" }}
-                  >
-                    <View style={styles.arrowBackBtn}>
-                      <TouchableOpacity onPress={() => router.back()}>
-                        <Feather name='arrow-left' size={30} color='white' />
-                      </TouchableOpacity>
-                    </View>
-                  </LinearGradient>
-                </ImageBackground>
-              )}
-              onError={(error) => console.error("AV Error", error)}
-            />
-          </GestureDetector>
+  return (
+    <View
+      style={{
+        flex: 1,
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        backgroundColor: isBufferControlsShowing
+          ? "rgba(0,0,0,0.5)"
+          : "transparent",
+      }}
+      className='flex flex-1 items-center justify-center'
+    >
+      <GestureDetector gesture={onSingleTap}>
+        <View className='w-full h-full'>
+          <Video
+            ref={videoRef}
+            style={{ flex: 1 }}
+            source={{
+              uri: videoSource,
+              headers: {
+                range: "bytes=0-",
+              },
+            }}
+            isLooping
+            useNativeControls={false}
+            resizeMode={ResizeMode.CONTAIN}
+            onReadyForDisplay={onReadyForDisplay}
+            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+            onError={(error) => console.error("AV Error", error)}
+            videoStyle={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "black",
+            }}
+          />
         </View>
-        {showControls && (
+      </GestureDetector>
+      <SafeAreaView
+        style={{
+          width: "100%",
+          position: "absolute",
+          height: "100%",
+          top: 0,
+          left: 0,
+          zIndex: showControls || isLoading ? 1 : -1,
+        }}
+      >
+        {isBufferControlsShowing && (
           <VideoControls
+            isLoading={isLoading}
             onTogglePlayPause={togglePlayPause}
             onForward={forward10s}
             onRewind={rewind10s}
@@ -264,7 +247,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
             onBackPress={onBackPress}
           />
         )}
-      </View>
+      </SafeAreaView>
     </View>
   )
 }

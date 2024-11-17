@@ -1,29 +1,30 @@
+import CategoryHeader from "@components/CategoryHeader"
+import Loader from "@components/Loader"
+import ReadMoreCard from "@components/ReadMore"
+import UpcomingMovieCard from "@components/UpcomingMovieCard"
+import VideoPlayer from "@components/VideoPlayer"
+import { useFilmCtx } from "@context/FilmProvider"
+import { COLORS } from "@src/color/VariableColors"
+import FilmActions from "@src/components/FilmActions"
+import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
 import React, { useCallback, useEffect, useState } from "react"
 import {
   Dimensions,
   FlatList,
   Image,
+  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
-import MoviesDB from "../../../assets/data/db.json"
-import { useFilmCtx } from "../../../context/FilmProvider"
-import { COLORS } from "../../../src/color/VariableColors"
-import CategoryHeader from "../../../src/components/CategoryHeader"
-import FilmActions from "../../../src/components/FilmActions"
-import Loader from "../../../src/components/Loader"
-import ReadMoreCard from "../../../src/components/ReadMore"
-import UpcomingMovieCard from "../../../src/components/UpcomingMovieCard"
-import VideoPlayer from "../../../src/components/VideoPlayer"
-
-const { width } = Dimensions.get("window")
+import MoviesDB from "../../../../assets/data/db.json"
 
 const getMainVideo = (film) => {
   if (!film?.video) return null
@@ -34,9 +35,10 @@ const getMainVideo = (film) => {
 }
 
 function FilmDetails() {
-  const { id, trackid } = useLocalSearchParams()
+  const { id, videoId } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilmCtx()
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const { width } = Dimensions.get("window")
 
   useEffect(() => {
     if (!id) return
@@ -44,7 +46,7 @@ function FilmDetails() {
   }, [fetchFilm, id])
 
   const playFilm = useCallback(async () => {
-    router.setParams({ trackid: getMainVideo(film) })
+    router.setParams({ videoId: getMainVideo(film) })
   }, [film?.id])
 
   return (
@@ -77,15 +79,45 @@ function FilmDetails() {
                 flex: 1,
               }}
             >
-              <VideoPlayer
+              <ImageBackground
+                source={{
+                  uri: film?.posters[0]?.url,
+                }}
+                style={{
+                  height: "100%",
+                  width: "100%",
+                  position: "relative",
+                  zIndex: 1,
+                  top: 0,
+                }}
+                resizeMode='cover'
+              >
+                <LinearGradient
+                  colors={[
+                    "transparent",
+                    "transparent",
+                    COLORS.generalOpacity,
+                    COLORS.generalOpacity,
+                    COLORS.generalBg,
+                  ]}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <View style={styles.arrowBackBtn}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                      <Feather name='arrow-left' size={30} color='white' />
+                    </TouchableOpacity>
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
+              {/* <VideoPlayer
                 posterSource={film?.posters[0]?.url}
                 handleFullscreen={(fullscreen) => setIsFullscreen(fullscreen)}
-              />
+              /> */}
             </View>
 
             {isFullscreen ? null : (
               <VStack style={{ width: "100%", flex: 1 }}>
-                <Details film={film} play={playFilm} showFilm={!!trackid} />
+                <Details film={film} play={playFilm} showFilm={!!videoId} />
               </VStack>
             )}
           </ScrollView>
@@ -96,7 +128,9 @@ function FilmDetails() {
 }
 
 function Details({ film, play, showFilm }) {
+  const { width } = Dimensions.get("window")
   const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
+  const videoId = getMainVideo(film)
   return (
     <View style={styles.detailWrap}>
       <View
@@ -129,10 +163,12 @@ function Details({ film, play, showFilm }) {
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
               style={{ backgroundColor: COLORS.formBtnBg }}
-              onPress={() => play()}
+              onPress={() =>
+                router.push(`/(home)/film/${film?.id}/watch/${videoId}`)
+              }
             >
               <Image
-                source={require("../../../assets/playcircle.png")}
+                source={require("../../../../assets/playcircle.png")}
                 style={{ width: 36, height: 36 }}
                 resizeMode='contain'
               />

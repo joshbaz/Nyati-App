@@ -1,7 +1,7 @@
 import { router } from "expo-router"
 import React from "react"
 import { Text, TouchableOpacity, View } from "react-native"
-import { Entypo, Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../../../context/AuthProvider"
 import { COLORS } from "../../../src/color/VariableColors"
 import Avatar from "../../../src/components/Avatar"
@@ -44,7 +44,8 @@ function Settings() {
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* TODO: To access the membership pages uncomment this section */}
+        {/* <TouchableOpacity
           onPress={() =>
             router.push({
               pathname: "/(home)/settings/(membership)",
@@ -69,7 +70,7 @@ function Settings() {
               <Ionicons name='chevron-forward' size={24} color='gray' />
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() =>
             router.push({

@@ -1,3 +1,7 @@
+import PaymentOptions from "@/components/PaymentOptions"
+import { useAuth } from "@context/AuthProvider"
+import { useToast } from "@context/ToastProvider"
+import { COLORS, FONTSFAMILIES } from "@src/color/VariableColors"
 import { router, useLocalSearchParams } from "expo-router"
 import React from "react"
 import {
@@ -13,11 +17,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { HStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
-import { useAuth } from "../../../context/AuthProvider"
-import { useToast } from "../../../context/ToastProvider"
-import { invoke } from "../../../lib/axios"
-import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
-import PaymentOptions from "../../../src/components/PaymentOptions"
 
 function Purchase() {
   const { user } = useAuth()
