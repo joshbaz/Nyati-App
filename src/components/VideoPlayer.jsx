@@ -1,43 +1,19 @@
 import { useAuth } from "context/AuthProvider"
 import { ResizeMode, Video } from "expo-av"
-import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams, useRouter } from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
-import {
-  Button,
-  Dimensions,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import { Dimensions, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { SafeAreaView } from "react-native-safe-area-context"
 // import { BallIndicator } from "react-native-indicators"
-import { Feather } from "@expo/vector-icons"
 import { BASE_API_URL, invoke } from "../../lib/axios"
-import { COLORS } from "../color/VariableColors"
 import VideoControls from "./VideoControls"
 
-// const playbackSpeedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
-const testsrc =
-  "https://newtou.nyc3.digitaloceanspaces.com/66ba92032df5ff8a0a4574ac/Fair Play_360p.mp4"
-
-function VideoPlayer({ posterSource, handleFullscreen }, ref) {
+function VideoPlayer({ handleFullscreen }, ref) {
   const router = useRouter()
   const videoRef = useRef(null)
   const { getAuthToken } = useAuth()
-  const { width, height } = Dimensions.get("window")
   const { id, videoId } = useLocalSearchParams()
 
   const token = getAuthToken()
@@ -60,7 +36,7 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
       videoRef.current.getStatusAsync().then((status) => {
         const newPosition = Math.max(
           status.positionMillis + 10000, // 10s
-          status.durationMillis,
+          0,
         )
         videoRef.current.setPositionAsync(newPosition)
       })
@@ -87,17 +63,12 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
 
   // Set the current time, if video is finished & film type is series, go to the next video
   const handlePlaybackStatusUpdate = useCallback((status) => {
-    // console.log("Playback Status", status)
     setCurrentTime(status.positionMillis)
     setDuration(status.durationMillis)
 
     if (status.isLoaded) {
       setIsLoading(false)
     }
-
-    // if (status.isBuffering) {
-    //   setIsLoading(true)
-    // }
 
     if (status.didJustFinish) {
       // reset duration and current time
@@ -234,7 +205,6 @@ function VideoPlayer({ posterSource, handleFullscreen }, ref) {
             onForward={forward10s}
             onRewind={rewind10s}
             onSeek={(value) => {
-              console.log("Seeking to", value)
               videoRef.current?.setPositionAsync(+value)
               setCurrentTime(+value)
             }}

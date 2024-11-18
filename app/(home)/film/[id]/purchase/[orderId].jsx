@@ -1,8 +1,12 @@
-import { router } from "expo-router"
-import React, { useEffect } from "react"
+import { useToast } from "context/ToastProvider"
+import { set } from "date-fns"
+import { router, useLocalSearchParams } from "expo-router"
+import { invoke } from "lib/axios"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   ActivityIndicator,
   Animated,
+  Button,
   Modal,
   StyleSheet,
   Text,
@@ -11,19 +15,12 @@ import {
 } from "react-native"
 import { BallIndicator } from "react-native-indicators"
 import { HStack, VStack } from "@react-native-material/core"
-import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
+import { COLORS, FONTSFAMILIES } from "../../../../../src/color/VariableColors"
 
-const PaymentComplete = () => {
-  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
-
-  useEffect(() => {
-    if (isSubmittingp) {
-      setTimeout(() => {
-        setIsSubmittingp(() => false)
-        router.replace("(home)")
-      }, 5000)
-    }
-  }, [isSubmittingp])
+function PurchaseStatus() {
+  const { orderId } = useLocalSearchParams()
+  const { status, isLoading, isCompleted, transaction, checkStatus } =
+    useCheckStatus(orderId)
   return (
     <View
       style={{
@@ -54,11 +51,17 @@ const PaymentComplete = () => {
             spacing={20}
             style={{ display: "flex", alignItems: "center" }}
           >
-            <Animated.Image
-              source={require("../../../assets/Fonts/arcticons_ticktick.png")}
+            {/* <Animated.Image
+              source={require("../../../../assets/Fonts/arcticons_ticktick.png")}
               style={{ height: 50, width: 50 }}
-            />
-            <Text style={styles.successTitle}>Payment Complete</Text>
+            /> */}
+            {isLoading && (
+              <View className='h-12'>
+                <BallIndicator color='#ED3F62' count={9} />
+              </View>
+            )}
+            {/* <Text style={styles.successTitle}>Payment Complete</Text> */}
+            <Text style={styles.successTitle}>{status}</Text>
           </VStack>
 
           <VStack
@@ -96,8 +99,14 @@ const PaymentComplete = () => {
             </VStack>
           </VStack>
 
+          <Button
+            title='Check Status'
+            onPress={checkStatus}
+            style={{ width: "100%", backgroundColor: COLORS.formBtnBg }}
+          />
+
           {/** form buttons */}
-          <VStack
+          {/* <VStack
             spacing={20}
             style={{ alignItems: "center", marginTop: "20%" }}
           >
@@ -113,10 +122,10 @@ const PaymentComplete = () => {
                 <Text style={styles.formBtnText}>Close</Text>
               </TouchableOpacity>
             )}
-          </VStack>
+          </VStack> */}
         </VStack>
       </Animated.View>
-      <Modal
+      {/* <Modal
         transparent={true}
         visible={isSubmittingp ? true : false}
         animationType='slide'
@@ -151,12 +160,106 @@ const PaymentComplete = () => {
             <BallIndicator color='#ED3F62' count={9} />
           </Animated.View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   )
 }
 
-export default PaymentComplete
+function StatusBlock({ status }) {
+  switch (status) {
+    case "PENDING":
+      return (
+        <View className=''>
+          {/* <Animated.Image
+              source={require("../../../../assets/Fonts/arcticons_ticktick.png")}
+              style={{ height: 50, width: 50 }}
+            /> */}
+          <Text style={styles.successTitle}>Payment Complete</Text>
+          <Text style={styles.successTitle}>{status}</Text>
+        </View>
+      )
+  }
+}
+
+function useCheckStatus(orderTrackingId) {
+  const { showToast } = useToast()
+  const [status, setStatus] = useState("PENDING")
+  const [transaction, setTransaction] = useState(null)
+  const [timerCount, setTimerCount] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isCompleted, setIsCompleted] = useState(false)
+
+  const checkStatus = useCallback(async () => {
+    if (!orderTrackingId) {
+      setStatus("FAILED")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const response = await invoke({
+        endpoint: `/film/checkpaymentstatus/${orderTrackingId}`,
+      })
+
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      switch (response.res.status) {
+        case "SUCCESSFUL":
+          if (response.res?.transaction?.id) {
+            setTransaction(response.res.transaction)
+          }
+          setStatus("SUCCESSFUL")
+          setIsCompleted(true)
+          break
+        case "FAILED":
+          setStatus("FAILED")
+
+          // clear the timer
+          break
+        case "TIMEOUT":
+          setStatus("FAILED")
+          break
+        default:
+          setStatus("PENDING")
+          break
+      }
+    } catch (error) {
+      console.log(error)
+      setStatus("FAILED")
+      showToast({
+        type: "error",
+        message: "An error occurred. Please try again",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [orderTrackingId])
+
+  useEffect(() => {
+    if (!orderTrackingId) {
+      setStatus("FAILED")
+      setIsLoading(false)
+      return
+    }
+
+    // checkStatus()
+
+    // if (timerCount <= 5) {
+    //   const timer = setInterval(() => {
+    //     setTimerCount((prev) => prev + 1)
+    //     checkStatus()
+    //   }, 10000) // check status every 10 seconds
+    //   return () => clearInterval(timer)
+    // }
+  }, [timerCount, status, checkStatus])
+
+  return { status, isLoading, isCompleted, transaction, checkStatus }
+}
+
+export default PurchaseStatus
 
 const styles = StyleSheet.create({
   successTitle: {

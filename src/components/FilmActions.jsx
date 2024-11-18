@@ -1,3 +1,4 @@
+import { useToast } from "context/ToastProvider"
 import { router } from "expo-router"
 import React, { useMemo, useState } from "react"
 import {
@@ -17,8 +18,17 @@ import { COLORS } from "../color/VariableColors"
 const { width } = Dimensions.get("window")
 
 function FilmActions() {
+  const { showToast } = useToast()
   const { fetchFilm, likeRateFilm, film } = useFilmCtx()
   const [currentTrailer, setCurrentTrailer] = useState(0)
+  const [selectedResolution, setSelectedResolution] = useState(() => {
+    const defaultResolution = film?.video.find(
+      (video) => video?.resolution === "HD",
+    )
+    if (!defaultResolution) return null
+    return defaultResolution
+  })
+
   const { removeItemFromWatchList, handleAddToWatchlist } = useWatchList({
     disableFetch: true,
   })
@@ -83,7 +93,6 @@ function FilmActions() {
         icon: watchlistId ? "check" : "plus",
         onPress: () => {
           if (watchlistId) {
-            console.log("removing from watchlist", watchlistId)
             removeItemFromWatchList(watchlistId, film?.id, fetchFilm)
           } else {
             handleAddToWatchlist(film?.id, fetchFilm)
@@ -146,18 +155,55 @@ function FilmActions() {
           {access}
         </Text>
       </View>
+      <View>
+        <FlatList
+          horizontal
+          data={film?.video ?? []}
+          keyExtractor={(video) => video.id}
+          contentContainerStyle={{ gap: 20 }}
+          renderItem={({ item: video }) => {
+            return (
+              <View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedResolution(video)
+                  }}
+                  className='flex flex-row items-center justify-center h-12 w-16 rounded-md p-2'
+                  style={{
+                    backgroundColor:
+                      selectedResolution.id === video?.id
+                        ? COLORS.formBg
+                        : "transparent",
+                  }}
+                >
+                  <Text className='text-primary-500 font-semibold text-lg'>
+                    {video?.resolution}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )
+          }}
+        />
+      </View>
       {shouldShowPurchaseBtn ? (
         <TouchableOpacity
-          onPress={() =>
+          disabled={!selectedResolution}
+          onPress={() => {
+            if (!selectedResolution) {
+              showToast({
+                type: "error",
+                message: "Please select a resolution to continue",
+              })
+              return
+            }
+
             router.push({
-              pathname: "/(home)/film/purchase",
+              pathname: `/(home)/film/${film.id}/purchase`,
               params: {
-                filmId: film?.id,
-                amount: film?.price,
-                access: film?.access,
+                videoId: selectedResolution?.id,
               },
             })
-          }
+          }}
           className='flex flex-row items-center justify-center h-16 border-2 border-primary-500 rounded-3xl w-full'
           style={{
             backgroundColor: COLORS.formBg,
@@ -165,7 +211,7 @@ function FilmActions() {
         >
           <Text className='text-primary-500 font-semibold text-xl'>
             {film?.access === "rent" ? "Rent @ " : "Buy @ "}{" "}
-            {`UGX ${numFormat.format(film?.price)}`}
+            {`UGX ${numFormat.format(selectedResolution?.videoPrice?.price)}`}
           </Text>
         </TouchableOpacity>
       ) : null}

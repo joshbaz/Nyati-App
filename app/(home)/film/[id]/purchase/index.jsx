@@ -3,6 +3,7 @@ import { useAuth } from "@context/AuthProvider"
 import { useToast } from "@context/ToastProvider"
 import { COLORS, FONTSFAMILIES } from "@src/color/VariableColors"
 import { router, useLocalSearchParams } from "expo-router"
+import { invoke } from "lib/axios"
 import React from "react"
 import {
   Animated,
@@ -21,38 +22,37 @@ import { Octicons } from "@expo/vector-icons"
 function Purchase() {
   const { user } = useAuth()
   const { showToast } = useToast()
-  const params = useLocalSearchParams() // filmId, amount, accessType (rent, buy) -> if rent we need to set an expiry date
-
-  console.log("Params", params)
+  const params = useLocalSearchParams() // filmId, videoId
 
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
-      console.log("Values", values)
-      // const response = await invoke({
-      //   method: "POST",
-      //   url: `/film/${params?.filmId}/donate`,
-      //   data: {
-      //     ...values,
-      //     userId: user.id,
-      //     amount: params?.amount,
-      //   },
-      // })
+      console.log("values", values)
+      const response = await invoke({
+        method: "POST",
+        endpoint: `/film/purchase/${user?.id}/${params.videoId}`,
+        data: {
+          ...values,
+        },
+      })
 
-      // if (response.error) {
-      //   throw new Error(response.error)
-      // }
+      if (response.error) {
+        throw new Error(response.error)
+      }
 
-      setTimeout(() => {
-        router.push("/(home)/donate/complete")
-      }, 2000)
+      if (!response.res.orderTrackingId) {
+        throw new Error("An error occurred. Please try again")
+      }
+
+      router.push(
+        `/(home)/film/${params.filmId}/purchase/${response.res.orderTrackingId}`,
+      )
     } catch (e) {
-      console.error(e)
+      console.log(e)
       showToast({
         type: "error",
         message: "An error occurred. Please try again",
       })
-      return
     } finally {
       hp.setSubmitting(false)
     }

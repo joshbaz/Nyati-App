@@ -1,5 +1,5 @@
 import { router } from "expo-router"
-import React, { useState } from "react"
+import React from "react"
 import {
   Animated,
   Dimensions,
@@ -15,7 +15,6 @@ import { BallIndicator } from "react-native-indicators"
 import { useFormik } from "formik"
 import * as yup from "yup"
 import { useMembership } from "../../context/MembershipProvider"
-import usePayments from "../../hooks/usePayments"
 import { COLORS } from "../color/VariableColors"
 import Checkbox from "./Checkbox"
 import RadioGroup from "./RadioGroup"
@@ -36,7 +35,12 @@ const validationSchema = yup.object().shape({
   saveDetails: yup.boolean().default(false),
 })
 
-function PaymentOptions({ onSubmit, loadSaved, initial }) {
+function PaymentOptions({
+  onSubmit,
+  loadSaved,
+  initial,
+  renderLoadingChildren,
+}) {
   const { paymentOptions: methods } = useMembership()
   const {
     handleBlur,
@@ -224,6 +228,7 @@ function PaymentOptions({ onSubmit, loadSaved, initial }) {
             >
               <BallIndicator color='#ED3F62' count={9} />
             </Animated.View>
+            <View>{renderLoadingChildren}</View>
           </View>
         </Modal>
       ) : null}

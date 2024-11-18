@@ -2,7 +2,6 @@ import CategoryHeader from "@components/CategoryHeader"
 import Loader from "@components/Loader"
 import ReadMoreCard from "@components/ReadMore"
 import UpcomingMovieCard from "@components/UpcomingMovieCard"
-import VideoPlayer from "@components/VideoPlayer"
 import { useFilmCtx } from "@context/FilmProvider"
 import { COLORS } from "@src/color/VariableColors"
 import FilmActions from "@src/components/FilmActions"
@@ -38,7 +37,6 @@ function FilmDetails() {
   const { id, videoId } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilmCtx()
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const { width } = Dimensions.get("window")
 
   useEffect(() => {
     if (!id) return
@@ -137,7 +135,6 @@ function Details({ film, play, showFilm }) {
         className='space-y-4'
         style={{ paddingVertical: 20, paddingHorizontal: 16 }}
       >
-        {/** first section */}
         <View className='min-h-10 w-full h-auto flex flex-row items-start justify-between'>
           <View className='flex flex-col items-start justify-start gap-y-1'>
             <Text className='text-2xl font-bold capitalize text-white'>
@@ -172,7 +169,6 @@ function Details({ film, play, showFilm }) {
                 style={{ width: 36, height: 36 }}
                 resizeMode='contain'
               />
-              {/* <Ionicons name='play-circle-outline' size={40} color='white' /> */}
             </Pressable>
           )}
         </View>
@@ -187,8 +183,7 @@ function Details({ film, play, showFilm }) {
             <ReadMoreCard content={film?.overview} linesToShow={5} />
           </View>
         </View>
-        {/** divider */}
-        {/* <View style={styles.horizontalLine} /> */}
+
         <View>
           <CategoryHeader title='Start Watching' viewMoreArrow={true} />
           <FlatList
