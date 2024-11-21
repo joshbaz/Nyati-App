@@ -27,7 +27,6 @@ function Purchase() {
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
-      console.log("values", values)
       const response = await invoke({
         method: "POST",
         endpoint: `/film/purchase/${user?.id}/${params.videoId}`,
@@ -45,7 +44,7 @@ function Purchase() {
       }
 
       router.push(
-        `/(home)/film/${params.filmId}/purchase/${response.res.orderTrackingId}`,
+        `/(home)/film/${params.id}/purchase/${response.res.orderTrackingId}`,
       )
     } catch (e) {
       console.log(e)

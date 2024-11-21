@@ -47,6 +47,15 @@ function FilmDetails() {
     router.setParams({ videoId: getMainVideo(film) })
   }, [film?.id])
 
+  console.log("film", film.video.length)
+
+  const isPurchased = film?.video?.find((video) => {
+    console.log("video", video.purchase)
+    return false
+  })
+
+  console.log("isPurchased", isPurchased)
+
   return (
     <Loader isLoading={!film && isFetching}>
       <View

@@ -1,181 +1,193 @@
+import CustomBtn from "@/components/CustomBtn"
+import PageLayoutWrapper from "@/components/PageLayoutWrapper"
 import { useToast } from "context/ToastProvider"
-import { set } from "date-fns"
 import { router, useLocalSearchParams } from "expo-router"
 import { invoke } from "lib/axios"
+import { CircleCheckBig, CircleX, Clock2, Clock9 } from "lucide-react-native"
 import React, { useCallback, useEffect, useState } from "react"
-import {
-  ActivityIndicator,
-  Animated,
-  Button,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native"
+import { Animated, Text, View } from "react-native"
 import { BallIndicator } from "react-native-indicators"
-import { HStack, VStack } from "@react-native-material/core"
-import { COLORS, FONTSFAMILIES } from "../../../../../src/color/VariableColors"
 
 function PurchaseStatus() {
-  const { orderId } = useLocalSearchParams()
-  const { status, isLoading, isCompleted, transaction, checkStatus } =
-    useCheckStatus(orderId)
+  const params = useLocalSearchParams() // {id, orderId}
+
+  const { status, isLoading, showCheckStatusBtn, checkStatus } = useCheckStatus(
+    params.orderId,
+  )
   return (
-    <View
-      style={{
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: COLORS.generalBg,
-      }}
-    >
-      <Animated.View
-        style={[
-          {
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "space-around",
-          },
-        ]}
-      >
-        <VStack
-          spacing={37}
-          style={{
-            width: "85%",
-          }}
-        >
-          <VStack
-            spacing={20}
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            {/* <Animated.Image
-              source={require("../../../../assets/Fonts/arcticons_ticktick.png")}
-              style={{ height: 50, width: 50 }}
-            /> */}
-            {isLoading && (
+    <PageLayoutWrapper>
+      <Animated.View className='h-full py-10'>
+        <StatusBlock
+          status={status}
+          isLoading={isLoading}
+          checkStatus={checkStatus}
+          showCheckStatusBtn={showCheckStatusBtn}
+        />
+      </Animated.View>
+    </PageLayoutWrapper>
+  )
+}
+
+/**
+ * @typedef {Object} StatusBlockProps
+ * @property {string} status - The status of the payment.
+ * @property {boolean} isLoading - Determines if the loading indicator should be shown.
+ * @property {boolean} showCheckStatusBtn - Determines if the check status button should be shown.
+ * @property {() => void} checkStatus - A function to check the status of the payment.
+ * */
+
+/**
+ * @name StatusBlock
+ * @description A component that displays the status of the payment.
+ * @param {StatusBlockProps} props
+ * @returns {React.ReactElement}
+ */
+
+function StatusBlock({ status, isLoading, showCheckStatusBtn, checkStatus }) {
+  const { id } = useLocalSearchParams() // {id, orderId}
+  switch (status) {
+    case "PENDING":
+      return (
+        <View className='flex items-center justify-center gap-y-24 h-full'>
+          <View className='flex items-center justify-center gap-y-5'>
+            <Clock2 size={50} className='text-amber-500' />
+            <Text className='font-bold text-amber-500 text-3xl'>
+              Payment Pending
+            </Text>
+          </View>
+          <View className='space-y-5'>
+            <Text className='text-white text-lg text-center'>
+              Hang tight! We're verifying your transaction for {"The film"}
+            </Text>
+            <Text className='text-white text-lg text-center'>
+              Once the payment is complete, you'll be automatically directed to
+              the confirmation page.
+            </Text>
+            <Text className='text-white text-lg text-center'>
+              If you have any inquiries, reach out to us at:
+              info@nyatimotionpictures.com
+            </Text>
+          </View>
+
+          <View className='w-full'>
+            {isLoading && !showCheckStatusBtn && (
               <View className='h-12'>
                 <BallIndicator color='#ED3F62' count={9} />
               </View>
             )}
-            {/* <Text style={styles.successTitle}>Payment Complete</Text> */}
-            <Text style={styles.successTitle}>{status}</Text>
-          </VStack>
-
-          <VStack
-            spacing={30}
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <Text style={styles.successSubText}>
-              Your payment has been recieved. Thank you, for making a donation
-              into our projects. if you have any inquires you can contact us on{" "}
-              <Text style={styles.successEmail}>name@nyatifilms.com</Text>
-            </Text>
-          </VStack>
-
-          <VStack>
-            <Text style={styles.formTitle}>Payment Details</Text>
-            {/** divider */}
-            <View style={styles.horizontalLine} />
-            <VStack spacing={15} style={{ marginVertical: 20 }}>
-              <HStack style={{ justifyContent: "space-between" }}>
-                <Text style={styles.paydetailTitle}>Receipt Code</Text>
-                <Text style={styles.paydetailTxt}>892774</Text>
-              </HStack>
-              <HStack style={{ justifyContent: "space-between" }}>
-                <Text style={styles.paydetailTitle}>Payment Date</Text>
-                <Text style={styles.paydetailTxt}>03 Jan, 2024, 09:00</Text>
-              </HStack>
-              <HStack style={{ justifyContent: "space-between" }}>
-                <Text style={styles.paydetailTitle}>Payment Type</Text>
-                <Text style={styles.paydetailTxt}>Airtel Money</Text>
-              </HStack>
-              <HStack style={{ justifyContent: "space-between" }}>
-                <Text style={styles.paydetailTitle}>Phone Number</Text>
-                <Text style={styles.paydetailTxt}>+25670000000</Text>
-              </HStack>
-            </VStack>
-          </VStack>
-
-          <Button
-            title='Check Status'
-            onPress={checkStatus}
-            style={{ width: "100%", backgroundColor: COLORS.formBtnBg }}
-          />
-
-          {/** form buttons */}
-          {/* <VStack
-            spacing={20}
-            style={{ alignItems: "center", marginTop: "20%" }}
-          >
-            {isSubmittingp ? (
-              <View style={styles.formBtn}>
-                <ActivityIndicator size='small' color='white' />
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.formBtn}
-                onPress={() => setIsSubmittingp(() => true)}
+            {showCheckStatusBtn && (
+              <CustomBtn
+                disabled={isLoading}
+                onPress={checkStatus}
+                isLoading={isLoading}
               >
-                <Text style={styles.formBtnText}>Close</Text>
-              </TouchableOpacity>
+                Check Status
+              </CustomBtn>
             )}
-          </VStack> */}
-        </VStack>
-      </Animated.View>
-      {/* <Modal
-        transparent={true}
-        visible={isSubmittingp ? true : false}
-        animationType='slide'
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-        }}
-      >
-        <View
-          style={[
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "space-around",
-              backgroundColor: "rgba(21, 21, 21, 0.6)",
-            },
-          ]}
-        >
-          <Animated.View
-            style={{
-              position: "relative",
-              width: 50,
-              height: 50,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BallIndicator color='#ED3F62' count={9} />
-          </Animated.View>
+          </View>
         </View>
-      </Modal> */}
-    </View>
-  )
-}
-
-function StatusBlock({ status }) {
-  switch (status) {
-    case "PENDING":
+      )
+    case "SUCCESSFUL":
       return (
-        <View className=''>
-          {/* <Animated.Image
-              source={require("../../../../assets/Fonts/arcticons_ticktick.png")}
-              style={{ height: 50, width: 50 }}
-            /> */}
-          <Text style={styles.successTitle}>Payment Complete</Text>
-          <Text style={styles.successTitle}>{status}</Text>
+        <View className='flex items-center justify-center gap-y-24 h-full'>
+          <View className='flex items-center justify-center gap-y-5'>
+            <CircleCheckBig size={50} className='text-green-600' />
+            <Text className='font-bold text-green-500 text-3xl'>
+              Payment Successful
+            </Text>
+          </View>
+
+          <View className='space-y-5'>
+            <Text className='text-white text-lg text-center'>
+              Your payment is confirmed. Enjoy watching Film Title
+            </Text>
+
+            <Text className='text-white text-lg text-center'>
+              You have 72 hours to view the purchased film. If you have any
+              inquiries, reach out to us at:
+            </Text>
+            <Text className='text-white text-lg text-center font-bold'>
+              info@nyatimotionpictures.com
+            </Text>
+          </View>
+
+          <View className='w-full'>
+            <CustomBtn
+              onPress={() => {
+                // push to the film page
+                router.replace(`/(home)/film/${id}`)
+              }}
+            >
+              Continue
+            </CustomBtn>
+          </View>
+        </View>
+      )
+    case "FAILED":
+      return (
+        <View className='flex items-center justify-center gap-y-24 h-full'>
+          <View className='flex items-center justify-center gap-y-5'>
+            <CircleX size={50} className='text-red-500' />
+            <Text className='font-bold text-red-500 text-3xl'>
+              Payment Failed
+            </Text>
+          </View>
+
+          <View className='space-y-5'>
+            <Text className='text-white text-lg text-center'>
+              Your payment failed because you may have insufficient funds.
+            </Text>
+
+            <Text className='text-white text-lg text-center'>
+              You can try the payment again here. Be sure to top-up the right
+              amount before submitting your transfer.
+            </Text>
+          </View>
+
+          <View className='w-full'>
+            <CustomBtn
+              onPress={() => {
+                router.back()
+              }}
+            >
+              Retry
+            </CustomBtn>
+          </View>
+        </View>
+      )
+    case "TIMEOUT":
+      return (
+        <View className='flex items-center justify-center gap-y-24 h-full'>
+          <View className='flex items-center justify-center gap-y-5'>
+            <Clock9 size={50} className='text-gray-400' />
+            <Text className='font-bold text-gray-400 text-3xl'>
+              Payment Timed Out
+            </Text>
+          </View>
+
+          <View className='space-y-5'>
+            <Text className='text-white text-lg text-center'>
+              It seems your payment didn't go through in time.
+            </Text>
+
+            <Text className='text-white text-lg text-center'>
+              Please try again to complete your purchase. If the issue persists,
+              feel free to contact us at:
+            </Text>
+            <Text className='text-white text-lg text-center font-bold'>
+              info@nyatimotionpictures.com
+            </Text>
+          </View>
+
+          <View className='w-full'>
+            <CustomBtn
+              onPress={() => {
+                router.back()
+              }}
+            >
+              Retry
+            </CustomBtn>
+          </View>
         </View>
       )
   }
@@ -187,7 +199,6 @@ function useCheckStatus(orderTrackingId) {
   const [transaction, setTransaction] = useState(null)
   const [timerCount, setTimerCount] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
-  const [isCompleted, setIsCompleted] = useState(false)
 
   const checkStatus = useCallback(async () => {
     if (!orderTrackingId) {
@@ -212,12 +223,9 @@ function useCheckStatus(orderTrackingId) {
             setTransaction(response.res.transaction)
           }
           setStatus("SUCCESSFUL")
-          setIsCompleted(true)
           break
         case "FAILED":
           setStatus("FAILED")
-
-          // clear the timer
           break
         case "TIMEOUT":
           setStatus("FAILED")
@@ -227,7 +235,6 @@ function useCheckStatus(orderTrackingId) {
           break
       }
     } catch (error) {
-      console.log(error)
       setStatus("FAILED")
       showToast({
         type: "error",
@@ -245,78 +252,27 @@ function useCheckStatus(orderTrackingId) {
       return
     }
 
-    // checkStatus()
+    // on first render, check the status immediately and then start the timer
+    if (timerCount === 1) {
+      checkStatus()
+    }
 
-    // if (timerCount <= 5) {
-    //   const timer = setInterval(() => {
-    //     setTimerCount((prev) => prev + 1)
-    //     checkStatus()
-    //   }, 10000) // check status every 10 seconds
-    //   return () => clearInterval(timer)
-    // }
+    if (timerCount <= 5) {
+      const timer = setInterval(() => {
+        setTimerCount((prev) => prev + 1)
+        checkStatus()
+      }, 10000) // check status every 10 seconds
+      return () => clearInterval(timer)
+    }
   }, [timerCount, status, checkStatus])
 
-  return { status, isLoading, isCompleted, transaction, checkStatus }
+  return {
+    status,
+    isLoading,
+    transaction,
+    checkStatus,
+    showCheckStatusBtn: timerCount <= 5,
+  }
 }
 
 export default PurchaseStatus
-
-const styles = StyleSheet.create({
-  successTitle: {
-    color: "#06CC6B",
-    fontFamily: "Inter-SemiBold",
-    fontSize: 25,
-
-    letterSpacing: -0.5,
-  },
-  successSubText: {
-    fontFamily: "Inter-Regular",
-    fontSize: 16,
-    color: "#d0cbca",
-    textAlign: "center",
-  },
-  successEmail: {
-    color: COLORS.formSubTitle,
-    fontFamily: "Inter-ExtraBold",
-  },
-  formTitle: {
-    color: COLORS.formTitle,
-    fontFamily: FONTSFAMILIES.formTitlefont,
-    fontSize: 20,
-
-    letterSpacing: -0.54,
-  },
-  horizontalLine: {
-    borderBottomColor: "#EE5170",
-    borderBottomWidth: 1,
-    marginVertical: 20,
-  },
-  paydetailTitle: {
-    color: "#FFFAF6",
-    fontFamily: "Inter-SemiBold",
-    fontSize: 16,
-  },
-  paydetailTxt: {
-    color: "#FFFAF6",
-    fontFamily: "Inter-Regular",
-    fontSize: 16,
-  },
-  formBtn: {
-    backgroundColor: COLORS.formBtnBg,
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 52,
-
-    borderRadius: 100,
-  },
-  formBtnText: {
-    fontFamily: FONTSFAMILIES.formBtnText,
-    color: COLORS.formBtnText,
-    fontSize: 16,
-    lineHeight: 20,
-    letterSpacing: 0.1,
-    fontWeight: "bold",
-  },
-})
