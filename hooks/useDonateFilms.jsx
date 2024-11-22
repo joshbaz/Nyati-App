@@ -3,10 +3,11 @@ import { invoke } from "../lib/axios"
 
 /**
  * @typedef {Object} Returns
- * @property {Array} films - films
+ * @property {import("./useFilms").Film[]} films - films
  * @property {boolean} loading - loading state
- * @property {Object} film - film
+ * @property {import("./useFilms").Film} film - film
  * @property {(id: string) => Promise<void>} getDonateFilm - function to get a film
+ * @property {() => Promise<void>} fetchDonateFilms - function to fetch films
  */
 
 /**
@@ -80,7 +81,7 @@ function useDonateFilms(disableFetch = false) {
     fetchDonateFilms()
   }, [fetchDonateFilms])
 
-  return { films, loading, film, getDonateFilm }
+  return { films, loading, film, getDonateFilm, fetchDonateFilms }
 }
 
 export default useDonateFilms
