@@ -13,11 +13,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { HStack, VStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
-import { useAuth } from "../../../context/AuthProvider"
-import { useToast } from "../../../context/ToastProvider"
-import { invoke } from "../../../lib/axios"
-import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
-import PaymentOptions from "../../../src/components/PaymentOptions"
+import { useAuth } from "../../../../context/AuthProvider"
+import { useToast } from "../../../../context/ToastProvider"
+import { invoke } from "../../../../lib/axios"
+import { COLORS, FONTSFAMILIES } from "../../../../src/color/VariableColors"
+import PaymentOptions from "../../../../src/components/PaymentOptions"
 
 function Options() {
   const { user } = useAuth()
@@ -38,29 +38,23 @@ function Options() {
     }
   }
 
-  console.log("Params", params)
+  console.log("Params", params) // filmId, filmTitle, amount
 
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
       console.log("Values", values)
-      // const response = await invoke({
-      //   method: "POST",
-      //   url: `/film/${params?.filmId}/donate`,
-      //   data: {
-      //     ...values,
-      //     userId: user.id,
-      //     amount: params?.amount,
-      //   },
-      // })
 
-      // if (response.error) {
-      //   throw new Error(response.error)
-      // }
-
-      setTimeout(() => {
-        router.push("/(home)/donate/complete")
-      }, 2000)
+      router.push({
+        pathname: `/(home)/donate/${params?.id}/order`,
+        params: {
+          amount: params.amount,
+          option: values.option,
+          phoneCode: values.phoneCode,
+          filmtitle: params.filmTitle,
+          paymentNumber: values.paymentNumber,
+        },
+      })
     } catch (e) {
       console.error(e)
       showToast({

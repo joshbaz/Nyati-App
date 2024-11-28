@@ -17,7 +17,7 @@ import { HStack, VStack } from "@react-native-material/core"
 import { Ionicons } from "@expo/vector-icons"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import { COLORS, FONTSFAMILIES } from "../../../src/color/VariableColors"
+import { COLORS, FONTSFAMILIES } from "../../../../src/color/VariableColors"
 
 const RegularAmounts = [
   {
@@ -50,7 +50,7 @@ const { height } = Dimensions.get("window")
 
 function AmountPage() {
   const router = useRouter()
-  const { filmId } = useLocalSearchParams()
+  const params = useLocalSearchParams() // filmId
 
   const validationSchema = yup.object().shape({
     amount: yup.string().required("required"),
@@ -67,10 +67,10 @@ function AmountPage() {
         hp.setSubmitting(true)
 
         router.push({
-          pathname: "/(home)/donate/options",
+          pathname: `/(home)/donate/${params?.id}/options`,
           params: {
+            filmTitle: params.filmTitle,
             amount: values.amount.replace(/,/g, ""),
-            filmId,
           },
         })
 

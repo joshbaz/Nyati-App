@@ -200,7 +200,9 @@ function FilmActions() {
             router.push({
               pathname: `/(home)/film/${film.id}/purchase`,
               params: {
+                filmName: film?.title,
                 videoId: selectedResolution?.id,
+                amount: selectedResolution?.videoPrice?.price,
               },
             })
           }}

@@ -15,15 +15,15 @@ import {
 import { ProgressBar } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Feather, Ionicons } from "@expo/vector-icons"
-import MoviesDB from "../../../assets/data/db.json"
-import { useAuth } from "../../../context/AuthProvider"
-import useDonateFilms from "../../../hooks/useDonateFilms"
-import useWatchList from "../../../hooks/useWatchList"
-import { COLORS } from "../../../src/color/VariableColors"
-import CategoryHeader from "../../../src/components/CategoryHeader"
-import ReadMoreCard from "../../../src/components/ReadMore"
-import SplashScreen from "../../../src/components/SplashScreen"
-import UpcomingMovieCard from "../../../src/components/UpcomingMovieCard"
+import MoviesDB from "../../../../assets/data/db.json"
+import { useAuth } from "../../../../context/AuthProvider"
+import useDonateFilms from "../../../../hooks/useDonateFilms"
+import useWatchList from "../../../../hooks/useWatchList"
+import { COLORS } from "../../../../src/color/VariableColors"
+import CategoryHeader from "../../../../src/components/CategoryHeader"
+import ReadMoreCard from "../../../../src/components/ReadMore"
+import SplashScreen from "../../../../src/components/SplashScreen"
+import UpcomingMovieCard from "../../../../src/components/UpcomingMovieCard"
 
 const { width } = Dimensions.get("window")
 
@@ -156,8 +156,8 @@ function DonationFilmPage() {
             <TouchableOpacity
               onPress={() =>
                 router.push({
-                  pathname: "/(home)/donate/amount",
-                  params: { filmId: film?.id },
+                  pathname: `/(home)/donate/${film?.id}/amount`,
+                  params: { filmId: film?.id, filmTitle: film?.title },
                 })
               }
               className='flex flex-row items-center justify-center h-14 border-2 rounded-full bg-primary-500 backdrop-blur-sm w-full'

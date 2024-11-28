@@ -9,7 +9,7 @@ function FilmLayout() {
         <Stack.Screen name='[id]/index' />
         <Stack.Screen name='[id]/watch/[videoId]' />
         <Stack.Screen name='[id]/purchase/index' />
-        <Stack.Screen name='[id]/purchase/[orderId]' />
+        <Stack.Screen name='[id]/purchase/order' />
       </Stack>
     </FilmProvider>
   )

@@ -7,8 +7,9 @@ import { COLORS } from "@src/color/VariableColors"
 import FilmActions from "@src/components/FilmActions"
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
+  Button,
   Dimensions,
   FlatList,
   Image,

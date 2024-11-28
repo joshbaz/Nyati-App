@@ -33,3 +33,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# service file google-services.json
+nyati-expo-automate-ec2a0f4b124a.json

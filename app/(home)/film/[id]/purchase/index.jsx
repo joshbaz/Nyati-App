@@ -1,9 +1,7 @@
 import PaymentOptions from "@/components/PaymentOptions"
-import { useAuth } from "@context/AuthProvider"
 import { useToast } from "@context/ToastProvider"
 import { COLORS, FONTSFAMILIES } from "@src/color/VariableColors"
 import { router, useLocalSearchParams } from "expo-router"
-import { invoke } from "lib/axios"
 import React from "react"
 import {
   Animated,
@@ -20,34 +18,27 @@ import { HStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
 
 function Purchase() {
-  const { user } = useAuth()
   const { showToast } = useToast()
   const params = useLocalSearchParams() // filmId, videoId
 
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
-      const response = await invoke({
-        method: "POST",
-        endpoint: `/film/purchase/${user?.id}/${params.videoId}`,
-        data: {
-          ...values,
+
+      router.push({
+        pathname: `/(home)/film/${params.id}/purchase/order`,
+        params: {
+          option: values.option,
+          phoneCode: values.phoneCode,
+          paymentNumber: values.paymentNumber,
+          amount: values.amount,
+          videoId: params.videoId,
+          filmtitle: params.filmName,
+          price: params.amount,
         },
       })
-
-      if (response.error) {
-        throw new Error(response.error)
-      }
-
-      if (!response.res.orderTrackingId) {
-        throw new Error("An error occurred. Please try again")
-      }
-
-      router.push(
-        `/(home)/film/${params.id}/purchase/${response.res.orderTrackingId}`,
-      )
     } catch (e) {
-      console.log(e)
+      console.log("error", e)
       showToast({
         type: "error",
         message: "An error occurred. Please try again",

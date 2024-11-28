@@ -1,3 +1,4 @@
+import { set } from "date-fns"
 import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { jwtDecode } from "jwt-decode"
@@ -6,6 +7,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react"
 import { invoke } from "../lib/axios"
@@ -31,6 +33,7 @@ import { Toast, useToast } from "./ToastProvider"
  * @property {boolean} isAuthenticated - A boolean indicating whether the user is authenticated.
  * @property {() => void} fetchUserProfile - A function to fetch the user's profile.
  * @property {()=> string} getAuthToken - A function to get the user's authentication token.
+ * @property {string} userToken - The user's authentication token.
  */
 
 /**
@@ -49,11 +52,13 @@ const AuthContext = createContext({
   getAuthToken: () => "",
   updateUser: () => {},
   isAuthenticated: false,
+  userToken: null,
 })
 
 function AuthProvider({ children }) {
   const { toast, showToast } = useToast()
   const [user, setUser] = useState(null)
+  const [userToken, setUserToken] = useState(null)
   const [loading, setLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [authError, setAuthError] = useState(null)
@@ -132,6 +137,7 @@ function AuthProvider({ children }) {
     }
 
     await SecureStore.setItemAsync(TOKEN_KEY, response?.res.token)
+    setUserToken(response?.res.token)
     setUser(response?.res.user || null)
     setLoading(false)
     setIsAuthenticated(true)
@@ -143,49 +149,49 @@ function AuthProvider({ children }) {
    * @param {[string]} id - The user's ID.
    * @returns Promise<void>
    */
-  const logout = async (id = user?.id) => {
-    try {
-      setLoading(true)
-      if (!id) return
-      const response = await invoke({
-        method: "POST",
-        endpoint: `${endpoint}/logout/${id}`,
-      })
+  const logout = useCallback(
+    async (id = user?.id) => {
+      try {
+        setLoading(true)
+        if (!id) return
 
-      if (response?.error) {
-        setLoading(false)
-        showToast({
-          type: "error",
-          message: response?.error?.message,
+        const response = await invoke({
+          method: "POST",
+          endpoint: `${endpoint}/logout/${id}`,
         })
-        return
-      }
 
-      await SecureStore.deleteItemAsync(TOKEN_KEY)
-      setUser(null)
-      setIsAuthenticated(false)
+        if (response?.error) {
+          const err = new Error(response?.error.message)
+          err.statusCode = response?.status
+          throw err
+        }
 
-      // navigate to the login screen
-      router.replace("/")
-    } catch (error) {
-      if ([401, 403, 404].includes(error.statusCode) && authToken) {
         await SecureStore.deleteItemAsync(TOKEN_KEY)
-        setIsAuthenticated(false)
+
         setUser(null)
+        setUserToken(null)
+        setIsAuthenticated(false)
+      } catch (error) {
+        if ([401, 403, 404].includes(error.statusCode) && user?.id) {
+          await SecureStore.deleteItemAsync(TOKEN_KEY)
+          setIsAuthenticated(false)
+          setUser(null)
+          showToast({
+            type: "error",
+            message: "An authentication error occurred. Please try again.",
+          })
+          return
+        }
         showToast({
           type: "error",
-          message: "An authentication error occurred. Please try again.",
+          message: error.message,
         })
-        return
+      } finally {
+        setLoading(false)
       }
-      showToast({
-        type: "error",
-        message: error.message,
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    [user?.id],
+  )
 
   /**
    * @name fetchUserProfile
@@ -210,6 +216,7 @@ function AuthProvider({ children }) {
     if (authToken && user?.id) {
       setIsAuthenticated(true)
       setIsFetching(false)
+      setUserToken(authToken)
       return
     }
 
@@ -276,6 +283,7 @@ function AuthProvider({ children }) {
         logout,
         loading,
         setToken,
+        userToken,
         isFetching,
         updateUser,
         getAuthToken,
