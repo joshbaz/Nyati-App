@@ -24,7 +24,7 @@ function Order() {
       <WebView
         style={{ flex: 1 }}
         source={{
-          uri: `http://localhost:5173/film/process/${user?.id}/${params.videoId}?${querystring}`,
+          uri: `https://nyatimotionpictures.com/film/process/${user?.id}/${params.videoId}?${querystring}`,
         }}
         onMessage={(event) => {
           const message = event.nativeEvent.data

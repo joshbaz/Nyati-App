@@ -6,6 +6,8 @@ import React from "react"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { WebView } from "react-native-webview"
 
+const BASE_URL = "https://nyatimotionpictures.com"
+
 function Order() {
   const { user, userToken } = useAuth()
   const params = useLocalSearchParams()
@@ -19,12 +21,16 @@ function Order() {
     { skipNull: true, skipEmptyString: true },
   )
 
+  console.log(
+    `${BASE_URL}/donate/process/${user?.id}/${params.id}?${querystring}`,
+  )
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.generalBg }}>
       <WebView
         style={{ flex: 1 }}
         source={{
-          uri: `http://localhost:5173/donate/process/${user?.id}/${params.id}?${querystring}`,
+          uri: `${BASE_URL}/donate/process/${user?.id}/${params.id}?${querystring}`,
         }}
         onMessage={(event) => {
           const message = event.nativeEvent.data
