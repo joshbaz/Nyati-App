@@ -169,7 +169,7 @@ function PaymentOptions({
             </View>
           )}
 
-          {loadSaved ? (
+          {/* {loadSaved ? (
             <View className='w-full py-4'>
               <TouchableOpacity
                 onPress={() =>
@@ -182,7 +182,7 @@ function PaymentOptions({
                 <Text className='text-white text-lg'>Edit Details</Text>
               </TouchableOpacity>
             </View>
-          ) : null}
+          ) : null} */}
         </View>
         <View
           style={{

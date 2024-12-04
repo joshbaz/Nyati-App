@@ -197,10 +197,20 @@ function Home() {
                       <UpcomingMovieCard
                         shouldMarginatedAtEnd={false}
                         cardFunction={() => {
-                          router.push({
-                            pathname: "/(home)/film/[id]",
-                            params: { id: item?.id },
-                          })
+                          if (item?.type === "series") {
+                            router.push({
+                              pathname: "/(home)/film/[id]/[seasonid]",
+                              params: {
+                                id: item.id,
+                                seasonid: item?.season[0]?.id,
+                              },
+                            })
+                          } else {
+                            router.push({
+                              pathname: "/(home)/film/[id]",
+                              params: { id: item?.id },
+                            })
+                          }
                         }}
                         title={item.title}
                         posterUrl={poster}

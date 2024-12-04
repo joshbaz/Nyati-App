@@ -1,7 +1,6 @@
 import CategoryHeader from "@components/CategoryHeader"
 import Loader from "@components/Loader"
 import ReadMoreCard from "@components/ReadMore"
-import UpcomingMovieCard from "@components/UpcomingMovieCard"
 import { useFilmCtx } from "@context/FilmProvider"
 import { COLORS } from "@src/color/VariableColors"
 import FilmActions from "@src/components/FilmActions"
@@ -10,8 +9,6 @@ import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
 import React, { useEffect, useState } from "react"
 import {
-  Dimensions,
-  FlatList,
   Image,
   ImageBackground,
   Pressable,
@@ -24,7 +21,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
-import MoviesDB from "../../../../assets/data/db.json"
 
 // get default video: {hd, if purchased we show the purchased video}
 const getMainVideo = (film) => {
@@ -40,9 +36,17 @@ const getMainVideo = (film) => {
   return mainVideo?.id
 }
 
+const getTrailer = (film) => {
+  if (!film?.video) return null
+  const trailer = film?.video?.find((video) => video?.isTrailer)
+  if (!trailer) return null
+  return trailer?.id
+}
+
 function FilmDetails() {
   const { id, videoId } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilmCtx()
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -111,9 +115,11 @@ function FilmDetails() {
               </ImageBackground>
             </View>
 
-            <VStack style={{ width: "100%", flex: 1 }}>
-              <Details film={film} showFilm={!!videoId} />
-            </VStack>
+            {isFullscreen ? null : (
+              <VStack style={{ width: "100%", flex: 1 }}>
+                <Details film={film} showFilm={!!videoId} />
+              </VStack>
+            )}
           </ScrollView>
         </SafeAreaView>
       </View>
@@ -122,9 +128,7 @@ function FilmDetails() {
 }
 
 function Details({ film, showFilm }) {
-  const { width } = Dimensions.get("window")
   const { showToast } = useToast()
-  const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
   const videoId = getMainVideo(film)
   return (
     <View style={styles.detailWrap}>
@@ -208,7 +212,7 @@ function Details({ film, showFilm }) {
               }}
             >
               <Image
-                source={require("../../../../assets/playcircle.png")}
+                source={require("../../../../../../assets/playcircle.png")}
                 style={{ width: 36, height: 36 }}
                 resizeMode='contain'
               />
@@ -229,7 +233,7 @@ function Details({ film, showFilm }) {
 
         <View>
           <CategoryHeader title='Start Watching' viewMoreArrow={true} />
-          <FlatList
+          {/* <FlatList
             horizontal
             data={upcomingFilmList}
             keyExtractor={(item) => item.id}
@@ -249,7 +253,7 @@ function Details({ film, showFilm }) {
                 isLast={index == upcomingFilmList?.length - 1 ? true : false}
               />
             )}
-          />
+          /> */}
         </View>
       </View>
     </View>

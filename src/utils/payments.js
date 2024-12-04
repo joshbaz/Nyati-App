@@ -13,13 +13,13 @@ export const PAYMENT_OPTIONS = [
   {
     label: "Airtel Money",
     value: "airtelmoney",
-    comingSoon: true,
+    comingSoon: false,
     logo: Image.resolveAssetSource(AIRTELMONEY)?.uri ?? "",
   },
   {
     label: "Visa | Mastercard",
-    value: "pesapal",
-    comingSoon: true,
+    value: "visa",
+    comingSoon: false,
     logo: Image.resolveAssetSource(PESAPAL)?.uri ?? "",
   },
 ]

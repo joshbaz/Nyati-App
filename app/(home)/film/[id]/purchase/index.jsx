@@ -1,7 +1,9 @@
 import PaymentOptions from "@/components/PaymentOptions"
 import { useToast } from "@context/ToastProvider"
 import { COLORS, FONTSFAMILIES } from "@src/color/VariableColors"
+import { useAuth } from "context/AuthProvider"
 import { router, useLocalSearchParams } from "expo-router"
+import { invoke } from "lib/axios"
 import React from "react"
 import {
   Animated,
@@ -18,25 +20,62 @@ import { HStack } from "@react-native-material/core"
 import { Octicons } from "@expo/vector-icons"
 
 function Purchase() {
+  const { user } = useAuth()
   const { showToast } = useToast()
   const params = useLocalSearchParams() // filmId, videoId
+
+  console.log(user?.id, params.videoId)
 
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
 
-      router.push({
-        pathname: `/(home)/film/${params.id}/purchase/order`,
-        params: {
+      if (values.option === "mtnmomo") {
+        router.push({
+          pathname: `/(home)/film/${params.id}/purchase/order`,
+          params: {
+            option: values.option,
+            phoneCode: values.phoneCode,
+            paymentNumber: values.paymentNumber,
+            amount: values.amount,
+            videoId: params.videoId,
+            filmtitle: params.filmName,
+            price: params.amount,
+          },
+        })
+
+        return
+      }
+
+      const { res, error } = await invoke({
+        method: "POST",
+        endpoint: `/film/purchase/${user?.id}/${params?.videoId}`,
+        data: {
           option: values.option,
           phoneCode: values.phoneCode,
           paymentNumber: values.paymentNumber,
-          amount: values.amount,
-          videoId: params.videoId,
-          filmtitle: params.filmName,
-          price: params.amount,
         },
       })
+
+      if (error) {
+        throw new Error(error)
+      }
+
+      if (res?.redirect_url) {
+        router.push({
+          pathname: `/(home)/film/${params.id}/purchase/order-pesapal`,
+          params: {
+            option: values.option,
+            phoneCode: values.phoneCode,
+            paymentNumber: values.paymentNumber,
+            amount: values.amount,
+            videoId: params.videoId,
+            filmtitle: params.filmName,
+            price: params.amount,
+            redirect_url: res.redirect_url,
+          },
+        })
+      }
     } catch (e) {
       console.log("error", e)
       showToast({

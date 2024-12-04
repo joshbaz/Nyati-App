@@ -20,6 +20,9 @@ import { invoke } from "../lib/axios"
  * @property {(id: string) => void} fetchFilm - A function to fetch a single film.
  * @property {boolean} isFetching - A boolean indicating whether the films are currently being fetched.
  * @property {(filmId: string, likeType: "THUMBS_UP" | "THUMBS_DOWN" | "NONE") => void} likeRateFilm - A function to like or rate a film.
+ * @property {Object} season - A season object.
+ * @property {() => void} fetchSeason - A function to fetch the season.
+ * @property {(seasonId: string) => void} selectSeason - A function to select a season.
  */
 
 /**
@@ -31,6 +34,7 @@ function useFilms() {
   const { isAuthenticated, user } = useAuth()
   const [films, setFilms] = React.useState([])
   const [film, setFilm] = React.useState(null)
+  const [season, setSeason] = React.useState(null)
   const [isFetching, setIsFetching] = React.useState(false)
 
   const fetchFilms = useCallback(async () => {
@@ -58,9 +62,11 @@ function useFilms() {
   const fetchFilm = useCallback(
     async (id) => {
       if (!id) return
+      if (id !== film?.id) {
+        setIsFetching(true)
+      }
 
       try {
-        setIsFetching(true)
         const response = await invoke({
           method: "GET",
           endpoint: `/film/${id}`,
@@ -72,7 +78,6 @@ function useFilms() {
         }
 
         setFilm(response?.res.film)
-        setIsFetching(false)
       } catch (error) {
         setFilm((prev) => prev)
       } finally {
@@ -108,7 +113,49 @@ function useFilms() {
     [user?.id],
   )
 
-  return { films, fetchFilms, film, fetchFilm, isFetching, likeRateFilm }
+  const fetchSeason = useCallback(
+    /**
+     * @param {string} filmId
+     */
+    (filmId) => {
+      if (!film) {
+        // fetch the film first
+        fetchFilm(filmId)
+      }
+
+      if (film?.season?.length > 0) {
+        setSeason(film?.season[0] ?? null)
+      }
+    },
+    [film, fetchFilm],
+  )
+
+  const selectSeason = useCallback(
+    /**
+     * @param {string} seasonId
+     */
+    (seasonId) => {
+      if (!film) throw new Error("Film is required")
+      if (film?.type !== "series") throw new Error("Film must be a series")
+      if (film?.season?.length === 0) throw new Error("Film has no season")
+
+      const selectedSeason = film?.season.find((s) => s.id === seasonId)
+      setSeason(selectedSeason)
+    },
+    [film],
+  )
+
+  return {
+    films,
+    fetchFilms,
+    film,
+    fetchFilm,
+    isFetching,
+    likeRateFilm,
+    season,
+    fetchSeason,
+    selectSeason,
+  }
 }
 
 export default useFilms

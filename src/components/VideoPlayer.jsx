@@ -1,17 +1,24 @@
 import { useAuth } from "context/AuthProvider"
 import { ResizeMode, Video } from "expo-av"
-import { router, useLocalSearchParams, useRouter } from "expo-router"
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router"
 import * as ScreenOrientation from "expo-screen-orientation"
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import { Dimensions, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { replace } from "formik"
 // import { BallIndicator } from "react-native-indicators"
 import { BASE_API_URL, invoke } from "../../lib/axios"
 import VideoControls from "./VideoControls"
 
 function VideoPlayer({ handleFullscreen }, ref) {
   const router = useRouter()
+  const navigation = useNavigation()
   const videoRef = useRef(null)
   const { getAuthToken } = useAuth()
   const { id, videoId } = useLocalSearchParams()
@@ -79,7 +86,7 @@ function VideoPlayer({ handleFullscreen }, ref) {
   }, [])
 
   // Toggle play/pause
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pauseAsync()
@@ -88,7 +95,7 @@ function VideoPlayer({ handleFullscreen }, ref) {
       }
     }
     setIsPlaying(!isPlaying)
-  }
+  }, [isPlaying])
   // When the video is ready for display
   const onReadyForDisplay = useCallback((evt) => {
     if (evt.status.isLoaded && videoRef.current) {
@@ -120,11 +127,8 @@ function VideoPlayer({ handleFullscreen }, ref) {
   }, [handleFullscreen, isFullscreen])
 
   // change orientation and play video
-  const playVideo = () => {
-    togglePlayPause()
-  }
 
-  const { source: src, clearSrc } = useVideo(playVideo)
+  const { source: src, clearSrc } = useVideo(togglePlayPause)
 
   // handle back button press
   const onBackPress = useCallback(async () => {
@@ -134,7 +138,23 @@ function VideoPlayer({ handleFullscreen }, ref) {
       ScreenOrientation.OrientationLock.PORTRAIT_UP,
     )
 
-    router.back()
+    // find previous route
+    if (router.canGoBack()) {
+      const previousRoute = navigation.getState().routes
+
+      if (previousRoute.length > 1) {
+        router.back()
+        clearSrc()
+      } else {
+        console.log("Previous route", previousRoute)
+        // means we clicked a trailer from the home page
+        router.push("/(home)")
+        clearSrc()
+      }
+    } else {
+      router.push("/(home)")
+      clearSrc()
+    }
   }, [])
 
   useEffect(() => {
@@ -150,8 +170,14 @@ function VideoPlayer({ handleFullscreen }, ref) {
 
   const isBufferControlsShowing = isLoading || showControls
 
+  if (!videoId) {
+    // unmount the video player
+    return null
+  }
+
   return (
     <View
+      key={videoId}
       style={{
         flex: 1,
         width: "100%",
@@ -159,7 +185,7 @@ function VideoPlayer({ handleFullscreen }, ref) {
         position: "relative",
         backgroundColor: isBufferControlsShowing
           ? "rgba(0,0,0,0.5)"
-          : "transparent",
+          : "rgba(0,0,0,0.2)",
       }}
       className='flex flex-1 items-center justify-center'
     >
@@ -169,10 +195,7 @@ function VideoPlayer({ handleFullscreen }, ref) {
             ref={videoRef}
             style={{ flex: 1 }}
             source={{
-              uri: videoSource,
-              headers: {
-                range: "bytes=0-",
-              },
+              uri: src,
             }}
             isLooping
             useNativeControls={false}
@@ -228,13 +251,13 @@ function useVideo(cb) {
   const [loading, setLoading] = useState(true)
 
   const getVideoUrl = useCallback(async () => {
-    if (!params.trackid) return
+    if (!params.videoId || source) return
     try {
       setLoading(true)
 
       const response = await invoke({
         method: "GET",
-        endpoint: `/film/track/${params.trackid}`,
+        endpoint: `/film/track/${params.videoId}`,
       })
 
       if (response.error) {
@@ -248,18 +271,18 @@ function useVideo(cb) {
       }
     } catch (error) {
       // clear the trackid for the use to try again
-      router.setParams({ trackid: null })
+      setSource("")
+      router.back()
     } finally {
       setLoading(false)
     }
-  }, [params?.trackid])
+  }, [params?.vidoeId, cb])
 
   const clearSrc = useCallback(() => {
-    if (params?.trackid && source) {
+    if (params?.videoId && source) {
       setSource("")
-      router.setParams({ trackid: null })
     }
-  }, [source, params?.trackid])
+  }, [source, params?.videoId])
 
   useEffect(() => {
     getVideoUrl()
@@ -267,48 +290,5 @@ function useVideo(cb) {
 
   return { source, loading, clearSrc }
 }
-
-const styles = StyleSheet.create({
-  trailerBtnWrap: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  trailerBtn: {
-    width: "80%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 229, 234, 0.33)",
-    height: 52,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: "#980F2A",
-    position: "absolute",
-
-    bottom: 23,
-  },
-  btnText: {
-    fontFamily: "Roboto-Bold",
-    color: "white",
-    fontSize: 16,
-    letterSpacing: 0.1,
-  },
-  videoTitleWrap: {
-    position: "absolute",
-    left: 80,
-    top: 10,
-  },
-  videoTitle: {
-    color: "#ffffff",
-    fontSize: 20,
-  },
-  arrowBackBtn: {
-    color: "#ffffff",
-    position: "absolute",
-    top: 20,
-    left: 20,
-  },
-})
 
 export default forwardRef(VideoPlayer)

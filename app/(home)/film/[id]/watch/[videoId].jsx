@@ -29,7 +29,7 @@ function WatchFilm() {
   return (
     // <Loader isLoading={false}>
     <View className='flex flex-1 w-full h-full items-center justify-center'>
-      <VideoPlayer posterSource={""} videoId={testsrc} />
+      <VideoPlayer posterSource={""} videoId={params.videoId} />
     </View>
     // </Loader>
   )

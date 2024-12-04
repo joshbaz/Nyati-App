@@ -38,7 +38,9 @@ function FilmActions() {
   }, [film?.access])
 
   const shouldShowPurchaseBtn = useMemo(() => {
-    if (film?.access === "free") return false
+    const access = film?.access.toLowerCase()
+    if (access === "free") return false
+    if (access === "rent" && film?.video.length === 0) return false
     return true
   }, [film?.access])
 
@@ -77,7 +79,9 @@ function FilmActions() {
         icon: "play",
         onPress: () => {
           if (trailerIds.length === 0) return
-          router.setParams({ trackid: trailerIds[currentTrailer] })
+          router.push(
+            `/(home)/film/${film?.id}/watch/${trailerIds[currentTrailer]}`,
+          )
           if (currentTrailer < trailerIds.length - 1) {
             setCurrentTrailer(currentTrailer + 1)
           } else {
@@ -155,36 +159,38 @@ function FilmActions() {
           {access}
         </Text>
       </View>
-      <View>
-        <FlatList
-          horizontal
-          data={film?.video ?? []}
-          keyExtractor={(video) => video.id}
-          contentContainerStyle={{ gap: 20 }}
-          renderItem={({ item: video }) => {
-            return (
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedResolution(video)
-                  }}
-                  className='flex flex-row items-center justify-center h-12 w-16 rounded-md p-2'
-                  style={{
-                    backgroundColor:
-                      selectedResolution.id === video?.id
-                        ? COLORS.formBg
-                        : "transparent",
-                  }}
-                >
-                  <Text className='text-primary-500 font-semibold text-lg'>
-                    {video?.resolution}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )
-          }}
-        />
-      </View>
+      {shouldShowPurchaseBtn ? (
+        <View>
+          <FlatList
+            horizontal
+            data={film?.video ?? []}
+            keyExtractor={(video) => video.id}
+            contentContainerStyle={{ gap: 20 }}
+            renderItem={({ item: video }) => {
+              return (
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedResolution(video)
+                    }}
+                    className='flex flex-row items-center justify-center h-12 w-16 rounded-md p-2'
+                    style={{
+                      backgroundColor:
+                        selectedResolution.id === video?.id
+                          ? COLORS.formBg
+                          : "transparent",
+                    }}
+                  >
+                    <Text className='text-primary-500 font-semibold text-lg'>
+                      {video?.resolution}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )
+            }}
+          />
+        </View>
+      ) : null}
       {shouldShowPurchaseBtn ? (
         <TouchableOpacity
           disabled={!selectedResolution}
