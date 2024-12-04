@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import useDisclosure from "../../hooks/useDisclosure"
 import { COLORS } from "../color/VariableColors"
 
-const ReadMoreCard = ({ content, linesToShow }) => {
+const ReadMoreCard = ({ renderContent, linesToShow }) => {
   const { isOpen: expanded, onToggle } = useDisclosure()
   return (
     <View style={styles.container}>
@@ -12,7 +12,7 @@ const ReadMoreCard = ({ content, linesToShow }) => {
         numberOfLines={expanded ? undefined : linesToShow}
         style={styles.text}
       >
-        {content}
+        {renderContent()}
       </Text>
 
       {!expanded && (

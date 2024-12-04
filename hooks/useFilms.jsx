@@ -1,3 +1,4 @@
+import { set } from "date-fns"
 import React, { useCallback } from "react"
 import { useAuth } from "../context/AuthProvider"
 import { invoke } from "../lib/axios"
@@ -23,6 +24,8 @@ import { invoke } from "../lib/axios"
  * @property {Object} season - A season object.
  * @property {() => void} fetchSeason - A function to fetch the season.
  * @property {(seasonId: string) => void} selectSeason - A function to select a season.
+ * @property {Object} episode - An episode object.
+ * @property {(episodeId: string) => void} selectEpisode - A function to select an episode
  */
 
 /**
@@ -35,6 +38,7 @@ function useFilms() {
   const [films, setFilms] = React.useState([])
   const [film, setFilm] = React.useState(null)
   const [season, setSeason] = React.useState(null)
+  const [episode, setEpisode] = React.useState(null)
   const [isFetching, setIsFetching] = React.useState(false)
 
   const fetchFilms = useCallback(async () => {
@@ -139,10 +143,25 @@ function useFilms() {
       if (film?.type !== "series") throw new Error("Film must be a series")
       if (film?.season?.length === 0) throw new Error("Film has no season")
 
-      const selectedSeason = film?.season.find((s) => s.id === seasonId)
+      const selectedSeason = film?.season?.find((s) => s.id === seasonId)
       setSeason(selectedSeason)
     },
     [film],
+  )
+
+  const selectEpisode = useCallback(
+    (episodeId) => {
+      if (!season) throw new Error("Season is required")
+      if (season?.episodes?.length === 0)
+        throw new Error("Season has no episode")
+
+      const selectedEpisode = season?.episodes?.find(
+        (ep) => ep.id === episodeId,
+      )
+      console.log(selectedEpisode)
+      setEpisode(selectedEpisode)
+    },
+    [season],
   )
 
   return {
@@ -155,6 +174,8 @@ function useFilms() {
     season,
     fetchSeason,
     selectSeason,
+    episode,
+    selectEpisode,
   }
 }
 

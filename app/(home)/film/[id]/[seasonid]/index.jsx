@@ -1,37 +1,48 @@
 import { COLORS } from "@/color/VariableColors"
 import Loader from "@/components/Loader"
 import PageLayoutWrapper from "@/components/PageLayoutWrapper"
+import ReadMoreCard from "@/components/ReadMore"
 import { useFilmCtx } from "context/FilmProvider"
+import { format } from "date-fns"
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
 import React, { useEffect } from "react"
 import {
+  Dimensions,
   ImageBackground,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native"
-import { PaperProvider } from "react-native-paper"
-import { Dropdown } from "react-native-paper-dropdown"
-import { Picker } from "@react-native-picker/picker"
-import { Feather } from "@expo/vector-icons"
+import RNPickerSelect from "react-native-picker-select"
+import { AntDesign, Feather } from "@expo/vector-icons"
 
 function SeasonPage() {
+  const { width } = Dimensions.get("window")
   const params = useLocalSearchParams() // filmId, seasonId
-  const { film, season, fetchSeason, isFetching, selectSeason } = useFilmCtx()
-
-  console.log(params)
+  const { film, season, fetchSeason, isFetching, selectSeason, selectEpisode } =
+    useFilmCtx()
 
   useEffect(() => {
     if (params?.seasonid) {
       fetchSeason(params?.id)
     }
   }, [params?.id, fetchSeason])
+
+  const seasonOptions =
+    film?.season?.length > 0
+      ? film?.season.map((sn) => ({
+          label: sn.title,
+          value: sn.id,
+        }))
+      : []
+
+  console.log(season?.episodes)
   return (
     <Loader isLoading={isFetching}>
-      <PageLayoutWrapper>
-        <View className='flex items-start justify-start w-full h-72 bg-green-400'>
+      <PageLayoutWrapper removePadding>
+        <View className='flex items-start justify-start w-full h-72'>
           <ImageBackground
             source={{
               uri: film?.posters[0]?.url,
@@ -61,54 +72,152 @@ function SeasonPage() {
             </LinearGradient>
           </ImageBackground>
         </View>
-        <View className='w-full space-y-2'>
+        <View className='w-full space-y-2 px-5'>
           <Text className='text-white font-bold text-3xl'>{film?.title}</Text>
-          <Text className='text-xs font-bold text-gray-300 text-sans'>
+          <Text className='text-sm text-gray-300 text-sans'>
             {new Date(film?.releaseDate).getFullYear()} &bull;{" "}
             {film?.genre.join(" \u2022 ")}
           </Text>
 
-          {/* <View className='bg-blue-200'> */}
-          <Picker
-            selectedValue={season?.id}
-            onValueChange={(value) => selectSeason(value)}
-            selectionColor={"#FFFAF6"}
-            style={{
-              backgroundColor: "#302d38",
-              height: 50,
-            }}
-            itemStyle={{
-              color: "#FFFAF6",
-              fontFamily: "Inter-Bold",
-              fontSize: 15,
-              height: 50,
-            }}
-            dropdownIconColor={"#FFFAF6"}
-          >
-            {film?.season?.length > 0 &&
-              film?.season.map((season) => (
-                <Picker.Item
-                  key={season.id}
-                  value={season.id}
-                  label={season.id}
-                >
-                  {season.title}
-                </Picker.Item>
-              ))}
-          </Picker>
+          <View className='flex flex-row items-center justify-between w-full'>
+            <RNPickerSelect
+              value={season?.id}
+              onValueChange={(value) => {
+                selectSeason(value)
+                router.push(`/film/${params.id}/${value}`)
+              }}
+              items={seasonOptions}
+              placeholder='Select Season'
+              style={{
+                inputIOS: {
+                  backgroundColor: "#302d38",
+                  color: "white",
+                  fontSize: 15,
+                  fontWeight: "bold",
+                  height: 50,
+                  width: width - 40,
+                  paddingHorizontal: 10,
+                  borderRadius: 1,
+                  textTransform: "capitalize",
+                },
+                viewContainer: {
+                  backgroundColor: "#302d38",
+                  borderRadius: 1,
+                  width: 300,
+                  fontWeight: "bold",
+                },
+                inputAndroid: {
+                  backgroundColor: "#302d38",
+                  color: "#FFFAF6",
+                  fontFamily: "Inter-Bold",
+                  fontSize: 15,
+                  height: 50,
+                  width: 300,
+                  paddingHorizontal: 10,
+                  borderRadius: 5,
+                },
 
-          <PaperProvider>
-            <View style={{ margin: 16 }}>
-              <Dropdown
-                label='Select season'
-                placeholder='Select season'
-                options={film?.season ?? []}
-                value={season?.id}
-                onSelect={(value) => selectSeason(value)}
-              />
-            </View>
-          </PaperProvider>
-          {/* </View> */}
+                chevronContainer: {
+                  background: "green",
+                },
+                chevron: {
+                  display: "none",
+                },
+                modalViewBottom: {
+                  backgroundColor: "#302d38",
+                },
+                modalViewMiddle: {
+                  backgroundColor: "#302d38",
+                  borderBlockColor: "#302d38",
+                  color: "#FFFAF6",
+                },
+              }}
+            />
+          </View>
+          <View className='mt-10 w-full relative min-h-20'>
+            <ReadMoreCard
+              renderContent={() => (
+                <View className='flex flex-col gap-y-1'>
+                  <Text className='text-white font-medium text-lg'>
+                    {film?.overview}
+                  </Text>
+                  <Text className='text-white font-medium text-lg'>
+                    {film?.plotSummary}
+                  </Text>
+                </View>
+              )}
+              linesToShow={4}
+            />
+          </View>
+          <View className='flex flex-1 space-y-4'>
+            <Text className='text-white font-bold text-xl'>Episodes</Text>
+
+            {season?.episodes?.length > 0 ? (
+              <View className='flex flex-col items-center justify-center '>
+                {season?.episodes.map((ep) => {
+                  const epPoster = ep?.posters[0]?.url
+                  return (
+                    <View key={ep.id} className='flex flex-1 space-y-3 w-full'>
+                      <ImageBackground
+                        source={{
+                          uri: epPoster,
+                        }}
+                        style={{
+                          height: 200,
+                          width: "100%",
+                          position: "relative",
+                          zIndex: 1,
+                          top: 0,
+                          borderRadius: 10,
+                        }}
+                        resizeMode='cover'
+                      />
+
+                      <View className='space-y-2'>
+                        <Text className='text-white font-bold text-xl'>
+                          S{season?.season} Ep{ep?.episode} - {ep?.title}
+                        </Text>
+                        <Text className='text-white font-medium text-sm'>
+                          {ep?.releaseDate
+                            ? format(new Date(ep?.releaseDate), "MMM dd, yyyy")
+                            : ""}
+                        </Text>
+
+                        <TouchableOpacity
+                          onPress={() => {
+                            selectEpisode(ep.id)
+                            router.push(
+                              `/film/${params.id}/${season.id}/${ep.id}`,
+                            )
+                          }}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: 12,
+                            borderRadius: 100,
+                            backgroundColor: "#302d38",
+                            width: "50%",
+                            height: 54,
+                          }}
+                        >
+                          <AntDesign
+                            name='exclamationcircleo'
+                            size={24}
+                            color='white'
+                          />
+                          <Text className='text-white font-medium text-lg ml-2'>
+                            More Details
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )
+                })}
+              </View>
+            ) : null}
+          </View>
         </View>
       </PageLayoutWrapper>
     </Loader>

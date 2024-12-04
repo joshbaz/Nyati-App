@@ -3,7 +3,7 @@ import { ScrollView, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { COLORS } from "../color/VariableColors"
 
-function PageLayoutWrapper({ children }) {
+function PageLayoutWrapper({ children, removePadding }) {
   return (
     <View
       style={{
@@ -21,7 +21,7 @@ function PageLayoutWrapper({ children }) {
             justifyContent: "flex-start",
             width: "100%",
             marginTop: 0,
-            paddingHorizontal: 20,
+            paddingHorizontal: removePadding ? 0 : 20,
           }}
         >
           {children}

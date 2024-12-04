@@ -1,13 +1,11 @@
-import CategoryHeader from "@components/CategoryHeader"
 import Loader from "@components/Loader"
 import ReadMoreCard from "@components/ReadMore"
-import { useFilmCtx } from "@context/FilmProvider"
 import { COLORS } from "@src/color/VariableColors"
 import FilmActions from "@src/components/FilmActions"
 import { useToast } from "context/ToastProvider"
 import { LinearGradient } from "expo-linear-gradient"
 import { router, useLocalSearchParams } from "expo-router"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import {
   Image,
   ImageBackground,
@@ -21,37 +19,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
-
-// get default video: {hd, if purchased we show the purchased video}
-const getMainVideo = (film) => {
-  if (!film?.video) return null
-
-  if (film?.access === "free") {
-    return film?.video[0]?.id
-  }
-
-  //filter out trailers
-  const mainVideo = film?.video?.find((video) => !video?.isTrailer)
-  if (!mainVideo) return null
-  return mainVideo?.id
-}
-
-const getTrailer = (film) => {
-  if (!film?.video) return null
-  const trailer = film?.video?.find((video) => video?.isTrailer)
-  if (!trailer) return null
-  return trailer?.id
-}
+import { useFilmCtx } from "../../../../../../context/FilmProvider"
 
 function FilmDetails() {
-  const { id, videoId } = useLocalSearchParams()
-  const { film, fetchFilm, isFetching } = useFilmCtx()
-  const [isFullscreen, setIsFullscreen] = useState(false)
-
-  useEffect(() => {
-    if (!id) return
-    fetchFilm(id)
-  }, [fetchFilm, id])
+  const params = useLocalSearchParams()
+  const { film, isFetching, episode } = useFilmCtx()
 
   return (
     <Loader isLoading={isFetching}>
@@ -115,11 +87,9 @@ function FilmDetails() {
               </ImageBackground>
             </View>
 
-            {isFullscreen ? null : (
-              <VStack style={{ width: "100%", flex: 1 }}>
-                <Details film={film} showFilm={!!videoId} />
-              </VStack>
-            )}
+            <VStack style={{ width: "100%", flex: 1 }}>
+              <Details episode={episode} showFilm={!!params.videoId} />
+            </VStack>
           </ScrollView>
         </SafeAreaView>
       </View>
@@ -127,9 +97,9 @@ function FilmDetails() {
   )
 }
 
-function Details({ film, showFilm }) {
+function Details({ episode, showFilm }) {
   const { showToast } = useToast()
-  const videoId = getMainVideo(film)
+
   return (
     <View style={styles.detailWrap}>
       <View
@@ -139,10 +109,11 @@ function Details({ film, showFilm }) {
         <View className='min-h-10 w-full h-auto flex flex-row items-start justify-between'>
           <View className='flex flex-col items-start justify-start gap-y-1'>
             <Text className='text-2xl font-bold capitalize text-white'>
-              {film?.title}
+              {episode?.title}
             </Text>
-            <Text className='text-xs font-bold text-gray-300 text-sans'>
-              2010 &bull; Film &bull; Drama{" "}
+            <Text className='text-sm text-gray-300 text-sans'>
+              {new Date(episode?.releaseDate).getFullYear()} &bull;{" "}
+              {episode?.genre.join(" \u2022 ")}
             </Text>
           </View>
           {showFilm ? (
@@ -159,20 +130,18 @@ function Details({ film, showFilm }) {
             </Pressable>
           ) : (
             <Pressable
-              disabled={!film?.video}
+              disabled={!episode?.video}
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-2'
               style={{
                 backgroundColor: COLORS.formBtnBg,
-                opacity: film?.video.length > 0 ? 1 : 0.5,
+                opacity: episode?.video?.length > 0 ? 1 : 0.5,
               }}
               onPress={() => {
-                if (!film?.video?.length > 0) return
+                if (!episode?.video?.length > 0) return
 
-                console.log("play film", film?.video)
-
-                if (film?.access === "free") {
+                if (episode?.access === "free") {
                   // play video or select the HD if available
-                  const selectedResolution = film?.video
+                  const selectedResolution = episode?.video
                     .filter((video) => !video.isTrailer)
                     .find(
                       (video) =>
@@ -191,7 +160,7 @@ function Details({ film, showFilm }) {
                   )
                 } else {
                   // get the video that has been purchased
-                  const selectedResolution = film?.video.find((video) => {
+                  const selectedResolution = episode?.video.find((video) => {
                     const isPurchased = video?.purchase.find(
                       (purchase) => purchase?.status === "SUCCESS",
                     )
@@ -220,40 +189,49 @@ function Details({ film, showFilm }) {
           )}
         </View>
         <View>
-          <FilmActions film={film} />
+          <FilmActions film={episode} />
         </View>
         <View className='relative space-y-2 py-4'>
           <Text className='text-white font-semibold text-xl'>
-            Film Information
+            Episode Information
           </Text>
           <View>
-            <ReadMoreCard content={film?.overview} linesToShow={5} />
+            <ReadMoreCard
+              renderContent={() => (
+                <View className='space-y-1'>
+                  <Text className='text-sm text-gray-300 text-sans'>
+                    {episode?.overview}
+                  </Text>
+                  <Text className='text-sm text-gray-300 text-sans'>
+                    {episode?.plotSummary}
+                  </Text>
+                  <View className='space-y-1'>
+                    <Text className='text-base font-bold text-gray-300 text-sans'>
+                      Cast
+                    </Text>
+                    <Text className='text-sm text-gray-300 text-sans'>
+                      {episode?.cast?.join(", ")}
+                    </Text>
+                  </View>
+                  <View className='space-y-1'>
+                    <Text className='text-base font-bold text-gray-300 text-sans'>
+                      Crew
+                    </Text>
+                    <Text className='text-sm text-gray-300 text-sans'>
+                      {episode?.crew?.join(", ")}
+                    </Text>
+                  </View>
+                  <View className='space-y-1'>
+                    <Text className='text-base font-bold text-gray-300 text-sans'></Text>
+                    <Text className='text-sm text-gray-300 text-sans'>
+                      {episode?.crew?.join(", ")}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              linesToShow={5}
+            />
           </View>
-        </View>
-
-        <View>
-          <CategoryHeader title='Start Watching' viewMoreArrow={true} />
-          {/* <FlatList
-            horizontal
-            data={upcomingFilmList}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.containerGap}
-            renderItem={({ item, index }) => (
-              <UpcomingMovieCard
-                shouldMarginatedAtEnd={false}
-                cardFunction={() => {
-                  navigation.push("FilmDetails", {
-                    filmid: item.id,
-                  })
-                }}
-                title={item.title}
-                posterUrl={item.posterUrl}
-                cardWidth={width / 2}
-                isFirst={index == 0 ? true : false}
-                isLast={index == upcomingFilmList?.length - 1 ? true : false}
-              />
-            )}
-          /> */}
         </View>
       </View>
     </View>

@@ -223,7 +223,10 @@ function Details({ film, showFilm }) {
             Film Information
           </Text>
           <View>
-            <ReadMoreCard content={film?.overview} linesToShow={5} />
+            <ReadMoreCard
+              renderContent={() => film?.overview}
+              linesToShow={5}
+            />
           </View>
         </View>
 
