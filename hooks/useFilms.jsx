@@ -158,7 +158,6 @@ function useFilms() {
       const selectedEpisode = season?.episodes?.find(
         (ep) => ep.id === episodeId,
       )
-      console.log(selectedEpisode)
       setEpisode(selectedEpisode)
     },
     [season],

@@ -64,7 +64,6 @@ const WatchFilm = ({ navigation }) => {
   const load = ({ duration }) =>
     setFilmStatus(() => ({ ...filmStatus, duration: duration }))
   const progress = ({ currentTime }) => {
-    console.log("running progress", currentTime)
     setFilmStatus(() => ({ ...filmStatus, currentTime }))
   }
 
@@ -74,7 +73,6 @@ const WatchFilm = ({ navigation }) => {
     setFilmStatus(() => ({ ...filmStatus, fullscreen: !fullscreen }))
   }
 
-  //console.log("status", status);
   return (
     <SafeAreaView
       style={{

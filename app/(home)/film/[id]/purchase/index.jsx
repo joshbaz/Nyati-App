@@ -24,8 +24,6 @@ function Purchase() {
   const { showToast } = useToast()
   const params = useLocalSearchParams() // filmId, videoId
 
-  console.log(user?.id, params.videoId)
-
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
@@ -77,7 +75,6 @@ function Purchase() {
         })
       }
     } catch (e) {
-      console.log("error", e)
       showToast({
         type: "error",
         message: "An error occurred. Please try again",

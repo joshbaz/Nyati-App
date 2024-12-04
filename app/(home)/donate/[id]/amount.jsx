@@ -83,7 +83,6 @@ function AmountPage() {
     let vsi = changeV !== null || changeV !== "" ? parseInt(changeV) : null
 
     if (isNaN(vsi)) {
-      console.log("Not A NUMBER")
       setFieldValue("amount", "")
     } else {
       let transformedTxt = vsi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")

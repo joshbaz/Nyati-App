@@ -1,44 +1,38 @@
+import Checkbox from "expo-checkbox"
+import React, { useEffect, useRef, useState } from "react"
 import {
-  StyleSheet,
-  Text,
-  View,
-  Animated,
-  TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
-  ScrollView,
-  Modal,
+  Animated,
   Dimensions,
   FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native"
+import { BallIndicator } from "react-native-indicators"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { Box, HStack, Stack, VStack } from "@react-native-material/core"
+import { Ionicons } from "@expo/vector-icons"
+import { Entypo, Octicons } from "@expo/vector-icons"
+import { Formik } from "formik"
+import * as yup from "yup"
+import MoviesDB from "../../../assets/data/db.json"
+import { COLORS, FONTSFAMILIES } from "../../color/VariableColors"
+import CategoryHeader from "../../components/CategoryHeader"
+import ContinueWatchCard from "../../components/ContinueWatchCard"
+import FeaturedMovieCard from "../../components/FeaturedMovieCard"
+import FilmFundCard from "../../components/FilmFundCard"
+import UpcomingMovieCard from "../../components/UpcomingMovieCard"
 
-} from "react-native";
+const { width, height } = Dimensions.get("window")
 
-import React, { useEffect, useState, useRef } from "react";
-import {
-  Stack,
-  Box,
-  HStack,
-  VStack,
-
-} from "@react-native-material/core";
-import Checkbox from "expo-checkbox";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, FONTSFAMILIES } from "../../color/VariableColors";
-import { Formik } from "formik";
-import * as yup from "yup";
-import { BallIndicator } from "react-native-indicators";
-import CategoryHeader from "../../components/CategoryHeader";
-const { width, height } = Dimensions.get("window");
-import MoviesDB from "../../../assets/data/db.json";
-import UpcomingMovieCard from "../../components/UpcomingMovieCard";
-import ContinueWatchCard from "../../components/ContinueWatchCard";
-import FilmFundCard from "../../components/FilmFundCard";
-import FeaturedMovieCard from "../../components/FeaturedMovieCard";
-import { Entypo, Octicons } from "@expo/vector-icons";
 const RegularAmounts = [
   {
     key: "1",
@@ -64,76 +58,39 @@ const RegularAmounts = [
     key: "6",
     amount: 400000,
   },
- 
-];
+]
 
 const Donate = ({ navigation }) => {
-    const [editedAmount, setEditedAmount] = useState(null)
-     const validationSchema = yup.object().shape({
-       amount: yup.string().required("required"),
-       donateAnonymously: yup
-         .bool()
-         .oneOf([true, false], "Field must be checked"),
-       agreeTerms: yup.bool().oneOf([true], "Field must be checked"),
-       agreePrivacyPolicy: yup
-         .bool()
-         .oneOf([true], "Field must be checked"),
-     });
-    
-    const [isSubmittingp, setIsSubmittingp] = React.useState(false);
-     useEffect(() => {
-       if (isSubmittingp) {
-         setTimeout(() => {
-           setIsSubmittingp(() => false);
-           navigation.navigate("PaymentOptions");
-         }, 500);
-       }
-     }, [isSubmittingp]);
-    
-    
-    
-    const changeValues = (setFieldValue, val) => {
-                                                              let changeV =
-                                                                typeof val ===
-                                                                "string"
-                                                                  ? val.replace(
-                                                                      /,/g,
-                                                                      ""
-                                                                    )
-                                                                  : val; 
-                                                              let vsi =
-                                                                changeV !==
-                                                                  null ||
-                                                                changeV !== ""
-                                                                  ? parseInt(
-                                                                      changeV
-                                                                    )
-                                                                  : null;
-                                                                
-                                                              if (isNaN(vsi)) {
-                                                                  console.log('Not A NUMBER')
-                                                                  setFieldValue(
-                                                                   "amount",
-                                                                   null
-                                                                 );
-                                                              } else {
-                                                                  let transformedTxt =
-                                                                    vsi
-                                                                      .toString()
-                                                                      .replace(
-                                                                        /\B(?=(\d{3})+(?!\d))/g,
-                                                                        ","
-                                                                      );
-                                                                 setFieldValue(
-                                                                   "amount",
-                                                                   transformedTxt
-                                                                 );  
-                                                                  
-                                                              }
-                                                             
-                                                          }
-    
-    
+  const [editedAmount, setEditedAmount] = useState(null)
+  const validationSchema = yup.object().shape({
+    amount: yup.string().required("required"),
+    donateAnonymously: yup.bool().oneOf([true, false], "Field must be checked"),
+    agreeTerms: yup.bool().oneOf([true], "Field must be checked"),
+    agreePrivacyPolicy: yup.bool().oneOf([true], "Field must be checked"),
+  })
+
+  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
+  useEffect(() => {
+    if (isSubmittingp) {
+      setTimeout(() => {
+        setIsSubmittingp(() => false)
+        navigation.navigate("PaymentOptions")
+      }, 500)
+    }
+  }, [isSubmittingp])
+
+  const changeValues = (setFieldValue, val) => {
+    let changeV = typeof val === "string" ? val.replace(/,/g, "") : val
+    let vsi = changeV !== null || changeV !== "" ? parseInt(changeV) : null
+
+    if (isNaN(vsi)) {
+      setFieldValue("amount", null)
+    } else {
+      let transformedTxt = vsi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+      setFieldValue("amount", transformedTxt)
+    }
+  }
+
   return (
     <View
       style={{
@@ -183,7 +140,7 @@ const Donate = ({ navigation }) => {
                   style={{ display: "flex", alignItems: "center" }}
                 >
                   <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Octicons name="arrow-left" size={24} color={"#FFFAF6"} />
+                    <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
                   </TouchableOpacity>
                   <Text style={styles.formTitle}>Donate</Text>
                 </HStack>
@@ -198,7 +155,7 @@ const Donate = ({ navigation }) => {
                   onSubmit={(values, helpers) => {
                     // setHelperFunctions(helpers)
                     // dispatch(Login(values))
-                    setIsSubmittingp(() => true);
+                    setIsSubmittingp(() => true)
                   }}
                 >
                   {({
@@ -221,8 +178,8 @@ const Donate = ({ navigation }) => {
                             <TextInput
                               style={styles.amountInput}
                               enablesReturnKeyAutomatically
-                              keyboardAppearance="dark"
-                              keyboardType="numeric"
+                              keyboardAppearance='dark'
+                              keyboardType='numeric'
                               value={values.amount}
                               onChangeText={(e) =>
                                 changeValues(setFieldValue, e)
@@ -251,7 +208,7 @@ const Donate = ({ navigation }) => {
                                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                                 </Text>
                               </TouchableOpacity>
-                            );
+                            )
                           })}
                         </View>
 
@@ -265,7 +222,7 @@ const Donate = ({ navigation }) => {
                               color={COLORS.formBtnBg}
                               style={{ width: 24, height: 24 }}
                               onValueChange={(e) => {
-                                setFieldValue("donateAnonymously", e);
+                                setFieldValue("donateAnonymously", e)
                               }}
                             />
 
@@ -280,7 +237,7 @@ const Donate = ({ navigation }) => {
                               color={COLORS.formBtnBg}
                               style={{ width: 24, height: 24 }}
                               onValueChange={(e) => {
-                                setFieldValue("agreeTerms", e);
+                                setFieldValue("agreeTerms", e)
                               }}
                             />
                             <Text style={styles.checkboxTxt}>
@@ -294,7 +251,7 @@ const Donate = ({ navigation }) => {
                               color={COLORS.formBtnBg}
                               style={{ width: 24, height: 24 }}
                               onValueChange={(e) => {
-                                setFieldValue("agreePrivacyPolicy", e);
+                                setFieldValue("agreePrivacyPolicy", e)
                               }}
                             />
                             <View style={{ flexDirection: "row" }}>
@@ -315,7 +272,7 @@ const Donate = ({ navigation }) => {
                       <VStack spacing={20} style={{ alignItems: "center" }}>
                         {isSubmittingp ? (
                           <View style={styles.formBtn}>
-                            <ActivityIndicator size="small" color="white" />
+                            <ActivityIndicator size='small' color='white' />
                           </View>
                         ) : (
                           <TouchableOpacity
@@ -335,10 +292,10 @@ const Donate = ({ navigation }) => {
         </ScrollView>
       </SafeAreaView>
     </View>
-  );
-};
+  )
+}
 
-export default Donate;
+export default Donate
 
 const styles = StyleSheet.create({
   formTitle: {
@@ -479,7 +436,5 @@ const styles = StyleSheet.create({
     color: "#06F",
     fontFamily: "Inter-Regular",
     fontSize: 14,
-   
   },
-});
-
+})

@@ -38,7 +38,6 @@ function SeasonPage() {
         }))
       : []
 
-  console.log(season?.episodes)
   return (
     <Loader isLoading={isFetching}>
       <PageLayoutWrapper removePadding>

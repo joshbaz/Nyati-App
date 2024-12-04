@@ -68,7 +68,6 @@ function ChangePassword() {
           router.back()
         }, 1000)
       } catch (error) {
-        console.log("Error", error)
         showToast({
           type: "error",
           message: error.message,

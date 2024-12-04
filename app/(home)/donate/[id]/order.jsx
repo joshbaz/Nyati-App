@@ -21,10 +21,6 @@ function Order() {
     { skipNull: true, skipEmptyString: true },
   )
 
-  console.log(
-    `${BASE_URL}/donate/process/${user?.id}/${params.id}?${querystring}`,
-  )
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.generalBg }}>
       <WebView

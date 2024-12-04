@@ -105,7 +105,10 @@ const Donate = () => {
                   </Pressable>
                   <Pressable
                     className='flex flex-row items-center justify-center'
-                    onPress={() => console.log("search")}
+                    onPress={() => {
+                      //TODO: Implement search
+                      return
+                    }}
                   >
                     <Feather name='search' size={24} color='white' />
                   </Pressable>

@@ -99,7 +99,6 @@ const VerifyAccount = () => {
           },
         })
       } catch (error) {
-        console.log("error", error)
         showToast({
           type: "error",
           message: "Something went wrong, please try again",

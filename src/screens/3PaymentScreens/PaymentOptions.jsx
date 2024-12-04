@@ -1,77 +1,72 @@
+import Checkbox from "expo-checkbox"
+import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button"
+import React, { useEffect, useRef, useState } from "react"
 import {
-  StyleSheet,
-  Text,
-  View,
-  Animated,
-  TouchableOpacity,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
-  ScrollView,
-  Modal,
+  Animated,
   Dimensions,
   FlatList,
   Image,
-} from "react-native";
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native"
+import { BallIndicator } from "react-native-indicators"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { Box, HStack, Stack, VStack } from "@react-native-material/core"
+import { Ionicons } from "@expo/vector-icons"
+import { Entypo, Octicons } from "@expo/vector-icons"
+import { Formik } from "formik"
+import * as yup from "yup"
+import AirtelMMImage from "../../../assets/AirtelMoney.png"
+import MomoPayImage from "../../../assets/MtnMoMo.png"
+import MoviesDB from "../../../assets/data/db.json"
+import { COLORS, FONTSFAMILIES } from "../../color/VariableColors"
+import CategoryHeader from "../../components/CategoryHeader"
+import ContinueWatchCard from "../../components/ContinueWatchCard"
+import FeaturedMovieCard from "../../components/FeaturedMovieCard"
+import FilmFundCard from "../../components/FilmFundCard"
+import UpcomingMovieCard from "../../components/UpcomingMovieCard"
 
-import React, { useEffect, useState, useRef } from "react";
-import { Stack, Box, HStack, VStack } from "@react-native-material/core";
-import Checkbox from "expo-checkbox";
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, FONTSFAMILIES } from "../../color/VariableColors";
-import { Formik } from "formik";
-import * as yup from "yup";
-import { BallIndicator } from "react-native-indicators";
-import CategoryHeader from "../../components/CategoryHeader";
-const { width, height } = Dimensions.get("window");
-import MoviesDB from "../../../assets/data/db.json";
-import UpcomingMovieCard from "../../components/UpcomingMovieCard";
-import ContinueWatchCard from "../../components/ContinueWatchCard";
-import FilmFundCard from "../../components/FilmFundCard";
-import FeaturedMovieCard from "../../components/FeaturedMovieCard";
-import { Entypo, Octicons } from "@expo/vector-icons";
-
-import MomoPayImage from '../../../assets/MtnMoMo.png'
-import AirtelMMImage from '../../../assets/AirtelMoney.png'
+const { width, height } = Dimensions.get("window")
 
 const PaymentOptions = ({ navigation }) => {
-     const [editedAmount, setEditedAmount] = useState(null);
-     const validationSchema = yup.object().shape({
-       phoneNumber: yup.string().required("required"),
-       payOption: yup.string().required("required"),
-       savePayment: yup
-         .bool()
-         .oneOf([true, false], "Field must be checked"),
-      
-     });
+  const [editedAmount, setEditedAmount] = useState(null)
+  const validationSchema = yup.object().shape({
+    phoneNumber: yup.string().required("required"),
+    payOption: yup.string().required("required"),
+    savePayment: yup.bool().oneOf([true, false], "Field must be checked"),
+  })
 
-     const [isSubmittingp, setIsSubmittingp] = React.useState(false);
-     useEffect(() => {
-       if (isSubmittingp) {
-         setTimeout(() => {
-           setIsSubmittingp(() => false);
-           navigation.navigate("PaymentComplete");
-         }, 5000);
-       }
-     }, [isSubmittingp]);
+  const [isSubmittingp, setIsSubmittingp] = React.useState(false)
+  useEffect(() => {
+    if (isSubmittingp) {
+      setTimeout(() => {
+        setIsSubmittingp(() => false)
+        navigation.navigate("PaymentComplete")
+      }, 5000)
+    }
+  }, [isSubmittingp])
 
-     const changeValues = (setFieldValue, val) => {
-       let changeV = val.toString();
-       let vsi = changeV !== "" || changeV !== "+256" ? changeV : "";
+  const changeValues = (setFieldValue, val) => {
+    let changeV = val.toString()
+    let vsi = changeV !== "" || changeV !== "+256" ? changeV : ""
 
-       if (vsi === "") {
-         console.log("Not A Value");
-         setFieldValue("phoneNumber", "");
-       } else {
-         let transformedTxt =  vsi
-        
-         setFieldValue("phoneNumber", transformedTxt);
-       }
-     };
+    if (vsi === "") {
+      setFieldValue("phoneNumber", "")
+    } else {
+      let transformedTxt = vsi
+
+      setFieldValue("phoneNumber", transformedTxt)
+    }
+  }
   return (
     <View
       style={{
@@ -121,7 +116,7 @@ const PaymentOptions = ({ navigation }) => {
                   style={{ display: "flex", alignItems: "center" }}
                 >
                   <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Octicons name="arrow-left" size={24} color={"#FFFAF6"} />
+                    <Octicons name='arrow-left' size={24} color={"#FFFAF6"} />
                   </TouchableOpacity>
                   <Text style={styles.formTitle}>Payment Options</Text>
                 </HStack>
@@ -135,7 +130,7 @@ const PaymentOptions = ({ navigation }) => {
                   onSubmit={(values, helpers) => {
                     // setHelperFunctions(helpers)
                     // dispatch(Login(values))
-                    setIsSubmittingp(() => true);
+                    setIsSubmittingp(() => true)
                   }}
                 >
                   {({
@@ -181,7 +176,7 @@ const PaymentOptions = ({ navigation }) => {
                                 </HStack>
 
                                 <View
-                                  value="Mtn"
+                                  value='Mtn'
                                   style={[
                                     styles.radioBtn,
                                     values.payOption === "Mtn"
@@ -243,8 +238,8 @@ const PaymentOptions = ({ navigation }) => {
                               <TextInput
                                 style={styles.amountInput}
                                 enablesReturnKeyAutomatically
-                                keyboardAppearance="dark"
-                                keyboardType="number-pad"
+                                keyboardAppearance='dark'
+                                keyboardType='number-pad'
                                 value={values.phoneNumber}
                                 onChangeText={(e) =>
                                   changeValues(setFieldValue, e)
@@ -263,7 +258,7 @@ const PaymentOptions = ({ navigation }) => {
                               color={COLORS.formBtnBg}
                               style={{ width: 24, height: 24 }}
                               onValueChange={(e) => {
-                                setFieldValue("savePayment", e);
+                                setFieldValue("savePayment", e)
                               }}
                             />
 
@@ -278,7 +273,7 @@ const PaymentOptions = ({ navigation }) => {
                       <VStack spacing={20} style={{ alignItems: "center" }}>
                         {isSubmittingp ? (
                           <View style={styles.formBtn}>
-                            <ActivityIndicator size="small" color="white" />
+                            <ActivityIndicator size='small' color='white' />
                           </View>
                         ) : (
                           <TouchableOpacity
@@ -301,7 +296,7 @@ const PaymentOptions = ({ navigation }) => {
       <Modal
         transparent={true}
         visible={isSubmittingp ? true : false}
-        animationType="slide"
+        animationType='slide'
         style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
       >
         <View
@@ -324,15 +319,15 @@ const PaymentOptions = ({ navigation }) => {
               justifyContent: "center",
             }}
           >
-            <BallIndicator color="#ED3F62" count={9} />
+            <BallIndicator color='#ED3F62' count={9} />
           </Animated.View>
         </View>
       </Modal>
     </View>
-  );
-};
+  )
+}
 
-export default PaymentOptions;
+export default PaymentOptions
 
 const styles = StyleSheet.create({
   formTitle: {
@@ -492,13 +487,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#EE5170",
     borderRadius: 34,
-    
   },
   radioTxt: {
     fontFamily: "Inter-Regular",
     fontSize: 16,
     color: "#FFFAF6",
   },
-});
-
-
+})

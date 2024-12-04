@@ -146,7 +146,6 @@ function VideoPlayer({ handleFullscreen }, ref) {
         router.back()
         clearSrc()
       } else {
-        console.log("Previous route", previousRoute)
         // means we clicked a trailer from the home page
         router.push("/(home)")
         clearSrc()

@@ -26,20 +26,6 @@ import { VStack } from "@react-native-material/core"
 import { Feather } from "@expo/vector-icons"
 import MoviesDB from "../../../../assets/data/db.json"
 
-// get default video: {hd, if purchased we show the purchased video}
-const getMainVideo = (film) => {
-  if (!film?.video) return null
-
-  if (film?.access === "free") {
-    return film?.video[0]?.id
-  }
-
-  //filter out trailers
-  const mainVideo = film?.video?.find((video) => !video?.isTrailer)
-  if (!mainVideo) return null
-  return mainVideo?.id
-}
-
 function FilmDetails() {
   const { id, videoId } = useLocalSearchParams()
   const { film, fetchFilm, isFetching } = useFilmCtx()
@@ -125,7 +111,6 @@ function Details({ film, showFilm }) {
   const { width } = Dimensions.get("window")
   const { showToast } = useToast()
   const [upcomingFilmList] = useState(MoviesDB.movies || undefined)
-  const videoId = getMainVideo(film)
   return (
     <View style={styles.detailWrap}>
       <View
@@ -145,8 +130,7 @@ function Details({ film, showFilm }) {
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-3 bg-gray-500/50 border border-white'
               onPress={async () => {
-                // bookmark it
-                console.log("bookmarking")
+                // TODO: bookmark the film
               }}
             >
               <View className='border-2 border-white rounded-full p-1.5 flex items-center justify-center'>
@@ -163,8 +147,6 @@ function Details({ film, showFilm }) {
               }}
               onPress={() => {
                 if (!film?.video?.length > 0) return
-
-                console.log("play film", film?.video)
 
                 if (film?.access === "free") {
                   // play video or select the HD if available

@@ -120,8 +120,7 @@ function Details({ episode, showFilm }) {
             <Pressable
               className='flex flex-row items-center justify-center h-16 w-16 rounded-full p-3 bg-gray-500/50 border border-white'
               onPress={async () => {
-                // bookmark it
-                console.log("bookmarking")
+                // TODO: handle bookmarking
               }}
             >
               <View className='border-2 border-white rounded-full p-1.5 flex items-center justify-center'>

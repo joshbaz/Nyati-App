@@ -65,7 +65,6 @@ function VerifyOtp() {
           })
 
           if (response.error) {
-            console.log("Errors", response.error)
             hp.setSubmitting(false)
             throw new Error(response.error)
           }
@@ -99,7 +98,6 @@ function VerifyOtp() {
             },
           })
         } catch (error) {
-          console.log("Errors", error)
           showToast({
             type: "error",
             message: "Something went wrong, please try again",
@@ -141,7 +139,6 @@ function VerifyOtp() {
       setFieldValue("isResending", false)
       count += 1
     } catch (error) {
-      console.log("error", error)
       count = 1 // reset the count
       setFieldValue("timer", 0) // reset the timer
       showToast({

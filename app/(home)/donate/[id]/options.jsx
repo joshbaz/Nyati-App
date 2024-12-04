@@ -29,7 +29,6 @@ function Options() {
     let vsi = changeV !== "" || changeV !== "+256" ? changeV : ""
 
     if (vsi === "") {
-      console.log("Not A Value")
       setFieldValue("phoneNumber", "")
     } else {
       let transformedTxt = vsi
@@ -38,12 +37,9 @@ function Options() {
     }
   }
 
-  console.log("Params", params) // filmId, filmTitle, amount
-
   const onSubmit = async (values, hp) => {
     try {
       hp.setSubmitting(true)
-      console.log("Values", values)
 
       router.push({
         pathname: `/(home)/donate/${params?.id}/order`,

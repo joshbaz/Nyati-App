@@ -88,7 +88,6 @@ function ContactForm() {
           },
         })
       } catch (error) {
-        console.log(error)
         showToast({
           type: "error",
           message: "Something went wrong, please try again",

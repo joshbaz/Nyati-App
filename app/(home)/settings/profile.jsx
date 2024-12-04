@@ -88,7 +88,6 @@ function Profile() {
         })
         router.setParams({ edit: false })
       } catch (error) {
-        console.log("Error", error)
         showToast({
           type: "error",
           message: error.message,
